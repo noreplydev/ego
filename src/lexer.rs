@@ -8,28 +8,45 @@ pub fn lex(source: String) -> Vec<String> {
 
     let source = source.trim(); // remove leading and trailing whitespaces
     let mut current_token = String::new();
-    let mut is_string = false;
+    let mut is_string = false; // inside a string flag
 
-    for c in source.chars() {
-        if c == '"' {
-            current_token.push(c);
+    for i in 0..source.len() {
+        if i < source.len() {
+            let c = source
+                .chars()
+                .nth(i)
+                .expect("[goru] Error string index out of bounds.");
 
-            if is_string {
-                tokens.push(current_token);
-                current_token = String::new();
+            match c {
+                // a quote
+                '"' => {
+                    current_token.push(c);
+
+                    if is_string {
+                        tokens.push(current_token);
+                        current_token = String::new();
+                    }
+
+                    is_string = !is_string;
+                }
+                // comments
+                '/' => {}
+                // whitespace types
+                ' ' | '\n' | '\t' => {
+                    if keywords.contains(&current_token) {
+                        tokens.push(current_token);
+
+                        current_token = String::new();
+                    }
+                }
+                // characters
+                _ if is_string || !c.is_whitespace() => {
+                    current_token.push(c);
+                }
+                _ => {}
             }
-
-            is_string = !is_string;
-        } else if is_string {
-            current_token.push(c);
-        } else if c == ' ' || c == '\n' || c == '\t' {
-            if keywords.contains(&current_token) {
-                tokens.push(current_token);
-            
-
-            current_token = String::new();
         } else {
-            current_token.push(c);
+            return tokens;
         }
     }
 
