@@ -2,42 +2,42 @@ use std::fmt;
 
 const KEYWORDS: [&str; 1] = ["print"]; // "if", "else", "while", "for", "fn"
 
-enum TokenType {
+enum LexerTokenType {
     ExpressionStatement,
     StringLiteral,
     Unknown,
 }
 
-impl fmt::Display for TokenType {
+impl fmt::Display for LexerTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TokenType::ExpressionStatement => write!(f, "ExpressionStatement"),
-            TokenType::StringLiteral => write!(f, "StringLiteral"),
-            TokenType::Unknown => write!(f, "Unknown"),
+            LexerTokenType::ExpressionStatement => write!(f, "ExpressionStatement"),
+            LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
+            LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }
 }
 
-pub struct Token {
-    token_type: TokenType,
+pub struct LexerToken {
+    token_type: LexerTokenType,
     value: String,
 }
 
-impl Token {
-    fn new(token_type: TokenType, value: String) -> Token {
-        Token { token_type, value }
+impl LexerToken {
+    fn new(token_type: LexerTokenType, value: String) -> LexerToken {
+        LexerToken { token_type, value }
     }
 }
 
-impl fmt::Display for Token {
+impl fmt::Display for LexerToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}: {}", self.token_type, self.value)
     }
 }
 
-pub fn lex(source: String) -> Vec<Token> {
+pub fn lex(source: String) -> Vec<LexerToken> {
     let keywords = KEYWORDS.to_vec();
-    let mut tokens: Vec<Token> = Vec::new();
+    let mut tokens: Vec<LexerToken> = Vec::new();
 
     let mut current_token = String::new();
     let mut is_string = false; // inside a string flag
@@ -84,12 +84,12 @@ pub fn lex(source: String) -> Vec<Token> {
 
 // Also, it doesn't handle the last token if it's not followed by whitespace.
 
-fn token_with_type(token: String) -> Token {
+fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
-        "print" => Token::new(TokenType::ExpressionStatement, token),
+        "print" => LexerToken::new(LexerTokenType::ExpressionStatement, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
-            Token::new(TokenType::StringLiteral, token)
+            LexerToken::new(LexerTokenType::StringLiteral, token)
         }
-        _ => Token::new(TokenType::Unknown, token),
+        _ => LexerToken::new(LexerTokenType::Unknown, token),
     }
 }
