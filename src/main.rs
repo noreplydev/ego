@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 
 use lexer::lex;
 use std::env;
@@ -18,8 +19,10 @@ fn main() {
     }
 
     let file_content = fs::read_to_string(filename).expect("[goru] This is not .e (ego) file");
-    println!("Before lexing: {}", file_content);
 
     let tokens = lex(file_content);
-    println!("After lexing: {:?}", tokens)
+    //let ast = parse(tokens);
+    for (i, token) in tokens.iter().enumerate() {
+        println!("{i}. {token}");
+    }
 }
