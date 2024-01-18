@@ -1,3 +1,3 @@
 mod tree;
 
-pub use self::tree::AstTree;
+pub use self::tree::{AstNode, AstTokenType, AstTree};

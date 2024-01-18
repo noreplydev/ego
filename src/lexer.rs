@@ -1,10 +1,12 @@
 use std::fmt;
 
-const KEYWORDS: [&str; 1] = ["print"]; // "if", "else", "while", "for", "fn"
+use crate::KEYWORDS;
 
-enum LexerTokenType {
+#[derive(Clone)]
+pub enum LexerTokenType {
     ExpressionStatement,
     StringLiteral,
+    EndOfStatement,
     Unknown,
 }
 
@@ -13,14 +15,16 @@ impl fmt::Display for LexerTokenType {
         match self {
             LexerTokenType::ExpressionStatement => write!(f, "ExpressionStatement"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
+            LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }
 }
 
+#[derive(Clone)]
 pub struct LexerToken {
-    token_type: LexerTokenType,
-    value: String,
+    pub token_type: LexerTokenType,
+    pub value: String,
 }
 
 impl LexerToken {
@@ -59,6 +63,15 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             }
             // comments
             '/' => {}
+            ';' => {
+                if is_string {
+                    current_token.push(c);
+                } else {
+                    tokens.push(token_with_type(current_token));
+                    current_token = String::new();
+                }
+                chars.next();
+            }
             // whitespace types
             ' ' | '\n' | '\t' => {
                 if keywords.contains(&current_token.as_str()) {
@@ -87,6 +100,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::ExpressionStatement, token),
+        ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }

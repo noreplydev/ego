@@ -3,8 +3,11 @@ mod lexer;
 mod parser;
 
 use lexer::lex;
+use parser::parse;
 use std::env;
 use std::fs;
+
+pub const KEYWORDS: [&str; 1] = ["print"]; // "if", "else", "while", "for", "fn"
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -22,8 +25,11 @@ fn main() {
     let file_content = fs::read_to_string(filename).expect("[goru] This is not .e (ego) file");
 
     let tokens = lex(file_content);
-    //let ast = parse(tokens);
+    println!("\nLexer tokens");
     for (i, token) in tokens.iter().enumerate() {
         println!("{i}. {token}");
     }
+
+    let ast = parse(tokens);
+    println!("\nAST: {:?}", ast)
 }
