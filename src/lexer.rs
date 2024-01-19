@@ -75,11 +75,14 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             }
             // whitespace types
             ' ' | '\n' | '\t' => {
-                if keywords.contains(&current_token.as_str()) {
+                if is_string {
+                    current_token.push(c);
+                } else if keywords.contains(&current_token.as_str()) {
                     tokens.push(token_with_type(current_token));
 
                     current_token = String::new();
                 }
+
                 chars.next();
             }
             // characters
