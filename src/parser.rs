@@ -63,5 +63,14 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
         }
     }
 
+    match &tokens[current + 2].token_type {
+        LexerTokenType::EndOfStatement => {
+            index_offset += 1;
+        }
+        _ => {
+            panic!("[goru] Expected a semicolon after print");
+        }
+    }
+
     (index_offset, print_root_node)
 }

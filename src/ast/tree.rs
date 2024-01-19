@@ -54,7 +54,7 @@ impl fmt::Display for AstNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "- {}: {}", self.token_type, self.value)?;
         for child in &self.children {
-            write!(f, " --- \n{}", child)?;
+            write!(f, "child: {}", child)?;
         }
 
         Ok(())

@@ -25,11 +25,11 @@ fn main() {
     let file_content = fs::read_to_string(filename).expect("[goru] This is not .e (ego) file");
 
     let tokens = lex(file_content);
-    println!("\nLexer tokens");
+    println!("\nLexer tokens: \n-------------");
     for (i, token) in tokens.iter().enumerate() {
         println!("{i}. {token}");
     }
 
     let ast = parse(tokens);
-    println!("\nAST: {:?}", ast)
+    println!("\nAST:\n----\n{:?}", ast)
 }

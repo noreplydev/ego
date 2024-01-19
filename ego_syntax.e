@@ -1,6 +1,6 @@
-print "one"
-print "two"
+print "one"; 
+print "two"; 
 
-print "three"
+print "three"; 
 
-  print "four" print "five"
+  print "four";  print "five"; 
