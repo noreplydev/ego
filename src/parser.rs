@@ -49,27 +49,31 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
         Vec::new(),
     );
 
-    match &tokens[current + 1].token_type {
-        LexerTokenType::StringLiteral => {
-            print_root_node.add_child(AstNode::new(
-                AstTokenType::StringLiteral,
-                tokens[current + 1].value.clone(),
-                Vec::new(),
-            ));
-            index_offset += 1;
+    if tokens.len() > current + 1 && tokens.len() > current + 2 {
+        match &tokens[current + 1].token_type {
+            LexerTokenType::StringLiteral => {
+                print_root_node.add_child(AstNode::new(
+                    AstTokenType::StringLiteral,
+                    tokens[current + 1].value.clone(),
+                    Vec::new(),
+                ));
+                index_offset += 1;
+            }
+            _ => {
+                panic!("[goru] Expected a string literal after print");
+            }
         }
-        _ => {
-            panic!("[goru] Expected a string literal after print");
-        }
-    }
 
-    match &tokens[current + 2].token_type {
-        LexerTokenType::EndOfStatement => {
-            index_offset += 1;
+        match &tokens[current + 2].token_type {
+            LexerTokenType::EndOfStatement => {
+                index_offset += 1;
+            }
+            _ => {
+                panic!("[goru] Expected a semicolon after print");
+            }
         }
-        _ => {
-            panic!("[goru] Expected a semicolon after print");
-        }
+    } else {
+        panic!("[goru] Expected a string literal after print");
     }
 
     (index_offset, print_root_node)
