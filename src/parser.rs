@@ -33,7 +33,9 @@ fn branch(branch_tokens: Vec<LexerToken>) -> AstNode {
                 ));
                 current += 1;
             }
-            _ => {}
+            _ => {
+                current += 1;
+            }
         }
     }
 

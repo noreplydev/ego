@@ -5,6 +5,9 @@ use crate::KEYWORDS;
 #[derive(Clone)]
 pub enum LexerTokenType {
     ExpressionStatement,
+    VariableDeclaration,
+    Identifier,
+    AssignmentOperator,
     StringLiteral,
     EndOfStatement,
     Unknown,
@@ -14,6 +17,9 @@ impl fmt::Display for LexerTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             LexerTokenType::ExpressionStatement => write!(f, "ExpressionStatement"),
+            LexerTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
+            LexerTokenType::Identifier => write!(f, "Identifier"),
+            LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
@@ -73,19 +79,32 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 }
                 chars.next();
             }
+            '=' => {
+                if is_string {
+                    current_token.push(c);
+                } else {
+                    current_token.push(c);
+                    println!("asignamment {}", token_with_type(current_token.clone()));
+                    tokens.push(token_with_type(current_token));
+                    current_token = String::new();
+                }
+                chars.next();
+            }
             // whitespace types
             ' ' | '\n' | '\t' => {
                 if is_string {
                     current_token.push(c);
                 } else if keywords.contains(&current_token.as_str()) {
                     tokens.push(token_with_type(current_token));
-
+                    current_token = String::new();
+                } else if current_token.len() > 0 { // if not empty
+                    tokens.push(token_with_type(current_token));
                     current_token = String::new();
                 }
 
                 chars.next();
             }
-            // characters
+            // characters that are not whitespace
             _ if is_string || !c.is_whitespace() => {
                 current_token.push(c);
                 chars.next();
@@ -104,10 +123,21 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::ExpressionStatement, token),
+        "let" => LexerToken::new(LexerTokenType::VariableDeclaration, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
+        "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
+        _ if is_identifier(token.clone()) => LexerToken::new(LexerTokenType::Identifier, token),
         _ => LexerToken::new(LexerTokenType::Unknown, token),
     }
+}
+
+fn is_identifier(token: String) -> bool {
+    let mut chars = token.chars();
+    chars
+        .next()
+        .is_some_and(|first_char| first_char.is_alphabetic() || first_char == '_')
+        && chars.all(|char| char.is_alphanumeric() || char == '_')
 }

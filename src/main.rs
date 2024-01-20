@@ -10,7 +10,7 @@ use std::fs;
 
 use crate::interpreter::Interpreter;
 
-pub const KEYWORDS: [&str; 1] = ["print"]; // "if", "else", "while", "for", "fn"
+pub const KEYWORDS: [&str; 2] = ["print", "let"]; // "if", "else", "while", "for", "fn"
 
 fn main() {
     let args: Vec<String> = env::args().collect();
