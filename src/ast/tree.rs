@@ -65,6 +65,8 @@ impl fmt::Display for AstNode {
 pub enum AstTokenType {
     Root,
     FunctionCall,
+    VariableDeclaration,
+    Identifier,
     StringLiteral,
 }
 
@@ -73,6 +75,8 @@ impl fmt::Display for AstTokenType {
         match self {
             AstTokenType::Root => write!(f, "Root"),
             AstTokenType::FunctionCall => write!(f, "FunctionCall"),
+            AstTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
+            AstTokenType::Identifier => write!(f, "Identifier"),
             AstTokenType::StringLiteral => write!(f, "StringLiteral"),
         }
     }

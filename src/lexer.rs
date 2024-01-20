@@ -4,8 +4,8 @@ use crate::KEYWORDS;
 
 #[derive(Clone)]
 pub enum LexerTokenType {
-    ExpressionStatement,
-    VariableDeclaration,
+    PrintKeyword,
+    LetKeyword,
     Identifier,
     AssignmentOperator,
     StringLiteral,
@@ -16,8 +16,8 @@ pub enum LexerTokenType {
 impl fmt::Display for LexerTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LexerTokenType::ExpressionStatement => write!(f, "ExpressionStatement"),
-            LexerTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
+            LexerTokenType::PrintKeyword => write!(f, "PrintKeyword"),
+            LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
@@ -84,7 +84,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     current_token.push(c);
                 } else {
                     current_token.push(c);
-                    println!("asignamment {}", token_with_type(current_token.clone()));
                     tokens.push(token_with_type(current_token));
                     current_token = String::new();
                 }
@@ -97,7 +96,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 } else if keywords.contains(&current_token.as_str()) {
                     tokens.push(token_with_type(current_token));
                     current_token = String::new();
-                } else if current_token.len() > 0 { // if not empty
+                } else if current_token.len() > 0 {
+                    // if not empty
                     tokens.push(token_with_type(current_token));
                     current_token = String::new();
                 }
@@ -122,8 +122,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
 fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
-        "print" => LexerToken::new(LexerTokenType::ExpressionStatement, token),
-        "let" => LexerToken::new(LexerTokenType::VariableDeclaration, token),
+        "print" => LexerToken::new(LexerTokenType::PrintKeyword, token),
+        "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
