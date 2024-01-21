@@ -1,14 +1,13 @@
 mod ast;
-mod interpreter;
 mod lexer;
 mod parser;
+mod runtime;
 
 use lexer::lex;
 use parser::parse;
+use runtime::Interpreter;
 use std::env;
 use std::fs;
-
-use crate::interpreter::Interpreter;
 
 pub const KEYWORDS: [&str; 2] = ["print", "let"]; // "if", "else", "while", "for", "fn"
 

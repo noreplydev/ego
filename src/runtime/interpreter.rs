@@ -25,6 +25,7 @@ impl Interpreter {
                     self.execute_print(node);
                 }
             }
+            AstTokenType::VariableDeclaration => {}
             _ => {}
         }
     }

@@ -16,8 +16,6 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
     while current < tokens.len() {
         let token = &tokens[current];
 
-        println!("curr: {}. {}", current, token);
-
         match token.token_type {
             LexerTokenType::PrintKeyword => {
                 let (index_offset, print_node) = print_statement(tokens.clone(), current);
@@ -135,7 +133,7 @@ fn lookhead(
                 }
                 LexerTokenType::AssignmentOperator => {}
                 LexerTokenType::EndOfStatement => {
-                    return (index_offset + 1, root_node);
+                    return (index_offset + 1, root_node); // +1 is for the node who called lookahead
                 }
                 _ => {
                     println!("unexpected token type for recursion")
@@ -148,5 +146,5 @@ fn lookhead(
         }
     }
 
-    (index_offset + 1, root_node)
+    (index_offset + 1, root_node) // +1 is for the node who called lookahead
 }
