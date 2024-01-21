@@ -1,7 +1,7 @@
 use std::fmt;
 
 /* AST TREE */
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AstTree {
     pub root: AstNode,
 }
@@ -21,7 +21,7 @@ impl fmt::Display for AstTree {
 }
 
 /* AST TOKEN */
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AstNode {
     pub token_type: AstTokenType,
     pub value: String,
@@ -61,7 +61,7 @@ impl fmt::Display for AstNode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum AstTokenType {
     Root,
     FunctionCall,

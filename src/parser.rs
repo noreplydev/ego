@@ -20,13 +20,11 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             LexerTokenType::PrintKeyword => {
                 let (index_offset, print_node) = print_statement(tokens.clone(), current);
                 root.add_child(print_node);
-                println!("index_offset: {}", index_offset);
                 current += index_offset;
             }
             LexerTokenType::LetKeyword => {
                 let (index_offset, assignment_node) = assignment_statement(tokens.clone(), current);
                 root.add_child(assignment_node);
-                println!("index_offset: {}", index_offset);
                 current += index_offset;
             }
             LexerTokenType::StringLiteral => {

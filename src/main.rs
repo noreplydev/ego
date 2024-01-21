@@ -9,6 +9,8 @@ use runtime::Interpreter;
 use std::env;
 use std::fs;
 
+use crate::runtime::ScopesStack;
+
 pub const KEYWORDS: [&str; 2] = ["print", "let"]; // "if", "else", "while", "for", "fn"
 
 fn main() {
@@ -39,7 +41,8 @@ fn main() {
         println!("\nAST:\n----\n{:?}\n", ast);
     }
 
-    let interpreter = Interpreter::new(ast);
+    let scopes = ScopesStack::new();
+    let mut interpreter = Interpreter::new(scopes, ast);
     interpreter.execute();
 
     println!("")
