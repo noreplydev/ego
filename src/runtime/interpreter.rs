@@ -29,14 +29,9 @@ impl Interpreter {
             }
             AstTokenType::VariableDeclaration => {
                 if let Some((identifier, value)) = self.variable_declaration(node) {
-                    let new_scopes =
-                        ScopesStack::add_identifier(self.scopes.get(), identifier, value);
-
-                    // update scopes with new variable
-                    if let Some(new_scopes) = new_scopes {
-                        self.scopes = new_scopes;
-                    }
+                    self.scopes.add_identifier(identifier, value);
                 }
+                println!("{:?}", self.scopes);
             }
             _ => {}
         }

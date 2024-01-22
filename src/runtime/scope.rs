@@ -24,26 +24,10 @@ impl ScopesStack {
         ScopesStack::__new(scopes)
     }
 
-    pub fn add_identifier(
-        scopes: Vec<Scope>,
-        identifier: String,
-        value: String,
-    ) -> Option<ScopesStack> {
-        let mut mutable_scopes = scopes.clone();
-        let last_scope = mutable_scopes.last_mut();
-
-        println!("last scope {:?} and scopes {:?}", last_scope, scopes);
-
-        if let Some(scope) = last_scope {
+    pub fn add_identifier(&mut self, identifier: String, value: String) {
+        if let Some(scope) = self.scopes.last_mut() {
             scope.add(identifier, value);
-            return Some(ScopesStack::__new(mutable_scopes));
         }
-
-        None
-    }
-
-    pub fn get(&self) -> Vec<Scope> {
-        self.scopes.clone()
     }
     // this function must to be recursive since the target variable can be defined in another scope
     /*     pub fn set_indentifier(&self, indentifier: String, value: String) -> bool {
