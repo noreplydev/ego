@@ -34,13 +34,6 @@ impl Interpreter {
                     }
                 }
                 AstTokenType::VariableDeclaration => {
-                    /*                     let identifier = &node.children[0].value;
-                                       let value = &node.children[1].value;
-
-                                       self.scopes
-                                           .add_identifier(identifier.to_string(), value.to_string());
-                    */
-
                     let mut current = 0;
                     let mut identifier = None;
                     let mut value = None;
@@ -66,7 +59,7 @@ impl Interpreter {
 
                         println!("{:?}", self.scopes);
                     } else {
-                        println!("[cei] Unexpected error declaring variable");
+                        println!("[cei] Variable identifier or value is missing");
                         std::process::exit(1);
                     }
                 }

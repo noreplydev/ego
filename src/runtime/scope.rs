@@ -12,18 +12,6 @@ impl ScopesStack {
         }
     }
 
-    fn __new(scopes: Vec<Scope>) -> ScopesStack {
-        ScopesStack { scopes }
-    }
-
-    pub fn add(&mut self) -> ScopesStack {
-        let new_scope = Scope::new();
-        let mut scopes = self.scopes.clone();
-        scopes.push(new_scope);
-
-        ScopesStack::__new(scopes)
-    }
-
     pub fn add_identifier(&mut self, identifier: String, value: String) {
         if let Some(scope) = self.scopes.last_mut() {
             scope.add(identifier, value);
