@@ -1,7 +1,8 @@
-use std::{os::unix::process, process::id};
-
 use super::ScopesStack;
-use crate::ast::{AstNode, AstTokenType, AstTree};
+use crate::{
+    ast::{AstTokenType, AstTree},
+    core::handlers::print,
+};
 
 pub struct Interpreter {
     scopes: ScopesStack,
@@ -18,19 +19,7 @@ impl Interpreter {
             match node.token_type {
                 AstTokenType::FunctionCall => {
                     if node.value == "print" {
-                        let string_node = &node.children[0];
-                        let mut string_chars = string_node.value.chars();
-                        // remove first and last quote
-                        string_chars.next();
-                        string_chars.next_back();
-                        let string_literal = string_chars.as_str();
-
-                        match &string_node.token_type {
-                            AstTokenType::StringLiteral => {
-                                println!("{string_literal}");
-                            }
-                            _ => {}
-                        }
+                        print(node.clone())
                     }
                 }
                 AstTokenType::VariableDeclaration => {

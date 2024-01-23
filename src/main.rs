@@ -1,4 +1,5 @@
 mod ast;
+mod core;
 mod runtime;
 
 use ast::lex;
