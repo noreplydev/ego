@@ -73,9 +73,12 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 if is_string {
                     current_token.push(c);
                 } else {
-                    current_token.push(c);
-                    tokens.push(token_with_type(current_token));
-                    current_token = String::new();
+                    // if identifier was before ;
+                    if current_token.len() > 0 {
+                        tokens.push(token_with_type(current_token));
+                        current_token = String::new();
+                    }
+                    tokens.push(token_with_type(c.to_string()));
                 }
                 chars.next();
             }
