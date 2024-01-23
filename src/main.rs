@@ -41,9 +41,5 @@ fn main() {
         println!("\nAST:\n----\n{:?}\n", ast);
     }
 
-    let scopes = ScopesStack::new();
-    let mut interpreter = Interpreter::new(scopes, ast);
-    interpreter.execute();
-
-    println!("")
+    Interpreter::new(ScopesStack::new(), ast).exec();
 }
