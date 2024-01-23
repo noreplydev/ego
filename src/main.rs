@@ -1,10 +1,8 @@
 mod ast;
-mod lexer;
-mod parser;
 mod runtime;
 
-use lexer::lex;
-use parser::parse;
+use ast::lex;
+use ast::parse;
 use runtime::Interpreter;
 use std::env;
 use std::fs;

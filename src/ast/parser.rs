@@ -1,7 +1,6 @@
-use crate::{
-    ast::{AstNode, AstTokenType, AstTree},
-    lexer::{LexerToken, LexerTokenType},
-};
+use crate::ast::{AstNode, AstTokenType, AstTree};
+
+use super::{LexerToken, LexerTokenType};
 
 pub fn parse(tokens: Vec<LexerToken>) -> AstTree {
     let _tree = tree(tokens);
