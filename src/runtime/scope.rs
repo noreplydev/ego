@@ -73,16 +73,12 @@ impl Scope {
             process::exit(1);
         }
 
-        let mut vars = self.vars.clone();
-        match vars.insert(identifier.clone(), value) {
+        match self.vars.insert(identifier.clone(), value) {
             Some(_) => {
                 println!("[cei] Cannot redeclare '{identifier}' in the scope");
                 process::exit(1);
             }
-            None => {
-                self.vars = vars;
-                true
-            }
+            _ => true,
         }
     }
 
