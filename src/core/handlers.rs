@@ -11,9 +11,6 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
             AstTokenType::Identifier => {
                 if let Some(value) = scopes.get_identifier_value(&child.value) {
                     values.push(value.clone());
-                } else {
-                    println!("[cei] '{}' is not defined", child.value);
-                    std::process::exit(1);
                 }
             }
             AstTokenType::StringLiteral => {

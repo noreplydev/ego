@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, os::unix::process};
 
 #[derive(Debug, Clone)]
 pub struct ScopesStack {
@@ -25,12 +25,14 @@ impl ScopesStack {
             if let Some(identifier_value) = self.scopes[counter].get(identifier) {
                 return Some(identifier_value);
             } else if counter == 0 {
-                return None;
+                println!("[cei] identifier '{identifier}' was not declared");
+                std::process::exit(1);
             }
             counter -= 1;
         }
 
-        return None;
+        println!("[cei] identifier '{identifier}' was not declared");
+        std::process::exit(1);
     }
 
     // this function must to be recursive since the target variable can be defined in another scope

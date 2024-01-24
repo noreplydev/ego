@@ -18,11 +18,13 @@ fn main() {
     let filename = if args.len() > 1 {
         &args[1]
     } else {
-        panic!("[cei] A file is required");
+        println!("[cei] an ego file is required");
+        std::process::exit(1);
     };
 
     if !filename.ends_with(".e") {
-        panic!("[cei] This is not .e (ego) file");
+        println!("[cei] This is not .e (ego) file");
+        std::process::exit(1);
     }
 
     let file_content = fs::read_to_string(filename).expect("[cei] This is not .e (ego) file");
