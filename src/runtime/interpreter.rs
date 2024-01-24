@@ -45,8 +45,6 @@ impl Interpreter {
                             identifier.unwrap().to_string(),
                             value.unwrap().to_string(),
                         );
-
-                        println!("{:?}", self.scopes);
                     } else {
                         println!("[cei] Variable identifier or value is missing");
                         std::process::exit(1);

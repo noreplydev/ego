@@ -1,3 +1,5 @@
+use std::vec;
+
 use crate::ast::{AstNode, AstTokenType, AstTree};
 
 use super::{LexerToken, LexerTokenType};
@@ -46,17 +48,17 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            LexerTokenType::StringLiteral,
+            vec![LexerTokenType::StringLiteral, LexerTokenType::Identifier],
             "[cei] Expected expression after print",
         ),
         (
-            LexerTokenType::EndOfStatement,
+            vec![LexerTokenType::EndOfStatement],
             "[cei] Expected ';' to close print statement",
         ),
     ];
 
     let root_node_value = tokens[current].value.clone();
-    lookhead(
+    lookahead(
         pattern,
         tokens,
         current + 1,
@@ -67,25 +69,25 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
 fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            LexerTokenType::Identifier,
+            vec![LexerTokenType::Identifier],
             "[cei] Expected identifier after 'let'",
         ),
         (
-            LexerTokenType::AssignmentOperator,
+            vec![LexerTokenType::AssignmentOperator],
             "[cei] Expected '=' after identifier",
         ),
         (
-            LexerTokenType::StringLiteral,
+            vec![LexerTokenType::StringLiteral],
             "[cei] Expected string literal after '='",
         ),
         (
-            LexerTokenType::EndOfStatement,
+            vec![LexerTokenType::EndOfStatement],
             "[cei] Expected ';' after variable declaration",
         ),
     ];
 
     let root_node_value = tokens[current].value.clone();
-    lookhead(
+    lookahead(
         pattern,
         tokens,
         current + 1,
@@ -97,8 +99,8 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
     )
 }
 
-fn lookhead(
-    types: Vec<(LexerTokenType, &str)>,
+fn lookahead(
+    types: Vec<(Vec<LexerTokenType>, &str)>,
     tokens: Vec<LexerToken>,
     mut current: usize,
     mut root_node: AstNode,
@@ -112,7 +114,7 @@ fn lookhead(
         current += 1;
         index_offset += 1;
 
-        if token.token_type.to_string() == token_type.to_string() {
+        if token_type.contains(&token.token_type) {
             match token.token_type {
                 LexerTokenType::Identifier => {
                     root_node.add_child(AstNode::new(

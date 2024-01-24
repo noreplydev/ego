@@ -27,6 +27,12 @@ impl fmt::Display for LexerTokenType {
     }
 }
 
+impl PartialEq for LexerTokenType {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_string() == other.to_string()
+    }
+}
+
 #[derive(Clone)]
 pub struct LexerToken {
     pub token_type: LexerTokenType,
