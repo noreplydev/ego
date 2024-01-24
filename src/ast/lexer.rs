@@ -9,6 +9,7 @@ pub enum LexerTokenType {
     Identifier,
     AssignmentOperator,
     StringLiteral,
+    Number,
     EndOfStatement,
     Unknown,
 }
@@ -21,6 +22,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
+            LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
@@ -137,6 +139,9 @@ fn token_with_type(token: String) -> LexerToken {
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
+        }
+        _ if token.chars().all(|c| c.is_numeric()) => {
+            LexerToken::new(LexerTokenType::Number, token)
         }
         _ if is_identifier(token.clone()) => LexerToken::new(LexerTokenType::Identifier, token),
         _ => LexerToken::new(LexerTokenType::Unknown, token),
