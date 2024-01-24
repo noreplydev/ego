@@ -35,6 +35,9 @@ impl Interpreter {
                             AstTokenType::StringLiteral => {
                                 value = Some(node.children[current].value.clone())
                             }
+                            AstTokenType::Number => {
+                                value = Some(node.children[current].value.clone())
+                            }
                             _ => {}
                         }
                         current += 1;
@@ -46,7 +49,10 @@ impl Interpreter {
                             value.unwrap().to_string(),
                         );
                     } else {
-                        println!("[cei] Variable identifier or value is missing");
+                        println!(
+                            "[cei] Cannot declare varible '{}'",
+                            identifier.unwrap_or("unknown".to_string())
+                        );
                         std::process::exit(1);
                     }
                 }

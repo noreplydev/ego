@@ -77,7 +77,7 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
             "[cei] Expected '=' after identifier",
         ),
         (
-            vec![LexerTokenType::StringLiteral],
+            vec![LexerTokenType::StringLiteral, LexerTokenType::Number],
             "[cei] Expected string literal after '='",
         ),
         (
@@ -126,6 +126,13 @@ fn lookahead(
                 LexerTokenType::StringLiteral => {
                     root_node.add_child(AstNode::new(
                         AstTokenType::StringLiteral,
+                        token.value.clone(),
+                        Vec::new(),
+                    ));
+                }
+                LexerTokenType::Number => {
+                    root_node.add_child(AstNode::new(
+                        AstTokenType::Number,
                         token.value.clone(),
                         Vec::new(),
                     ));

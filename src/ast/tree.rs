@@ -68,6 +68,7 @@ pub enum AstTokenType {
     VariableDeclaration,
     Identifier,
     StringLiteral,
+    Number,
 }
 
 impl fmt::Display for AstTokenType {
@@ -78,6 +79,7 @@ impl fmt::Display for AstTokenType {
             AstTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstTokenType::Identifier => write!(f, "Identifier"),
             AstTokenType::StringLiteral => write!(f, "StringLiteral"),
+            AstTokenType::Number => write!(f, "Number"),
         }
     }
 }
