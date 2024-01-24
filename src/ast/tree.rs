@@ -81,3 +81,9 @@ impl fmt::Display for AstTokenType {
         }
     }
 }
+
+impl PartialEq for AstTokenType {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_string() == other.to_string()
+    }
+}

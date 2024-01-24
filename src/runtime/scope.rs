@@ -1,4 +1,4 @@
-use std::{collections::HashMap, process};
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct ScopesStack {
@@ -17,6 +17,22 @@ impl ScopesStack {
             scope.add(identifier, value);
         }
     }
+
+    pub fn get_identifier_value(&self, identifier: &String) -> Option<&String> {
+        let mut counter = self.scopes.len() - 1;
+
+        while counter >= 0 {
+            if let Some(identifier_value) = self.scopes[counter].get(identifier) {
+                return Some(identifier_value);
+            } else if counter == 0 {
+                return None;
+            }
+            counter -= 1;
+        }
+
+        return None;
+    }
+
     // this function must to be recursive since the target variable can be defined in another scope
     /*     pub fn set_indentifier(&self, indentifier: String, value: String) -> bool {
         let current_scope = match self.scopes.last() {
@@ -58,13 +74,13 @@ impl Scope {
     fn add(&mut self, identifier: String, value: String) -> bool {
         if self.vars.contains_key(&identifier) {
             println!("[cei] Cannot redeclare '{identifier}' in the scope");
-            process::exit(1);
+            std::process::exit(1);
         }
 
         match self.vars.insert(identifier.clone(), value) {
             Some(_) => {
                 println!("[cei] Cannot redeclare '{identifier}' in the scope");
-                process::exit(1);
+                std::process::exit(1);
             }
             _ => true,
         }
@@ -75,6 +91,10 @@ impl Scope {
             Some(_) => true,
             None => false,
         }
+    }
+
+    fn get(&self, identifier: &String) -> Option<&String> {
+        self.vars.get(identifier)
     }
 
     /*     fn get(&self, name: &str) -> Option<String> {

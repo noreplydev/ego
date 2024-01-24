@@ -19,7 +19,7 @@ impl Interpreter {
             match node.token_type {
                 AstTokenType::FunctionCall => {
                     if node.value == "print" {
-                        print(node.clone())
+                        print(node.clone(), &self.scopes);
                     }
                 }
                 AstTokenType::VariableDeclaration => {
