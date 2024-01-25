@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstNode, AstTokenType, Expression},
+    ast::{AstNode, AstNodeType, Expression},
     runtime::ScopesStack,
 };
 
@@ -7,13 +7,13 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
     let mut values: Vec<String> = vec![];
 
     for child in node.children {
-        match child.token_type {
-            AstTokenType::Identifier => {
+        match child.node_type {
+            AstNodeType::Identifier => {
                 if let Some(value) = scopes.get_identifier_value(&child.value) {
                     values.push(value.clone());
                 }
             }
-            AstTokenType::Expression(exp) => match exp {
+            AstNodeType::Expression(exp) => match exp {
                 Expression::StringLiteral => {
                     values.push(child.value.clone());
                 }

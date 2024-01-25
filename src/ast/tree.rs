@@ -9,7 +9,7 @@ pub struct AstTree {
 impl AstTree {
     pub fn new(root_node: AstNode) -> AstTree {
         AstTree {
-            root: AstNode::new(root_node.token_type, root_node.value, root_node.children),
+            root: AstNode::new(root_node.node_type, root_node.value, root_node.children),
         }
     }
 }
@@ -23,15 +23,15 @@ impl fmt::Display for AstTree {
 /* AST TOKEN */
 #[derive(Debug, Clone)]
 pub struct AstNode {
-    pub token_type: AstTokenType,
+    pub node_type: AstNodeType,
     pub value: String,
     pub children: Vec<AstNode>,
 }
 
 impl AstNode {
-    pub fn new(token_type: AstTokenType, value: String, children: Vec<AstNode>) -> AstNode {
+    pub fn new(node_type: AstNodeType, value: String, children: Vec<AstNode>) -> AstNode {
         AstNode {
-            token_type,
+            node_type,
             value,
             children,
         }
@@ -39,7 +39,7 @@ impl AstNode {
 
     pub fn root() -> AstNode {
         AstNode {
-            token_type: AstTokenType::Root,
+            node_type: AstNodeType::Root,
             value: String::new(),
             children: Vec::new(),
         }
@@ -52,7 +52,7 @@ impl AstNode {
 
 impl fmt::Display for AstNode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "- {}: {}", self.token_type, self.value)?;
+        write!(f, "- {}: {}", self.node_type, self.value)?;
         for child in &self.children {
             write!(f, "child: {}", child)?;
         }
@@ -62,7 +62,7 @@ impl fmt::Display for AstNode {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub enum AstTokenType {
+pub enum AstNodeType {
     Root,
     FunctionCall,
     VariableDeclaration,
@@ -70,20 +70,20 @@ pub enum AstTokenType {
     Expression(Expression),
 }
 
-impl fmt::Display for AstTokenType {
+impl fmt::Display for AstNodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AstTokenType::Root => write!(f, "Root"),
-            AstTokenType::FunctionCall => write!(f, "FunctionCall"),
-            AstTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
-            AstTokenType::Identifier => write!(f, "Identifier"),
-            AstTokenType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
-            AstTokenType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
+            AstNodeType::Root => write!(f, "Root"),
+            AstNodeType::FunctionCall => write!(f, "FunctionCall"),
+            AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
+            AstNodeType::Identifier => write!(f, "Identifier"),
+            AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
+            AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
         }
     }
 }
 
-impl PartialEq for AstTokenType {
+impl PartialEq for AstNodeType {
     fn eq(&self, other: &Self) -> bool {
         self.to_string() == other.to_string()
     }

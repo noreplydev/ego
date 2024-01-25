@@ -2,7 +2,7 @@ use std::vec;
 
 use super::{LexerToken, LexerTokenType};
 use crate::ast::{
-    AstNode, AstTokenType, AstTree,
+    AstNode, AstNodeType, AstTree,
     Expression::{NumberLiteral, StringLiteral},
 };
 
@@ -32,7 +32,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
-                    AstTokenType::Expression(StringLiteral),
+                    AstNodeType::Expression(StringLiteral),
                     token.value.clone(),
                     Vec::new(),
                 ));
@@ -40,7 +40,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::Number => {
                 root.add_child(AstNode::new(
-                    AstTokenType::Expression(NumberLiteral),
+                    AstNodeType::Expression(NumberLiteral),
                     token.value.clone(),
                     Vec::new(),
                 ));
@@ -72,7 +72,7 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
         pattern,
         tokens,
         current + 1,
-        AstNode::new(AstTokenType::FunctionCall, root_node_value, Vec::new()),
+        AstNode::new(AstNodeType::FunctionCall, root_node_value, Vec::new()),
     )
 }
 
@@ -102,7 +102,7 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
         tokens,
         current + 1,
         AstNode::new(
-            AstTokenType::VariableDeclaration,
+            AstNodeType::VariableDeclaration,
             root_node_value,
             Vec::new(),
         ),
@@ -128,21 +128,21 @@ fn lookahead(
             match token.token_type {
                 LexerTokenType::Identifier => {
                     root_node.add_child(AstNode::new(
-                        AstTokenType::Identifier,
+                        AstNodeType::Identifier,
                         token.value.clone(),
                         Vec::new(),
                     ));
                 }
                 LexerTokenType::StringLiteral => {
                     root_node.add_child(AstNode::new(
-                        AstTokenType::Expression(StringLiteral),
+                        AstNodeType::Expression(StringLiteral),
                         token.value.clone(),
                         Vec::new(),
                     ));
                 }
                 LexerTokenType::Number => {
                     root_node.add_child(AstNode::new(
-                        AstTokenType::Expression(NumberLiteral),
+                        AstNodeType::Expression(NumberLiteral),
                         token.value.clone(),
                         Vec::new(),
                     ));

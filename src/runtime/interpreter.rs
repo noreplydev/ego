@@ -1,6 +1,6 @@
 use super::ScopesStack;
 use crate::{
-    ast::{AstTokenType, AstTree, Expression},
+    ast::{AstNodeType, AstTree, Expression},
     core::handlers::print,
 };
 
@@ -16,23 +16,23 @@ impl Interpreter {
 
     pub fn exec(&mut self) {
         for node in &mut self.ast.root.children {
-            match node.token_type {
-                AstTokenType::FunctionCall => {
+            match node.node_type {
+                AstNodeType::FunctionCall => {
                     if node.value == "print" {
                         print(node.clone(), &self.scopes);
                     }
                 }
-                AstTokenType::VariableDeclaration => {
+                AstNodeType::VariableDeclaration => {
                     let mut current = 0;
                     let mut identifier = None;
                     let mut value = None;
 
                     while current < node.children.len() {
-                        match node.children[current].token_type {
-                            AstTokenType::Identifier => {
+                        match node.children[current].node_type {
+                            AstNodeType::Identifier => {
                                 identifier = Some(node.children[current].value.clone())
                             }
-                            AstTokenType::Expression(exp) => match exp {
+                            AstNodeType::Expression(exp) => match exp {
                                 Expression::StringLiteral => {
                                     value = Some(node.children[current].value.clone())
                                 }
@@ -78,18 +78,18 @@ pub fn new(scopes: ScopesStack, ast: AstTree) -> Interpreter {
    }
 
    fn execute_node(&mut self, node: AstNode) -> AstNode {
-       match node.token_type {
-           AstTokenType::Root => {
+       match node.node_type {
+           AstNodeType::Root => {
                for child in node.children {
                    self.execute_node(child);
                }
            }
-           AstTokenType::FunctionCall => {
+           AstNodeType::FunctionCall => {
                if node.value == "print" {
                    Self::execute_print(&node);
                }
            }
-           AstTokenType::VariableDeclaration => {
+           AstNodeType::VariableDeclaration => {
                if let Some((identifier, value)) = Self::variable_declaration(&node) {
                    self.scopes.add_identifier(identifier, value);
                }
@@ -108,8 +108,8 @@ pub fn new(scopes: ScopesStack, ast: AstTree) -> Interpreter {
        string_chars.next_back();
        let string_literal = string_chars.as_str();
 
-       match &string_node.token_type {
-           AstTokenType::StringLiteral => {
+       match &string_node.node_type {
+           AstNodeType::StringLiteral => {
                println!("{}", string_literal);
            }
            _ => {}
@@ -122,9 +122,9 @@ pub fn new(scopes: ScopesStack, ast: AstTree) -> Interpreter {
        let mut value = None;
 
        while current < node.children.len() {
-           match node.children[current].token_type {
-               AstTokenType::Identifier => identifier = Some(node.children[current].value.clone()),
-               AstTokenType::StringLiteral => value = Some(node.children[current].value.clone()),
+           match node.children[current].node_type {
+               AstNodeType::Identifier => identifier = Some(node.children[current].value.clone()),
+               AstNodeType::StringLiteral => value = Some(node.children[current].value.clone()),
                _ => {}
            }
            current += 1;
