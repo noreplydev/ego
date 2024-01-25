@@ -1,8 +1,10 @@
 use std::vec;
 
-use crate::ast::{AstNode, AstTokenType, AstTree};
-
 use super::{LexerToken, LexerTokenType};
+use crate::ast::{
+    AstNode, AstTokenType, AstTree,
+    Expression::{NumberLiteral, StringLiteral},
+};
 
 pub fn parse(tokens: Vec<LexerToken>) -> AstTree {
     let _tree = tree(tokens);
@@ -30,7 +32,15 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
-                    AstTokenType::StringLiteral,
+                    AstTokenType::Expression(StringLiteral),
+                    token.value.clone(),
+                    Vec::new(),
+                ));
+                current += 1;
+            }
+            LexerTokenType::Number => {
+                root.add_child(AstNode::new(
+                    AstTokenType::Expression(NumberLiteral),
                     token.value.clone(),
                     Vec::new(),
                 ));
@@ -125,14 +135,14 @@ fn lookahead(
                 }
                 LexerTokenType::StringLiteral => {
                     root_node.add_child(AstNode::new(
-                        AstTokenType::StringLiteral,
+                        AstTokenType::Expression(StringLiteral),
                         token.value.clone(),
                         Vec::new(),
                     ));
                 }
                 LexerTokenType::Number => {
                     root_node.add_child(AstNode::new(
-                        AstTokenType::Number,
+                        AstTokenType::Expression(NumberLiteral),
                         token.value.clone(),
                         Vec::new(),
                     ));

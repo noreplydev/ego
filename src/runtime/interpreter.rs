@@ -1,6 +1,6 @@
 use super::ScopesStack;
 use crate::{
-    ast::{AstTokenType, AstTree},
+    ast::{AstTokenType, AstTree, Expression},
     core::handlers::print,
 };
 
@@ -32,12 +32,14 @@ impl Interpreter {
                             AstTokenType::Identifier => {
                                 identifier = Some(node.children[current].value.clone())
                             }
-                            AstTokenType::StringLiteral => {
-                                value = Some(node.children[current].value.clone())
-                            }
-                            AstTokenType::Number => {
-                                value = Some(node.children[current].value.clone())
-                            }
+                            AstTokenType::Expression(exp) => match exp {
+                                Expression::StringLiteral => {
+                                    value = Some(node.children[current].value.clone())
+                                }
+                                Expression::NumberLiteral => {
+                                    value = Some(node.children[current].value.clone())
+                                }
+                            },
                             _ => {}
                         }
                         current += 1;

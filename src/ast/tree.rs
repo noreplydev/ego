@@ -61,14 +61,13 @@ impl fmt::Display for AstNode {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum AstTokenType {
     Root,
     FunctionCall,
     VariableDeclaration,
     Identifier,
-    StringLiteral,
-    Number,
+    Expression(Expression),
 }
 
 impl fmt::Display for AstTokenType {
@@ -78,8 +77,8 @@ impl fmt::Display for AstTokenType {
             AstTokenType::FunctionCall => write!(f, "FunctionCall"),
             AstTokenType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstTokenType::Identifier => write!(f, "Identifier"),
-            AstTokenType::StringLiteral => write!(f, "StringLiteral"),
-            AstTokenType::Number => write!(f, "Number"),
+            AstTokenType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
+            AstTokenType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
         }
     }
 }
@@ -88,4 +87,10 @@ impl PartialEq for AstTokenType {
     fn eq(&self, other: &Self) -> bool {
         self.to_string() == other.to_string()
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Expression {
+    StringLiteral,
+    NumberLiteral,
 }

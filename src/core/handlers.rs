@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstNode, AstTokenType},
+    ast::{AstNode, AstTokenType, Expression},
     runtime::ScopesStack,
 };
 
@@ -13,10 +13,14 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
                     values.push(value.clone());
                 }
             }
-            AstTokenType::StringLiteral => {
-                let a = child.value.clone();
-                values.push(a);
-            }
+            AstTokenType::Expression(exp) => match exp {
+                Expression::StringLiteral => {
+                    values.push(child.value.clone());
+                }
+                Expression::NumberLiteral => {
+                    values.push(child.value.clone());
+                }
+            },
             _ => {}
         }
     }
