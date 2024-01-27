@@ -1,4 +1,4 @@
-use std::fmt::{self, write};
+use std::fmt::{self};
 
 use crate::KEYWORDS;
 
@@ -12,7 +12,9 @@ pub enum LexerTokenType {
     Number,
     OpenParenthesis,
     CloseParenthesis,
+    Comma,
     EndOfStatement,
+    Any, // possible tokens or no tokens
     Unknown,
 }
 
@@ -27,7 +29,9 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
             LexerTokenType::CloseParenthesis => write!(f, "CloseParenthesis"),
+            LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
+            LexerTokenType::Any => write!(f, "Any"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }
@@ -80,25 +84,16 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             }
             // comments
             '/' => {}
-            '(' | ')' => {
+            // groups
+            '(' | ')' | ';' | ',' => {
                 if is_string {
                     current_token.push(c);
                 } else {
-                    tokens.push(token_with_type(current_token)); // push previous token to (
-                    tokens.push(token_with_type(c.to_string())); // push (
-                    current_token = String::new();
-                }
-            }
-            ';' => {
-                if is_string {
-                    current_token.push(c);
-                } else {
-                    // if identifier was before ;
                     if current_token.len() > 0 {
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(current_token)); // push previous token
                         current_token = String::new();
                     }
-                    tokens.push(token_with_type(c.to_string()));
+                    tokens.push(token_with_type(c.to_string())); // push current
                 }
             }
             '=' => {
@@ -141,10 +136,11 @@ fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::PrintKeyword, token),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
-        ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
-        "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token),
         ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token),
+        "," => LexerToken::new(LexerTokenType::Comma, token),
+        ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
+        "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
