@@ -1,4 +1,4 @@
-use std::fmt;
+use std::fmt::{self, write};
 
 use crate::KEYWORDS;
 
@@ -10,6 +10,8 @@ pub enum LexerTokenType {
     AssignmentOperator,
     StringLiteral,
     Number,
+    OpenCurlyBrace,
+    CloseCurlyBrace,
     EndOfStatement,
     Unknown,
 }
@@ -23,6 +25,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
+            LexerTokenType::OpenCurlyBrace => write!(f, "OpenCurlyBrace"),
+            LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
@@ -59,8 +63,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     let mut current_token = String::new();
     let mut is_string = false; // inside a string flag
-    let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
 
+    let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     while let Some(&c) = chars.peek() {
         match c {
             // a quote
@@ -73,10 +77,18 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 }
 
                 is_string = !is_string;
-                chars.next();
             }
             // comments
             '/' => {}
+            '(' | ')' => {
+                if is_string {
+                    current_token.push(c);
+                } else {
+                    tokens.push(token_with_type(current_token)); // push previous token to (
+                    tokens.push(token_with_type(c.to_string())); // push (
+                    current_token = String::new();
+                }
+            }
             ';' => {
                 if is_string {
                     current_token.push(c);
@@ -88,7 +100,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     }
                     tokens.push(token_with_type(c.to_string()));
                 }
-                chars.next();
             }
             '=' => {
                 if is_string {
@@ -98,7 +109,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     tokens.push(token_with_type(current_token));
                     current_token = String::new();
                 }
-                chars.next();
             }
             // whitespace types
             ' ' | '\n' | '\t' => {
@@ -112,18 +122,14 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     tokens.push(token_with_type(current_token));
                     current_token = String::new();
                 }
-
-                chars.next();
             }
             // characters that are not whitespace
             _ if is_string || !c.is_whitespace() => {
                 current_token.push(c);
-                chars.next();
             }
-            _ => {
-                chars.next();
-            }
+            _ => {}
         }
+        chars.next();
     }
 
     return tokens;
@@ -137,6 +143,8 @@ fn token_with_type(token: String) -> LexerToken {
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
+        "(" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token),
+        ")" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
