@@ -10,8 +10,8 @@ pub enum LexerTokenType {
     AssignmentOperator,
     StringLiteral,
     Number,
-    OpenCurlyBrace,
-    CloseCurlyBrace,
+    OpenParenthesis,
+    CloseParenthesis,
     EndOfStatement,
     Unknown,
 }
@@ -25,8 +25,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
-            LexerTokenType::OpenCurlyBrace => write!(f, "OpenCurlyBrace"),
-            LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
+            LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
+            LexerTokenType::CloseParenthesis => write!(f, "CloseParenthesis"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
@@ -143,8 +143,8 @@ fn token_with_type(token: String) -> LexerToken {
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
-        "(" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token),
-        ")" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token),
+        "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token),
+        ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
