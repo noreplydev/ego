@@ -15,25 +15,15 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
                     }
                 }
                 Expression::StringLiteral => {
-                    values.push(child.value.to_string().clone());
+                    values.push(child.value.to_string());
                 }
                 Expression::NumberLiteral => {
-                    values.push(child.value.to_string().clone());
+                    values.push(child.value.to_string());
                 }
             },
             _ => {}
         }
     }
 
-    let formatted_values: Vec<String> = values
-        .iter()
-        .map(|val| {
-            let mut val = val.chars();
-            val.next();
-            val.next_back();
-            val.as_str().to_string()
-        })
-        .collect();
-
-    println!("{}", formatted_values.join(""));
+    println!("{}", values.join(" "));
 }

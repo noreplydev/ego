@@ -39,7 +39,7 @@ fn main() {
 
     let ast = parse(tokens.clone());
     if args.len() > 2 && args[2] == "-d" {
-        println!("\nAST:\n----\n{:?}\n", ast);
+        println!("\nAST:\n----\n{:#?}\n", ast);
     }
 
     Interpreter::new(ScopesStack::new(), ast).exec();

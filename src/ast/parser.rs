@@ -41,14 +41,14 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 ));
                 current += 1;
             }
-            /*             LexerTokenType::Number => {
+            LexerTokenType::Number => {
                 root.add_child(AstNode::new(
                     AstNodeType::Expression(NumberLiteral),
-                    token.value.clone(),
+                    RuntimeType::number(token.value.parse().unwrap()),
                     Vec::new(),
                 ));
                 current += 1;
-            } */
+            }
             _ => {
                 current += 1;
             }
@@ -70,14 +70,14 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
         ),
     ];
 
-    //let root_node_value = tokens[current].value.clone();
+    let root_node_value = tokens[current].value.clone();
     lookahead(
         pattern,
         tokens,
         current + 1,
         AstNode::new(
             AstNodeType::FunctionCall,
-            RuntimeType::nothing(),
+            RuntimeType::string(root_node_value),
             Vec::new(),
         ),
     )
@@ -95,7 +95,7 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
         ),
         (
             vec![LexerTokenType::StringLiteral, LexerTokenType::Number],
-            "[cei] Expected string literal after '='",
+            "[cei] Expected value after '='",
         ),
         (
             vec![LexerTokenType::EndOfStatement],
@@ -103,14 +103,14 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
         ),
     ];
 
-    //let root_node_value = tokens[current].value.clone();
+    let root_node_value = tokens[current].value.clone();
     lookahead(
         pattern,
         tokens,
         current + 1,
         AstNode::new(
             AstNodeType::VariableDeclaration,
-            RuntimeType::nothing(),
+            RuntimeType::string(root_node_value),
             Vec::new(),
         ),
     )
@@ -147,13 +147,15 @@ fn lookahead(
                         Vec::new(),
                     ));
                 }
-                /*                 LexerTokenType::Number => {
-                    root_node.add_child(AstNode::new(
-                        AstNodeType::Expression(NumberLiteral),
-                        token.value.clone(),
-                        Vec::new(),
-                    ));
-                } */
+                LexerTokenType::Number => {
+                    if let Ok(number) = token.value.parse() {
+                        root_node.add_child(AstNode::new(
+                            AstNodeType::Expression(NumberLiteral),
+                            RuntimeType::number(number),
+                            Vec::new(),
+                        ));
+                    }
+                }
                 LexerTokenType::AssignmentOperator => {}
                 LexerTokenType::EndOfStatement => {
                     return (index_offset + 1, root_node); // +1 is for the node who called lookahead

@@ -1,11 +1,12 @@
 use std::fmt;
 
-use super::string::RnString;
+use super::{number::RnNumber, string::RnString};
 
 #[derive(Debug, Clone)]
 pub enum RuntimeType {
     Nothing(Nothing),
     RnString(RnString),
+    RnNumber(RnNumber),
 }
 
 impl RuntimeType {
@@ -17,8 +18,16 @@ impl RuntimeType {
         RuntimeType::Nothing(Nothing::new())
     }
 
+    pub fn number(value: usize) -> RuntimeType {
+        RuntimeType::RnNumber(RnNumber::new(value))
+    }
+
     pub fn to_string(&self) -> String {
-        self.to_string()
+        match self {
+            RuntimeType::Nothing(nothing) => nothing.to_string(),
+            RuntimeType::RnString(rn_string) => rn_string.to_string(),
+            RuntimeType::RnNumber(rn_number) => rn_number.to_string(),
+        }
     }
 }
 
@@ -27,6 +36,7 @@ impl fmt::Display for RuntimeType {
         match self {
             RuntimeType::Nothing(_) => write!(f, "Nothing"),
             RuntimeType::RnString(_) => write!(f, "RnString"),
+            RuntimeType::RnNumber(_) => write!(f, "RnNumber"),
         }
     }
 }
@@ -36,5 +46,9 @@ pub struct Nothing {}
 impl Nothing {
     pub fn new() -> Nothing {
         Nothing {}
+    }
+
+    pub fn to_string(&self) -> String {
+        String::from("Nothing")
     }
 }
