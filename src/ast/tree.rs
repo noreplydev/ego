@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::core::types::RuntimeType;
+
 /* AST TREE */
 #[derive(Debug, Clone)]
 pub struct AstTree {
@@ -24,12 +26,12 @@ impl fmt::Display for AstTree {
 #[derive(Debug, Clone)]
 pub struct AstNode {
     pub node_type: AstNodeType,
-    pub value: String,
+    pub value: RuntimeType,
     pub children: Vec<AstNode>,
 }
 
 impl AstNode {
-    pub fn new(node_type: AstNodeType, value: String, children: Vec<AstNode>) -> AstNode {
+    pub fn new(node_type: AstNodeType, value: RuntimeType, children: Vec<AstNode>) -> AstNode {
         AstNode {
             node_type,
             value,
@@ -40,7 +42,7 @@ impl AstNode {
     pub fn root() -> AstNode {
         AstNode {
             node_type: AstNodeType::Root,
-            value: String::new(),
+            value: RuntimeType::nothing(),
             children: Vec::new(),
         }
     }

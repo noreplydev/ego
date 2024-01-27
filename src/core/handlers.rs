@@ -10,15 +10,15 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
         match child.node_type {
             AstNodeType::Expression(exp) => match exp {
                 Expression::Identifier => {
-                    if let Some(value) = scopes.get_identifier_value(&child.value) {
+                    if let Some(value) = scopes.get_identifier_value(&child.value.to_string()) {
                         values.push(value.clone());
                     }
                 }
                 Expression::StringLiteral => {
-                    values.push(child.value.clone());
+                    values.push(child.value.to_string().clone());
                 }
                 Expression::NumberLiteral => {
-                    values.push(child.value.clone());
+                    values.push(child.value.to_string().clone());
                 }
             },
             _ => {}

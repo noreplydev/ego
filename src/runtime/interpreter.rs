@@ -1,7 +1,7 @@
 use super::ScopesStack;
 use crate::{
     ast::{AstNodeType, AstTree, Expression},
-    core::handlers::print,
+    core::{handlers::print, types::RuntimeType},
 };
 
 pub struct Interpreter {
@@ -18,7 +18,8 @@ impl Interpreter {
         for node in &mut self.ast.root.children {
             match node.node_type {
                 AstNodeType::FunctionCall => {
-                    if node.value == "print" {
+                    println!("test {}", node.value.to_string());
+                    if node.value.to_string() == "print" {
                         print(node.clone(), &self.scopes);
                     }
                 }
@@ -53,7 +54,7 @@ impl Interpreter {
                     } else {
                         println!(
                             "[cei] Cannot declare varible '{}'",
-                            identifier.unwrap_or("unknown".to_string())
+                            identifier.unwrap_or(RuntimeType::string("unknown".to_string()))
                         );
                         std::process::exit(1);
                     }

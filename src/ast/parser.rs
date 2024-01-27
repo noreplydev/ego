@@ -1,9 +1,12 @@
 use std::vec;
 
 use super::{LexerToken, LexerTokenType};
-use crate::ast::{
-    AstNode, AstNodeType, AstTree,
-    Expression::{Identifier, NumberLiteral, StringLiteral},
+use crate::{
+    ast::{
+        AstNode, AstNodeType, AstTree,
+        Expression::{Identifier, NumberLiteral, StringLiteral},
+    },
+    core::types::RuntimeType,
 };
 
 pub fn parse(tokens: Vec<LexerToken>) -> AstTree {
@@ -33,19 +36,19 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
                     AstNodeType::Expression(StringLiteral),
-                    token.value.clone(),
+                    RuntimeType::string(token.value.clone()),
                     Vec::new(),
                 ));
                 current += 1;
             }
-            LexerTokenType::Number => {
+            /*             LexerTokenType::Number => {
                 root.add_child(AstNode::new(
                     AstNodeType::Expression(NumberLiteral),
                     token.value.clone(),
                     Vec::new(),
                 ));
                 current += 1;
-            }
+            } */
             _ => {
                 current += 1;
             }
@@ -67,12 +70,16 @@ fn print_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstNode) 
         ),
     ];
 
-    let root_node_value = tokens[current].value.clone();
+    //let root_node_value = tokens[current].value.clone();
     lookahead(
         pattern,
         tokens,
         current + 1,
-        AstNode::new(AstNodeType::FunctionCall, root_node_value, Vec::new()),
+        AstNode::new(
+            AstNodeType::FunctionCall,
+            RuntimeType::nothing(),
+            Vec::new(),
+        ),
     )
 }
 
@@ -96,14 +103,14 @@ fn assignment_statement(tokens: Vec<LexerToken>, current: usize) -> (usize, AstN
         ),
     ];
 
-    let root_node_value = tokens[current].value.clone();
+    //let root_node_value = tokens[current].value.clone();
     lookahead(
         pattern,
         tokens,
         current + 1,
         AstNode::new(
             AstNodeType::VariableDeclaration,
-            root_node_value,
+            RuntimeType::nothing(),
             Vec::new(),
         ),
     )
@@ -129,30 +136,30 @@ fn lookahead(
                 LexerTokenType::Identifier => {
                     root_node.add_child(AstNode::new(
                         AstNodeType::Expression(Identifier),
-                        token.value.clone(),
+                        RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
                 }
                 LexerTokenType::StringLiteral => {
                     root_node.add_child(AstNode::new(
                         AstNodeType::Expression(StringLiteral),
-                        token.value.clone(),
+                        RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
                 }
-                LexerTokenType::Number => {
+                /*                 LexerTokenType::Number => {
                     root_node.add_child(AstNode::new(
                         AstNodeType::Expression(NumberLiteral),
                         token.value.clone(),
                         Vec::new(),
                     ));
-                }
+                } */
                 LexerTokenType::AssignmentOperator => {}
                 LexerTokenType::EndOfStatement => {
                     return (index_offset + 1, root_node); // +1 is for the node who called lookahead
                 }
                 _ => {
-                    println!("unexpected token type for recursion")
+                    println!("unexpected token type,aka: recursion")
                     // here goes recursion
                 }
             }
