@@ -66,7 +66,6 @@ pub enum AstNodeType {
     Root,
     FunctionCall,
     VariableDeclaration,
-    Identifier,
     Expression(Expression),
 }
 
@@ -76,9 +75,9 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Root => write!(f, "Root"),
             AstNodeType::FunctionCall => write!(f, "FunctionCall"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
-            AstNodeType::Identifier => write!(f, "Identifier"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
+            AstNodeType::Expression(Expression::Identifier) => write!(f, "Indentifier"),
         }
     }
 }
@@ -93,4 +92,5 @@ impl PartialEq for AstNodeType {
 pub enum Expression {
     StringLiteral,
     NumberLiteral,
+    Identifier,
 }

@@ -3,7 +3,7 @@ use std::vec;
 use super::{LexerToken, LexerTokenType};
 use crate::ast::{
     AstNode, AstNodeType, AstTree,
-    Expression::{NumberLiteral, StringLiteral},
+    Expression::{Identifier, NumberLiteral, StringLiteral},
 };
 
 pub fn parse(tokens: Vec<LexerToken>) -> AstTree {
@@ -128,7 +128,7 @@ fn lookahead(
             match token.token_type {
                 LexerTokenType::Identifier => {
                     root_node.add_child(AstNode::new(
-                        AstNodeType::Identifier,
+                        AstNodeType::Expression(Identifier),
                         token.value.clone(),
                         Vec::new(),
                     ));

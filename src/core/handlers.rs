@@ -8,12 +8,12 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
 
     for child in node.children {
         match child.node_type {
-            AstNodeType::Identifier => {
-                if let Some(value) = scopes.get_identifier_value(&child.value) {
-                    values.push(value.clone());
-                }
-            }
             AstNodeType::Expression(exp) => match exp {
+                Expression::Identifier => {
+                    if let Some(value) = scopes.get_identifier_value(&child.value) {
+                        values.push(value.clone());
+                    }
+                }
                 Expression::StringLiteral => {
                     values.push(child.value.clone());
                 }
