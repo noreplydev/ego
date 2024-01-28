@@ -4,7 +4,7 @@ use crate::KEYWORDS;
 
 #[derive(Clone)]
 pub enum LexerTokenType {
-    PrintKeyword,
+    FunctionCall,
     LetKeyword,
     Identifier,
     AssignmentOperator,
@@ -21,7 +21,7 @@ pub enum LexerTokenType {
 impl fmt::Display for LexerTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LexerTokenType::PrintKeyword => write!(f, "PrintKeyword"),
+            LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
@@ -134,7 +134,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
 fn token_with_type(token: String) -> LexerToken {
     match token.as_str() {
-        "print" => LexerToken::new(LexerTokenType::PrintKeyword, token),
+        "print" => LexerToken::new(LexerTokenType::FunctionCall, token),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
         "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token),
         ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token),
