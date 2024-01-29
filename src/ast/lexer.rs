@@ -12,6 +12,8 @@ pub enum LexerTokenType {
     Number,
     OpenParenthesis,
     CloseParenthesis,
+    OpenCurlyBrace,
+    CloseCurlyBrace,
     Comma,
     EndOfStatement,
     Any, // possible tokens or no tokens
@@ -29,6 +31,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
             LexerTokenType::CloseParenthesis => write!(f, "CloseParenthesis"),
+            LexerTokenType::OpenCurlyBrace => write!(f, "OpenCurlyBrace"),
+            LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Any => write!(f, "Any"),
@@ -84,8 +88,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             }
             // comments
             '/' => {}
-            // groups
-            '(' | ')' | ';' | ',' => {
+            // special characters
+            '(' | ')' | '{' | '}' | ',' | ';' => {
                 if is_string {
                     current_token.push(c);
                 } else {
@@ -138,6 +142,8 @@ fn token_with_type(token: String) -> LexerToken {
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
         "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token),
         ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token),
+        "{" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token),
+        "}" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token),
         "," => LexerToken::new(LexerTokenType::Comma, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
