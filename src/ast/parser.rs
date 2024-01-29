@@ -23,7 +23,14 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
         let token = &tokens[current];
 
         match token.token_type {
+            LexerTokenType::OpenCurlyBrace => {
+                let (index_offset, block_node) = block(&tokens, current);
+                root.add_child(block_node);
+                println!("repertirlo otra vez {index_offset}");
+                current += index_offset;
+            }
             LexerTokenType::FunctionCall => {
+                println!("function call boy");
                 let (index_offset, print_node) = function_call(&tokens, current);
                 root.add_child(print_node);
                 current += index_offset;
@@ -61,6 +68,29 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
     }
 
     root
+}
+
+// all parsing functions pattern variable takes
+// in consideration that the function triggerer token is skipped.
+// e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
+fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+    let pattern = vec![
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Expected expression before '}'",
+        ),
+        (
+            vec![LexerTokenType::CloseCurlyBrace],
+            "[cei] Expected '}' to close a function call",
+        ),
+    ];
+
+    lookahead(
+        pattern,
+        tokens,
+        current + 1,
+        AstNode::new(AstNodeType::Block, RuntimeType::nothing(), Vec::new()),
+    )
 }
 
 fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
@@ -142,13 +172,20 @@ fn lookahead(
         let token = &tokens[current];
         let (tokens_types, error_message) = &types[pattern_index];
 
-        if tokens_types.contains(&LexerTokenType::Any) && tokens_types.contains(&token.token_type) {
+        if tokens_types.contains(&LexerTokenType::Any)
+            && types[pattern_index + 1].0.contains(&token.token_type)
+        {
             pattern_index += 1; // go to the next pattern item after this iteration
             continue;
         }
 
         if tokens_types.contains(&token.token_type) || tokens_types.contains(&LexerTokenType::Any) {
             match token.token_type {
+                LexerTokenType::OpenCurlyBrace => {
+                    let (offset, block_node) = block(&tokens, current);
+                    root.add_child(block_node);
+                    current += offset;
+                }
                 LexerTokenType::FunctionCall => {
                     let (offset, function_node) = function_call(&tokens, current);
                     root.add_child(function_node);
