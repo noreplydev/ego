@@ -1,7 +1,7 @@
 use super::ScopesStack;
 use crate::{
     ast::{AstNodeType, AstTree, Expression},
-    core::{handlers::print, types::interpolate},
+    core::handlers::print,
 };
 
 pub struct Interpreter {
@@ -34,8 +34,7 @@ impl Interpreter {
                                     identifier = Some(node.children[current].value.to_string())
                                 }
                                 Expression::StringLiteral => {
-                                    value =
-                                        Some(interpolate(node.children[current].value.to_string()))
+                                    value = Some(node.children[current].value.to_string())
                                 }
                                 Expression::NumberLiteral => {
                                     value = Some(node.children[current].value.to_string())

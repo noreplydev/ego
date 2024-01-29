@@ -1,4 +1,4 @@
-use std::{env::current_exe, vec};
+use std::vec;
 
 use super::{LexerToken, LexerTokenType};
 use crate::{
@@ -90,7 +90,7 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
         current + 1,
         AstNode::new(
             AstNodeType::FunctionCall,
-            RuntimeType::string(root_node_value),
+            RuntimeType::identifier(root_node_value),
             Vec::new(),
         ),
     )
@@ -123,7 +123,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
         current + 1,
         AstNode::new(
             AstNodeType::VariableDeclaration,
-            RuntimeType::string(root_node_value),
+            RuntimeType::identifier(root_node_value),
             Vec::new(),
         ),
     )
@@ -162,7 +162,7 @@ fn lookahead(
                 LexerTokenType::Identifier => {
                     root.add_child(AstNode::new(
                         AstNodeType::Expression(Identifier),
-                        RuntimeType::string(token.value.clone()),
+                        RuntimeType::identifier(token.value.clone()),
                         Vec::new(),
                     ));
                     current += 1;

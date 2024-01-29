@@ -9,11 +9,11 @@ impl RnString {
     }
 
     pub fn to_string(&self) -> String {
-        self.val.clone()
+        interpolate(self.val.clone())
     }
 }
 
-pub fn interpolate(string: String) -> String {
+fn interpolate(string: String) -> String {
     let mut chars = string.chars();
     chars.next();
     chars.next_back();

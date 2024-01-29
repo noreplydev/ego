@@ -1,25 +1,30 @@
 use std::fmt;
 
-use super::{number::RnNumber, string::RnString};
+use super::{identifier::RnIdentifier, number::RnNumber, string::RnString};
 
 #[derive(Debug, Clone)]
 pub enum RuntimeType {
     Nothing(Nothing),
     RnString(RnString),
     RnNumber(RnNumber),
+    RnIdentifier(RnIdentifier),
 }
 
 impl RuntimeType {
-    pub fn string(value: String) -> RuntimeType {
-        RuntimeType::RnString(RnString::new(value))
-    }
-
     pub fn nothing() -> RuntimeType {
         RuntimeType::Nothing(Nothing::new())
     }
 
+    pub fn string(value: String) -> RuntimeType {
+        RuntimeType::RnString(RnString::new(value))
+    }
+
     pub fn number(value: usize) -> RuntimeType {
         RuntimeType::RnNumber(RnNumber::new(value))
+    }
+
+    pub fn identifier(value: String) -> RuntimeType {
+        RuntimeType::RnIdentifier(RnIdentifier::new(value))
     }
 
     pub fn to_string(&self) -> String {
@@ -27,6 +32,7 @@ impl RuntimeType {
             RuntimeType::Nothing(nothing) => nothing.to_string(),
             RuntimeType::RnString(rn_string) => rn_string.to_string(),
             RuntimeType::RnNumber(rn_number) => rn_number.to_string(),
+            RuntimeType::RnIdentifier(rn_number) => rn_number.to_string(),
         }
     }
 }
@@ -37,6 +43,7 @@ impl fmt::Display for RuntimeType {
             RuntimeType::Nothing(_) => write!(f, "Nothing"),
             RuntimeType::RnString(_) => write!(f, "RnString"),
             RuntimeType::RnNumber(_) => write!(f, "RnNumber"),
+            RuntimeType::RnIdentifier(_) => write!(f, "RnIdentifier"),
         }
     }
 }
