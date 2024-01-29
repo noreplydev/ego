@@ -23,7 +23,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
         let token = &tokens[current];
 
         match token.token_type {
-            LexerTokenType::PrintKeyword => {
+            LexerTokenType::FunctionCall => {
                 let (index_offset, print_node) = print_statement(&tokens, current);
                 root.add_child(print_node);
                 current += index_offset;
@@ -34,9 +34,9 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 current += index_offset;
             }
             LexerTokenType::OpenParenthesis => {
-                let (index_offset, assignment_node) = group_expression(&tokens, current);
+                /*                 let (index_offset, assignment_node) = group_expression(&tokens, current);
                 root.add_child(assignment_node);
-                current += index_offset;
+                current += index_offset; */
             }
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
