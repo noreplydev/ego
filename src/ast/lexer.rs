@@ -71,63 +71,75 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     let mut current_token = String::new();
     let mut is_string = false; // inside a string flag
+    let mut is_comment = 0; // inside a comment
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     while let Some(&c) = chars.peek() {
-        match c {
-            // a quote
-            '"' => {
-                current_token.push(c);
-
-                if is_string {
-                    tokens.push(token_with_type(current_token));
-                    current_token = String::new();
-                }
-
-                is_string = !is_string;
+        // inside comment
+        if is_comment > 1 {
+            if c == '\n' {
+                is_comment = 0;
             }
-            // comments
-            '/' => {}
-            // special characters
-            '(' | ')' | '{' | '}' | ',' | ';' => {
-                if is_string {
+        // normal mode
+        } else {
+            match c {
+                // a quote
+                '"' => {
                     current_token.push(c);
-                } else {
-                    if current_token.len() > 0 {
-                        tokens.push(token_with_type(current_token)); // push previous token
+
+                    if is_string {
+                        tokens.push(token_with_type(current_token));
                         current_token = String::new();
                     }
-                    tokens.push(token_with_type(c.to_string())); // push current
+
+                    is_string = !is_string;
                 }
-            }
-            '=' => {
-                if is_string {
-                    current_token.push(c);
-                } else {
-                    current_token.push(c);
-                    tokens.push(token_with_type(current_token));
-                    current_token = String::new();
+                // comments
+                '/' => {
+                    is_comment += 1;
                 }
-            }
-            // whitespace types
-            ' ' | '\n' | '\t' => {
-                if is_string {
-                    current_token.push(c);
-                } else if keywords.contains(&current_token.as_str()) {
-                    tokens.push(token_with_type(current_token));
-                    current_token = String::new();
-                } else if current_token.len() > 0 {
-                    // if not empty
-                    tokens.push(token_with_type(current_token));
-                    current_token = String::new();
+                // special characters
+                '(' | ')' | '{' | '}' | ',' | ';' => {
+                    if is_string {
+                        current_token.push(c);
+                    } else {
+                        if current_token.len() > 0 {
+                            tokens.push(token_with_type(current_token)); // push previous token
+                            current_token = String::new();
+                        }
+                        tokens.push(token_with_type(c.to_string())); // push current
+                    }
                 }
+                '=' => {
+                    if is_string {
+                        current_token.push(c);
+                    } else {
+                        current_token.push(c);
+                        tokens.push(token_with_type(current_token));
+                        current_token = String::new();
+                    }
+                }
+                // whitespace types
+                ' ' | '\n' | '\t' => {
+                    if is_string {
+                        current_token.push(c);
+                    } else if keywords.contains(&current_token.as_str()) {
+                        tokens.push(token_with_type(current_token));
+                        current_token = String::new();
+                    } else if current_token.len() > 0 {
+                        // if not empty
+                        tokens.push(token_with_type(current_token));
+                        current_token = String::new();
+                    }
+                }
+                // characters that are not whitespace
+                _ if is_string || !c.is_whitespace() => {
+                    current_token.push(c);
+                }
+                _ => {}
             }
-            // characters that are not whitespace
-            _ if is_string || !c.is_whitespace() => {
-                current_token.push(c);
-            }
-            _ => {}
         }
+
         chars.next();
     }
 

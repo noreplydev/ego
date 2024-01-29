@@ -26,11 +26,9 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             LexerTokenType::OpenCurlyBrace => {
                 let (index_offset, block_node) = block(&tokens, current);
                 root.add_child(block_node);
-                println!("repertirlo otra vez {index_offset}");
                 current += index_offset;
             }
             LexerTokenType::FunctionCall => {
-                println!("function call boy");
                 let (index_offset, print_node) = function_call(&tokens, current);
                 root.add_child(print_node);
                 current += index_offset;
