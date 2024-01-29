@@ -1,4 +1,4 @@
-use std::vec;
+use std::{env::current_exe, vec};
 
 use super::{LexerToken, LexerTokenType};
 use crate::{
@@ -24,7 +24,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 
         match token.token_type {
             LexerTokenType::FunctionCall => {
-                let (index_offset, print_node) = print_statement(&tokens, current);
+                let (index_offset, print_node) = function_call(&tokens, current);
                 root.add_child(print_node);
                 current += index_offset;
             }
@@ -63,15 +63,23 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
     root
 }
 
-fn print_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            vec![LexerTokenType::StringLiteral, LexerTokenType::Identifier],
-            "[cei] Expected expression after print",
+            vec![LexerTokenType::OpenParenthesis],
+            "[cei] Expected '(' after function call",
+        ),
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Something went wrong while parsing a function call",
+        ),
+        (
+            vec![LexerTokenType::CloseParenthesis],
+            "[cei] Expected ')' to close a function call",
         ),
         (
             vec![LexerTokenType::EndOfStatement],
-            "[cei] Expected ';' to close print statement",
+            "[cei] Expected ';' to close a function call",
         ),
     ];
 
@@ -124,59 +132,74 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
 fn lookahead(
     types: Vec<(Vec<LexerTokenType>, &str)>,
     tokens: &Vec<LexerToken>,
-    mut current: usize,
-    mut root_node: AstNode,
+    called_on: usize,
+    mut root: AstNode,
 ) -> (usize, AstNode) {
-    let mut index_offset = 0; // then we will rest
+    let mut current = called_on; // index of the
+    let mut pattern_index = 0;
 
-    while current < tokens.len() && index_offset < types.len() {
+    while current < tokens.len() && pattern_index < types.len() {
         let token = &tokens[current];
-        let (tokens_types, error_message) = &types[index_offset];
+        let (tokens_types, error_message) = &types[pattern_index];
 
-        current += 1;
-        index_offset += 1;
+        if tokens_types.contains(&LexerTokenType::Any) && tokens_types.contains(&token.token_type) {
+            pattern_index += 1; // go to the next pattern item after this iteration
+            continue;
+        }
 
-        if tokens_types.contains(&token.token_type) {
+        println!("now -> {}", token);
+
+        if tokens_types.contains(&token.token_type) || tokens_types.contains(&LexerTokenType::Any) {
             match token.token_type {
+                LexerTokenType::FunctionCall => {
+                    let (offset, function_node) = function_call(&tokens, current);
+                    root.add_child(function_node);
+                    current += offset;
+                }
+                LexerTokenType::LetKeyword => {
+                    let (offset, assignment_node) = assignment_statement(&tokens, current);
+                    root.add_child(assignment_node);
+                    current += offset;
+                }
                 LexerTokenType::Identifier => {
-                    root_node.add_child(AstNode::new(
+                    root.add_child(AstNode::new(
                         AstNodeType::Expression(Identifier),
                         RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
+                    current += 1;
                 }
                 LexerTokenType::StringLiteral => {
-                    root_node.add_child(AstNode::new(
+                    root.add_child(AstNode::new(
                         AstNodeType::Expression(StringLiteral),
                         RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
+                    current += 1;
                 }
                 LexerTokenType::Number => {
-                    if let Ok(number) = token.value.parse() {
-                        root_node.add_child(AstNode::new(
-                            AstNodeType::Expression(NumberLiteral),
-                            RuntimeType::number(number),
-                            Vec::new(),
-                        ));
-                    }
-                }
-                LexerTokenType::AssignmentOperator => {}
-                LexerTokenType::OpenParenthesis => {}
-                LexerTokenType::Any => {}
-                LexerTokenType::EndOfStatement => {
-                    return (index_offset + 1, root_node); // +1 is for the node who called lookahead
+                    root.add_child(AstNode::new(
+                        AstNodeType::Expression(NumberLiteral),
+                        RuntimeType::number(token.value.parse().unwrap()),
+                        Vec::new(),
+                    ));
+                    current += 1;
                 }
                 _ => {
-                    println!("unexpected token type,aka: recursion")
-                    // here goes recursion
+                    current += 1;
                 }
             }
         } else {
             println!("{}", error_message);
             std::process::exit(1);
         }
+
+        // resolve LexerTokenType::Any type loop
+        // check next token type with the next pattern token type
+        if !tokens_types.contains(&LexerTokenType::Any) {
+            pattern_index += 1;
+        }
     }
 
-    (index_offset + 1, root_node) // +1 is for the node who called lookahead
+    ((current - called_on), root) // +1 is for the node who called lookahead
 }
