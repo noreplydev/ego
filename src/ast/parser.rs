@@ -147,8 +147,6 @@ fn lookahead(
             continue;
         }
 
-        println!("now -> {}", token);
-
         if tokens_types.contains(&token.token_type) || tokens_types.contains(&LexerTokenType::Any) {
             match token.token_type {
                 LexerTokenType::FunctionCall => {
