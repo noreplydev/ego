@@ -17,6 +17,7 @@ impl Interpreter {
     pub fn exec(&mut self) {
         for node in &mut self.ast.root.children {
             match node.node_type {
+                AstNodeType::Block => {}
                 AstNodeType::FunctionCall => {
                     if node.value.to_string() == "print" {
                         print(node.clone(), &self.scopes);
