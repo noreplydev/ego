@@ -38,6 +38,11 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 root.add_child(print_node);
                 current += index_offset;
             }
+            LexerTokenType::IfKeyword => {
+                let (index_offset, if_node) = if_statement(&tokens, current);
+                root.add_child(if_node);
+                current += index_offset;
+            }
             LexerTokenType::LetKeyword => {
                 let (index_offset, assignment_node) = assignment_statement(&tokens, current);
                 root.add_child(assignment_node);
@@ -179,6 +184,47 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
         current + 1,
         AstNode::new(
             AstNodeType::VariableDeclaration,
+            RuntimeType::identifier(root_node_value),
+            Vec::new(),
+        ),
+    )
+}
+
+fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+    let pattern = vec![
+        (
+            vec![LexerTokenType::OpenParenthesis],
+            "[cei] Expected '(' after function call",
+        ),
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Something went wrong while parsing a function call",
+        ),
+        (
+            vec![LexerTokenType::CloseParenthesis],
+            "[cei] Expected ')' to close a function call",
+        ),
+        (
+            vec![LexerTokenType::OpenCurlyBrace],
+            "[cei] Expected ';' to close a function call",
+        ),
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Expected ';' to close a function call",
+        ),
+        (
+            vec![LexerTokenType::CloseCurlyBrace],
+            "[cei] Expected ';' to close a function call",
+        ),
+    ];
+
+    let root_node_value = tokens[current].value.clone();
+    lookahead(
+        pattern,
+        tokens,
+        current + 1,
+        AstNode::new(
+            AstNodeType::IfStatement,
             RuntimeType::identifier(root_node_value),
             Vec::new(),
         ),

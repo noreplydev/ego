@@ -69,6 +69,7 @@ pub enum AstNodeType {
     Block,
     Group,
     FunctionCall,
+    IfStatement,
     VariableDeclaration,
     Expression(Expression),
 }
@@ -80,6 +81,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Block => write!(f, "Block"),
             AstNodeType::Group => write!(f, "Group"),
             AstNodeType::FunctionCall => write!(f, "FunctionCall"),
+            AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
