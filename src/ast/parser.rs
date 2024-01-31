@@ -28,6 +28,11 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 root.add_child(block_node);
                 current += index_offset;
             }
+            LexerTokenType::OpenParenthesis => {
+                let (index_offset, group_node) = group(&tokens, current);
+                root.add_child(group_node);
+                current += index_offset;
+            }
             LexerTokenType::FunctionCall => {
                 let (index_offset, print_node) = function_call(&tokens, current);
                 root.add_child(print_node);
@@ -37,11 +42,6 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 let (index_offset, assignment_node) = assignment_statement(&tokens, current);
                 root.add_child(assignment_node);
                 current += index_offset;
-            }
-            LexerTokenType::OpenParenthesis => {
-                /*                 let (index_offset, assignment_node) = group_expression(&tokens, current);
-                root.add_child(assignment_node);
-                current += index_offset; */
             }
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
@@ -71,6 +71,26 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 // all parsing functions pattern variable takes
 // in consideration that the function triggerer token is skipped.
 // e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
+fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+    let pattern = vec![
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Expected expression before '}'",
+        ),
+        (
+            vec![LexerTokenType::CloseParenthesis],
+            "[cei] Expected '}' to close a function call",
+        ),
+    ];
+
+    lookahead(
+        pattern,
+        tokens,
+        current + 1,
+        AstNode::new(AstNodeType::Group, RuntimeType::nothing(), Vec::new()),
+    )
+}
+
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
@@ -183,6 +203,11 @@ fn lookahead(
                     let (offset, block_node) = block(&tokens, current);
                     root.add_child(block_node);
                     current += offset;
+                }
+                LexerTokenType::OpenParenthesis => {
+                    let (index_offset, group_node) = group(&tokens, current);
+                    root.add_child(group_node);
+                    current += index_offset;
                 }
                 LexerTokenType::FunctionCall => {
                     let (offset, function_node) = function_call(&tokens, current);

@@ -67,6 +67,7 @@ impl fmt::Display for AstNode {
 pub enum AstNodeType {
     Root,
     Block,
+    Group,
     FunctionCall,
     VariableDeclaration,
     Expression(Expression),
@@ -77,6 +78,7 @@ impl fmt::Display for AstNodeType {
         match self {
             AstNodeType::Root => write!(f, "Root"),
             AstNodeType::Block => write!(f, "Block"),
+            AstNodeType::Group => write!(f, "Group"),
             AstNodeType::FunctionCall => write!(f, "FunctionCall"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
