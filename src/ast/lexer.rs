@@ -9,6 +9,7 @@ pub enum LexerTokenType {
     IfKeyword,
     Identifier,
     AssignmentOperator,
+    AddOperator,
     StringLiteral,
     Number,
     OpenParenthesis,
@@ -29,6 +30,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::IfKeyword => write!(f, "IfKeyword"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
+            LexerTokenType::AddOperator => write!(f, "AddOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
@@ -76,7 +78,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
     let mut is_comment = 0; // inside a comment
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
-    while let Some(&c) = chars.peek() {
+    while let Some(c) = chars.next() {
         // inside comment
         if is_comment > 1 {
             if c == '\n' {
@@ -112,12 +114,11 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         tokens.push(token_with_type(c.to_string())); // push current
                     }
                 }
-                '=' => {
+                '=' | '+' => {
                     if is_string {
                         current_token.push(c);
                     } else {
-                        current_token.push(c);
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(c.to_string()));
                         current_token = String::new();
                     }
                 }
@@ -134,15 +135,24 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         current_token = String::new();
                     }
                 }
+                // accumulating numbers
+                _ if c.is_numeric() && current_token.chars().all(|char| char.is_numeric()) => {
+                    if chars.peek().is_some_and(|char| char.is_numeric()) {
+                        current_token.push(c);
+                    } else {
+                        current_token.push(c);
+                        tokens.push(token_with_type(current_token));
+                        current_token = String::new();
+                    }
+                }
                 // characters that are not whitespace
                 _ if is_string || !c.is_whitespace() => {
+                    // check for numeric strings
                     current_token.push(c);
                 }
                 _ => {}
             }
         }
-
-        chars.next();
     }
 
     return tokens;
@@ -162,6 +172,7 @@ fn token_with_type(token: String) -> LexerToken {
         "," => LexerToken::new(LexerTokenType::Comma, token),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
+        "+" => LexerToken::new(LexerTokenType::AddOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
