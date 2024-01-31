@@ -20,6 +20,9 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
                 Expression::NumberLiteral => {
                     values.push(child.value.to_string());
                 }
+                Expression::BinaryOperator => {
+                    values.push(child.value.to_string());
+                }
             },
             _ => {}
         }

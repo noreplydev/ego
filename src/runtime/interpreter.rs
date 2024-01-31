@@ -40,6 +40,9 @@ impl Interpreter {
                                 Expression::NumberLiteral => {
                                     value = Some(node.children[current].value.to_string())
                                 }
+                                Expression::BinaryOperator => {
+                                    value = Some(node.children[current].value.to_string())
+                                }
                             },
                             _ => {}
                         }

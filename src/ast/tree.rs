@@ -84,6 +84,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier) => write!(f, "Indentifier"),
+            AstNodeType::Expression(Expression::BinaryOperator) => write!(f, "BinaryOperator"),
         }
     }
 }
@@ -99,4 +100,5 @@ pub enum Expression {
     StringLiteral,
     NumberLiteral,
     Identifier,
+    BinaryOperator,
 }

@@ -4,7 +4,7 @@ use super::{LexerToken, LexerTokenType};
 use crate::{
     ast::{
         AstNode, AstNodeType, AstTree,
-        Expression::{Identifier, NumberLiteral, StringLiteral},
+        Expression::{BinaryOperator, Identifier, NumberLiteral, StringLiteral},
     },
     core::types::RuntimeType,
 };
@@ -59,6 +59,14 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 ));
                 current += 1;
             }
+            LexerTokenType::AddOperator => {
+                root.add_child(AstNode::new(
+                    AstNodeType::Expression(BinaryOperator),
+                    RuntimeType::number(token.value.parse().unwrap()),
+                    Vec::new(),
+                ));
+                current += 1;
+            }
             _ => {
                 current += 1;
             }
@@ -71,26 +79,6 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 // all parsing functions pattern variable takes
 // in consideration that the function triggerer token is skipped.
 // e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
-fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
-    let pattern = vec![
-        (
-            vec![LexerTokenType::Any],
-            "[cei] Expected expression before '}'",
-        ),
-        (
-            vec![LexerTokenType::CloseParenthesis],
-            "[cei] Expected '}' to close a function call",
-        ),
-    ];
-
-    lookahead(
-        pattern,
-        tokens,
-        current + 1,
-        AstNode::new(AstNodeType::Group, RuntimeType::nothing(), Vec::new()),
-    )
-}
-
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
@@ -108,6 +96,26 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
         tokens,
         current + 1,
         AstNode::new(AstNodeType::Block, RuntimeType::nothing(), Vec::new()),
+    )
+}
+
+fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+    let pattern = vec![
+        (
+            vec![LexerTokenType::Any],
+            "[cei] Expected expression before '}'",
+        ),
+        (
+            vec![LexerTokenType::CloseParenthesis],
+            "[cei] Expected '}' to close a function call",
+        ),
+    ];
+
+    lookahead(
+        pattern,
+        tokens,
+        current + 1,
+        AstNode::new(AstNodeType::Group, RuntimeType::nothing(), Vec::new()),
     )
 }
 
@@ -239,6 +247,14 @@ fn lookahead(
                     root.add_child(AstNode::new(
                         AstNodeType::Expression(NumberLiteral),
                         RuntimeType::number(token.value.parse().unwrap()),
+                        Vec::new(),
+                    ));
+                    current += 1;
+                }
+                LexerTokenType::AddOperator => {
+                    root.add_child(AstNode::new(
+                        AstNodeType::Expression(BinaryOperator),
+                        RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
                     current += 1;
