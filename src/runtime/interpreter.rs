@@ -17,7 +17,11 @@ impl Interpreter {
     pub fn exec(&mut self) {
         for node in &mut self.ast.root.children {
             match node.node_type {
-                AstNodeType::Block => {}
+                AstNodeType::Block => {
+                    // okay, if we implement recursivity here
+                    // we can go through execs. We have to workaround
+                    // rust borrow checker, but as always.
+                }
                 AstNodeType::FunctionCall => {
                     if node.value.to_string() == "print" {
                         print(node.clone(), &self.scopes);
@@ -65,5 +69,7 @@ impl Interpreter {
                 _ => {}
             }
         }
+
+        self.scopes.pop();
     }
 }

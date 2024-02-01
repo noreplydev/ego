@@ -35,6 +35,10 @@ impl ScopesStack {
         std::process::exit(1);
     }
 
+    pub fn pop(&mut self) -> Option<Scope> {
+        self.scopes.pop()
+    }
+
     // this function must to be recursive since the target variable can be defined in another scope
     /*     pub fn set_indentifier(&self, indentifier: String, value: String) -> bool {
         let current_scope = match self.scopes.last() {
@@ -57,7 +61,6 @@ impl ScopesStack {
         process::exit(1); */
     } */
     /*
-    pub fn remove(&self) -> bool {}
     pub fn remove_identifier(&self) -> bool {} */
 }
 
