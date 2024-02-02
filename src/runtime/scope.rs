@@ -35,8 +35,16 @@ impl ScopesStack {
         std::process::exit(1);
     }
 
-    pub fn pop(&mut self) -> Option<Scope> {
-        self.scopes.pop()
+    pub fn push(&mut self) {
+        self.scopes.push(Scope::new());
+    }
+
+    pub fn pop(&mut self) {
+        let pop_status = self.scopes.pop();
+        if pop_status.is_none() {
+            println!("[cei] Error: Stack Underflow Detected\nThe program attempted to exit a scope when none are active. This usually indicates a mismatch in the creation and destruction of scopes, such as exiting more blocks or functions than were entered. Please review your code for any discrepancies in scope management, ensuring that each entered scope or function block is properly exited.");
+            std::process::exit(1);
+        }
     }
 
     // this function must to be recursive since the target variable can be defined in another scope

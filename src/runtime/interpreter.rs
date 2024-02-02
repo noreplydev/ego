@@ -18,20 +18,14 @@ impl Interpreter {
         Self::exec_block(&mut self.ast.root, &mut self.scopes);
     }
 
-    fn push_stack(&mut self) {}
-
-    fn pop_stack(&mut self) {
-        self.scopes.pop();
-    }
-
     fn exec_block(node: &mut AstNode, scopes: &mut ScopesStack) {
         println!("EXEC BLOCK NODE: {:#?}", node);
         for node in &mut node.children {
             match node.node_type {
                 AstNodeType::Block => {
-                    // scopes add new scope and the go inside
-                    // recursion
+                    scopes.push();
                     Self::exec_block(node, scopes);
+                    scopes.pop();
                 }
                 AstNodeType::FunctionCall => {
                     if node.value.to_string() == "print" {
