@@ -26,6 +26,21 @@ impl Interpreter {
                     Self::exec_block(node, scopes);
                     scopes.pop();
                 }
+                AstNodeType::IfStatement => {
+                    if node.children.len() < 1 {
+                        println!("[cei] Error: 'if' statement AST node was provided with no children. This occurs if an 'if' statement has no group and block nodes inside of it");
+                        std::process::exit(1);
+                    }
+
+                    if Self::resolve_group(&node.children[0]) {
+                        scopes.push();
+                        Self::exec_block(&mut node.children[1], scopes);
+                        scopes.pop();
+                    }
+                }
+                AstNodeType::Group => {
+                    // todo
+                }
                 AstNodeType::FunctionCall => {
                     if node.value.to_string() == "print" {
                         print(node.clone(), scopes);
@@ -81,5 +96,12 @@ impl Interpreter {
                 _ => {}
             }
         }
+    }
+
+    // this is a use-case fitted solution, but i need
+    // more conceptual development of the expressions
+    // to know how to handle them well
+    fn resolve_group(node: &AstNode) -> bool {
+        true
     }
 }
