@@ -19,7 +19,6 @@ impl Interpreter {
     }
 
     fn exec_block(node: &mut AstNode, scopes: &mut ScopesStack) {
-        println!("EXEC BLOCK NODE: {:#?}", node);
         for node in &mut node.children {
             match node.node_type {
                 AstNodeType::Block => {

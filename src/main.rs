@@ -10,7 +10,7 @@ use std::fs;
 
 use crate::runtime::ScopesStack;
 
-pub const KEYWORDS: [&str; 3] = ["print", "let", "if"]; // "if", "else", "while", "for", "fn"
+pub const KEYWORDS: [&str; 5] = ["print", "let", "if", "true", "false"];
 
 fn main() {
     let args: Vec<String> = env::args().collect();
