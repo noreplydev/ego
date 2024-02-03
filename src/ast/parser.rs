@@ -214,23 +214,23 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
         ),
         (
             vec![LexerTokenType::Any],
-            "[cei] Something went wrong while parsing a function call",
+            "[cei] Bad 'if' structure after '('",
         ),
         (
             vec![LexerTokenType::CloseParenthesis],
-            "[cei] Expected ')' to close a function call",
+            "[cei] Expected ')' to close expression on 'if' statement",
         ),
         (
             vec![LexerTokenType::OpenCurlyBrace],
-            "[cei] Expected ';' to close a function call",
+            "[cei] Expected '{' after parentheses on 'if' statement",
         ),
         (
             vec![LexerTokenType::Any],
-            "[cei] Expected ';' to close a function call",
+            "[cei] Bad 'if' block structure after '{'",
         ),
         (
             vec![LexerTokenType::CloseCurlyBrace],
-            "[cei] Expected ';' to close a function call",
+            "[cei] Expected '}' to close 'if' statement block",
         ),
     ];
 
