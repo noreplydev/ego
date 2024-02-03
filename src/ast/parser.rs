@@ -210,7 +210,7 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
             vec![LexerTokenType::OpenParenthesis],
-            "[cei] Expected '(' after function call",
+            "[cei] Expected '(' after if statement",
         ),
         (
             vec![LexerTokenType::Any],
