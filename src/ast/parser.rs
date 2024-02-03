@@ -174,6 +174,15 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 }
 
 fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
+    let expression_valid_types = vec![
+        LexerTokenType::StringLiteral,
+        LexerTokenType::Number,
+        LexerTokenType::AddOperator,
+        LexerTokenType::Identifier,
+        LexerTokenType::TrueKeyword,
+        LexerTokenType::FalseKeyword,
+    ];
+
     let pattern = vec![
         (
             vec![LexerTokenType::Identifier],
@@ -184,7 +193,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             "[cei] Expected '=' after identifier",
         ),
         (
-            vec![LexerTokenType::Any],
+            expression_valid_types,
             "[cei] Expected expression after '='",
         ),
         (
