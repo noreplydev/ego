@@ -184,8 +184,8 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             "[cei] Expected '=' after identifier",
         ),
         (
-            vec![LexerTokenType::StringLiteral, LexerTokenType::Number],
-            "[cei] Expected value after '='",
+            vec![LexerTokenType::Any],
+            "[cei] Expected expression after '='",
         ),
         (
             vec![LexerTokenType::EndOfStatement],
