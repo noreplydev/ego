@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::{identifier::RnIdentifier, number::RnNumber, string::RnString};
+use super::{boolean::RnBoolean, identifier::RnIdentifier, number::RnNumber, string::RnString};
 
 #[derive(Debug, Clone)]
 pub enum RuntimeType {
@@ -8,6 +8,7 @@ pub enum RuntimeType {
     RnString(RnString),
     RnNumber(RnNumber),
     RnIdentifier(RnIdentifier),
+    RnBoolean(RnBoolean),
 }
 
 impl RuntimeType {
@@ -27,12 +28,17 @@ impl RuntimeType {
         RuntimeType::RnIdentifier(RnIdentifier::new(value))
     }
 
+    pub fn boolean(value: bool) -> RuntimeType {
+        RuntimeType::RnBoolean(RnBoolean::new(value))
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             RuntimeType::Nothing(nothing) => nothing.to_string(),
             RuntimeType::RnString(rn_string) => rn_string.to_string(),
             RuntimeType::RnNumber(rn_number) => rn_number.to_string(),
             RuntimeType::RnIdentifier(rn_number) => rn_number.to_string(),
+            RuntimeType::RnBoolean(rn_boolean) => rn_boolean.to_string(),
         }
     }
 }
@@ -44,6 +50,7 @@ impl fmt::Display for RuntimeType {
             RuntimeType::RnString(_) => write!(f, "RnString"),
             RuntimeType::RnNumber(_) => write!(f, "RnNumber"),
             RuntimeType::RnIdentifier(_) => write!(f, "RnIdentifier"),
+            RuntimeType::RnBoolean(_) => write!(f, "RnBoolean"),
         }
     }
 }

@@ -290,17 +290,19 @@ fn lookahead(
                     current += offset;
                 }
                 LexerTokenType::TrueKeyword => {
+                    let boolean = if token.value == "true" { true } else { false };
                     root.add_child(AstNode::new(
                         AstNodeType::Expression(Expression::Boolean(Boolean::True)),
-                        RuntimeType::string(token.value.clone()),
+                        RuntimeType::boolean(boolean),
                         Vec::new(),
                     ));
                     current += 1;
                 }
                 LexerTokenType::FalseKeyword => {
+                    let boolean = if token.value == "true" { true } else { false };
                     root.add_child(AstNode::new(
                         AstNodeType::Expression(Expression::Boolean(Boolean::False)),
-                        RuntimeType::string(token.value.clone()),
+                        RuntimeType::boolean(boolean),
                         Vec::new(),
                     ));
                     current += 1;

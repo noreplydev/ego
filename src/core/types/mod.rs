@@ -1,3 +1,4 @@
+mod boolean;
 mod identifier;
 mod number;
 mod runtime_type;
