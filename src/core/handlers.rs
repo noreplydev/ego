@@ -1,5 +1,5 @@
 use crate::{
-    ast::{AstNode, AstNodeType, Expression},
+    ast::{AstNode, AstNodeType, Boolean, Expression},
     runtime::ScopesStack,
 };
 
@@ -27,6 +27,14 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
                         Expression::BinaryOperator => {
                             values.push(child.value.to_string());
                         }
+                        Expression::Boolean(bool) => match bool {
+                            Boolean::True => {
+                                values.push(child.value.to_string());
+                            }
+                            Boolean::False => {
+                                values.push(child.value.to_string());
+                            }
+                        },
                     },
                     _ => {}
                 }

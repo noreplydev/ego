@@ -1,6 +1,6 @@
 use super::ScopesStack;
 use crate::{
-    ast::{AstNode, AstNodeType, AstTree, Expression},
+    ast::{AstNode, AstNodeType, AstTree, Boolean, Expression},
     core::handlers::print,
 };
 
@@ -51,6 +51,14 @@ impl Interpreter {
                                 Expression::BinaryOperator => {
                                     value = Some(node.children[current].value.to_string())
                                 }
+                                Expression::Boolean(bool) => match bool {
+                                    Boolean::True => {
+                                        value = Some(node.children[current].value.to_string())
+                                    }
+                                    Boolean::False => {
+                                        value = Some(node.children[current].value.to_string())
+                                    }
+                                },
                             },
                             _ => {}
                         }

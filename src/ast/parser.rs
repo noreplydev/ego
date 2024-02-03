@@ -1,6 +1,6 @@
 use std::vec;
 
-use super::{LexerToken, LexerTokenType};
+use super::{tree::Boolean, Expression, LexerToken, LexerTokenType};
 use crate::{
     ast::{
         AstNode, AstNodeType, AstTree,
@@ -47,6 +47,22 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
                 let (index_offset, assignment_node) = assignment_statement(&tokens, current);
                 root.add_child(assignment_node);
                 current += index_offset;
+            }
+            LexerTokenType::TrueKeyword => {
+                root.add_child(AstNode::new(
+                    AstNodeType::Expression(Expression::Boolean(Boolean::True)),
+                    RuntimeType::string(token.value.clone()),
+                    Vec::new(),
+                ));
+                current += 1;
+            }
+            LexerTokenType::FalseKeyword => {
+                root.add_child(AstNode::new(
+                    AstNodeType::Expression(Expression::Boolean(Boolean::False)),
+                    RuntimeType::string(token.value.clone()),
+                    Vec::new(),
+                ));
+                current += 1;
             }
             LexerTokenType::StringLiteral => {
                 root.add_child(AstNode::new(
@@ -272,6 +288,22 @@ fn lookahead(
                     let (offset, assignment_node) = assignment_statement(&tokens, current);
                     root.add_child(assignment_node);
                     current += offset;
+                }
+                LexerTokenType::TrueKeyword => {
+                    root.add_child(AstNode::new(
+                        AstNodeType::Expression(Expression::Boolean(Boolean::True)),
+                        RuntimeType::string(token.value.clone()),
+                        Vec::new(),
+                    ));
+                    current += 1;
+                }
+                LexerTokenType::FalseKeyword => {
+                    root.add_child(AstNode::new(
+                        AstNodeType::Expression(Expression::Boolean(Boolean::False)),
+                        RuntimeType::string(token.value.clone()),
+                        Vec::new(),
+                    ));
+                    current += 1;
                 }
                 LexerTokenType::Identifier => {
                     root.add_child(AstNode::new(

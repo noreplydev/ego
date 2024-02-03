@@ -86,6 +86,8 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier) => write!(f, "Indentifier"),
+            AstNodeType::Expression(Expression::Boolean(Boolean::True)) => write!(f, "True"),
+            AstNodeType::Expression(Expression::Boolean(Boolean::False)) => write!(f, "False"),
             AstNodeType::Expression(Expression::BinaryOperator) => write!(f, "BinaryOperator"),
         }
     }
@@ -102,5 +104,12 @@ pub enum Expression {
     StringLiteral,
     NumberLiteral,
     Identifier,
+    Boolean(Boolean),
     BinaryOperator,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum Boolean {
+    True,
+    False,
 }
