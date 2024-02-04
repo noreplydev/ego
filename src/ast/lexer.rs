@@ -82,6 +82,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
     let mut is_comment = 0; // inside a comment
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
+    let mut chars_counter = 0;
+
     while let Some(c) = chars.next() {
         // inside comment
         if is_comment > 1 {
@@ -157,6 +159,15 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 _ => {}
             }
         }
+
+        // last character in the source code
+        if chars_counter == source.len() - 1 {
+            tokens.push(token_with_type(current_token));
+            current_token = String::new()
+        }
+
+        // keep track of current char index
+        chars_counter += 1;
     }
 
     return tokens;
