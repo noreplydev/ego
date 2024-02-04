@@ -20,7 +20,8 @@ pub enum LexerTokenType {
     CloseCurlyBrace,
     Comma,
     EndOfStatement,
-    Any, // possible tokens or no tokens
+    Many,    // many apparences of a subset of tokens
+    ManyAny, // many or no apparences of any type of tokens
     Unknown,
 }
 
@@ -43,7 +44,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
-            LexerTokenType::Any => write!(f, "Any"),
+            LexerTokenType::Many => write!(f, "Many"),
+            LexerTokenType::ManyAny => write!(f, "ManyAny"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }

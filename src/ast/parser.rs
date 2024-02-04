@@ -99,11 +99,11 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 
 // all parsing functions pattern variable takes
 // in consideration that the function triggerer token is skipped.
-// e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
+// e.g: block() starts lookahead with ::ManyAny instead of ::OpenCurlyBrace
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            vec![LexerTokenType::Any],
+            vec![LexerTokenType::ManyAny],
             "[cei] Expected expression before '}'",
         ),
         (
@@ -123,7 +123,7 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            vec![LexerTokenType::Any],
+            vec![LexerTokenType::ManyAny],
             "[cei] Expected expression before '}'",
         ),
         (
@@ -147,7 +147,7 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '(' after function call",
         ),
         (
-            vec![LexerTokenType::Any],
+            vec![LexerTokenType::ManyAny],
             "[cei] Something went wrong while parsing a function call",
         ),
         (
@@ -174,7 +174,7 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 }
 
 fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
-    let expression_valid_types = vec![
+    let valid_expressions = vec![
         LexerTokenType::StringLiteral,
         LexerTokenType::Number,
         LexerTokenType::AddOperator,
@@ -193,7 +193,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             "[cei] Expected '=' after identifier",
         ),
         (
-            expression_valid_types,
+            vector_of_many(valid_expressions),
             "[cei] Expected expression after '='",
         ),
         (
@@ -222,7 +222,7 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '(' after if statement",
         ),
         (
-            vec![LexerTokenType::Any],
+            vec![LexerTokenType::ManyAny],
             "[cei] Bad 'if' structure after '('",
         ),
         (
@@ -234,7 +234,7 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '{' after parentheses on 'if' statement",
         ),
         (
-            vec![LexerTokenType::Any],
+            vec![LexerTokenType::ManyAny],
             "[cei] Bad 'if' block structure after '{'",
         ),
         (
@@ -269,14 +269,16 @@ fn lookahead(
         let token = &tokens[current];
         let (tokens_types, error_message) = &types[pattern_index];
 
-        if tokens_types.contains(&LexerTokenType::Any)
+        if tokens_types.contains(&LexerTokenType::ManyAny)
             && types[pattern_index + 1].0.contains(&token.token_type)
         {
             pattern_index += 1; // go to the next pattern item after this iteration
             continue;
         }
 
-        if tokens_types.contains(&token.token_type) || tokens_types.contains(&LexerTokenType::Any) {
+        if tokens_types.contains(&token.token_type)
+            || tokens_types.contains(&LexerTokenType::ManyAny)
+        {
             match token.token_type {
                 LexerTokenType::OpenCurlyBrace => {
                     let (offset, block_node) = block(&tokens, current);
@@ -357,12 +359,17 @@ fn lookahead(
             std::process::exit(1);
         }
 
-        // resolve LexerTokenType::Any type loop
+        // resolve LexerTokenType::ManyAny type loop
         // check next token type with the next pattern token type
-        if !tokens_types.contains(&LexerTokenType::Any) {
+        if !tokens_types.contains(&LexerTokenType::ManyAny) {
             pattern_index += 1;
         }
     }
 
     ((current - called_on), root) // +1 is for the node who called lookahead
+}
+
+fn vector_of_many(mut types: Vec<LexerTokenType>) -> Vec<LexerTokenType> {
+    types.push(LexerTokenType::Many);
+    types
 }
