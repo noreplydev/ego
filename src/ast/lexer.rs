@@ -161,7 +161,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
         }
 
         // last character in the source code
-        if chars_counter == source.len() - 1 {
+        if chars_counter == source.len() - 1 && current_token.len() > 0 {
             tokens.push(token_with_type(current_token));
             current_token = String::new()
         }
