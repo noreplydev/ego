@@ -2,7 +2,7 @@ use std::fmt::{self};
 
 use crate::KEYWORDS;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum LexerTokenType {
     FunctionCall,
     LetKeyword,
@@ -20,8 +20,8 @@ pub enum LexerTokenType {
     CloseCurlyBrace,
     Comma,
     EndOfStatement,
-    Many,    // many apparences of a subset of tokens
-    ManyAny, // many or no apparences of any type of tokens
+    Expression, // for parser expressions handling
+    Any,        // many or no apparences of any type of tokens
     Unknown,
 }
 
@@ -44,8 +44,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
-            LexerTokenType::Many => write!(f, "Many"),
-            LexerTokenType::ManyAny => write!(f, "ManyAny"),
+            LexerTokenType::Any => write!(f, "Many"),
+            LexerTokenType::Expression => write!(f, "Expression"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }

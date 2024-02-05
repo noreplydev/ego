@@ -99,11 +99,11 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 
 // all parsing functions pattern variable takes
 // in consideration that the function triggerer token is skipped.
-// e.g: block() starts lookahead with ::ManyAny instead of ::OpenCurlyBrace
+// e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            vec![LexerTokenType::ManyAny],
+            vec![LexerTokenType::Any],
             "[cei] Expected expression before '}'",
         ),
         (
@@ -123,7 +123,7 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
-            vec![LexerTokenType::ManyAny],
+            vec![LexerTokenType::Any],
             "[cei] Expected expression before '}'",
         ),
         (
@@ -147,7 +147,7 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '(' after function call",
         ),
         (
-            vec![LexerTokenType::ManyAny],
+            vec![LexerTokenType::Any],
             "[cei] Something went wrong while parsing a function call",
         ),
         (
@@ -174,15 +174,6 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 }
 
 fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
-    let valid_expressions = vec![
-        LexerTokenType::StringLiteral,
-        LexerTokenType::Number,
-        LexerTokenType::AddOperator,
-        LexerTokenType::Identifier,
-        LexerTokenType::TrueKeyword,
-        LexerTokenType::FalseKeyword,
-    ];
-
     let pattern = vec![
         (
             vec![LexerTokenType::Identifier],
@@ -193,7 +184,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             "[cei] Expected '=' after identifier",
         ),
         (
-            vector_of_many(valid_expressions),
+            vec![LexerTokenType::Expression],
             "[cei] Expected expression after '='",
         ),
         (
@@ -222,7 +213,7 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '(' after if statement",
         ),
         (
-            vec![LexerTokenType::ManyAny],
+            vec![LexerTokenType::Any],
             "[cei] Bad 'if' structure after '('",
         ),
         (
@@ -234,7 +225,7 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
             "[cei] Expected '{' after parentheses on 'if' statement",
         ),
         (
-            vec![LexerTokenType::ManyAny],
+            vec![LexerTokenType::Any],
             "[cei] Bad 'if' block structure after '{'",
         ),
         (
@@ -262,23 +253,40 @@ fn lookahead(
     called_on: usize,
     mut root: AstNode,
 ) -> (usize, AstNode) {
-    let mut current = called_on; // index of the
-    let mut pattern_index = 0;
+    let mut current = called_on; // first token index
+    let mut pattern_index = 0; // pattern type index
 
     while current < tokens.len() && pattern_index < types.len() {
         let token = &tokens[current];
         let (tokens_types, error_message) = &types[pattern_index];
 
-        if tokens_types.contains(&LexerTokenType::ManyAny)
-            && types[pattern_index + 1].0.contains(&token.token_type)
+        println!("{}----{:?}", token.token_type, tokens_types);
+
+        if tokens_types.contains(&LexerTokenType::Expression) {
+            let (tokens_offset, node, error) = lookahead_expression(tokens, current);
+
+            if error {
+                println!("{}", error_message);
+                std::process::exit(1);
+            } else {
+                current += tokens_offset;
+                root.add_child(node);
+                pattern_index += 1;
+                continue;
+            }
+        }
+
+        // stop many and manyAny loop
+        if tokens_types.contains(&LexerTokenType::Any)
+            && types[pattern_index + 1]
+                .0
+                .contains(&tokens[current].token_type)
         {
-            pattern_index += 1; // go to the next pattern item after this iteration
+            pattern_index += 1;
             continue;
         }
 
-        if tokens_types.contains(&token.token_type)
-            || tokens_types.contains(&LexerTokenType::ManyAny)
-        {
+        if tokens_types.contains(&token.token_type) || tokens_types.contains(&LexerTokenType::Any) {
             match token.token_type {
                 LexerTokenType::OpenCurlyBrace => {
                     let (offset, block_node) = block(&tokens, current);
@@ -359,17 +367,63 @@ fn lookahead(
             std::process::exit(1);
         }
 
-        // resolve LexerTokenType::ManyAny type loop
-        // check next token type with the next pattern token type
-        if !tokens_types.contains(&LexerTokenType::ManyAny) {
+        // if Many or ManyAny present, start loop
+        if !tokens_types.contains(&LexerTokenType::Any) {
             pattern_index += 1;
         }
+    }
+
+    // if we've look less tokens than required minimun by
+    // the lookahead function pattern, return error
+    if (current - called_on) < types.len() {
+        let error_message = types[pattern_index].1;
+        println!("{}", error_message);
+        std::process::exit(1);
     }
 
     ((current - called_on), root) // +1 is for the node who called lookahead
 }
 
-fn vector_of_many(mut types: Vec<LexerTokenType>) -> Vec<LexerTokenType> {
-    types.push(LexerTokenType::Many);
-    types
+// returns: offset of tokens index, expression node, error?
+fn lookahead_expression(tokens: &Vec<LexerToken>, mut current: usize) -> (usize, AstNode, bool) {
+    let expression_types = vec![
+        LexerTokenType::StringLiteral,
+        LexerTokenType::Number,
+        LexerTokenType::AddOperator,
+        LexerTokenType::TrueKeyword,
+        LexerTokenType::FalseKeyword,
+        LexerTokenType::FunctionCall,
+        LexerTokenType::Identifier,
+    ];
+
+    let mut expressions_counter = 0;
+
+    while current < tokens.len() {
+        let token = &tokens[current];
+
+        if expression_types.contains(&token.token_type) {
+            // here goes the logic to know how to handle
+            // a expression
+        } else if expressions_counter == 0 {
+            // means no expression at all
+            return (
+                expressions_counter,
+                AstNode::new(AstNodeType::Empty, RuntimeType::nothing(), vec![]),
+                true,
+            );
+        }
+
+        current += 1;
+        expressions_counter += 1;
+    }
+
+    (
+        expressions_counter,
+        AstNode::new(
+            AstNodeType::Expression(Expression::StringLiteral),
+            RuntimeType::string("test".to_string()),
+            vec![],
+        ),
+        false,
+    )
 }

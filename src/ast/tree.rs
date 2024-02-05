@@ -66,6 +66,7 @@ impl fmt::Display for AstNode {
 #[derive(Debug, Clone, Copy)]
 pub enum AstNodeType {
     Root,
+    Empty,
     Block,
     Group,
     FunctionCall,
@@ -78,6 +79,7 @@ impl fmt::Display for AstNodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             AstNodeType::Root => write!(f, "Root"),
+            AstNodeType::Empty => write!(f, "Empty"),
             AstNodeType::Block => write!(f, "Block"),
             AstNodeType::Group => write!(f, "Group"),
             AstNodeType::FunctionCall => write!(f, "FunctionCall"),
