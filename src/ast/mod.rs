@@ -4,4 +4,4 @@ mod tree;
 
 pub use self::lexer::*;
 pub use self::parser::*;
-pub use self::tree::{AstNode, AstNodeType, AstTree, Boolean, Expression};
+pub use self::tree::{AstNode, AstNodeType, AstTree, BinaryOperator, Bool, Expression};

@@ -1,10 +1,13 @@
 use std::vec;
 
-use super::{tree::Boolean, Expression, LexerToken, LexerTokenType};
+use super::{
+    tree::{BinaryOperator, Bool},
+    Expression, LexerToken, LexerTokenType,
+};
 use crate::{
     ast::{
         AstNode, AstNodeType, AstTree,
-        Expression::{BinaryOperator, Identifier, NumberLiteral, StringLiteral},
+        Expression::{Binary, Identifier, NumberLiteral, StringLiteral},
     },
     core::types::RuntimeType,
 };
@@ -50,7 +53,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::TrueKeyword => {
                 root.add_child(AstNode::new(
-                    AstNodeType::Expression(Expression::Boolean(Boolean::True)),
+                    AstNodeType::Expression(Expression::Boolean(Bool::True)),
                     RuntimeType::string(token.value.clone()),
                     Vec::new(),
                 ));
@@ -58,7 +61,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::FalseKeyword => {
                 root.add_child(AstNode::new(
-                    AstNodeType::Expression(Expression::Boolean(Boolean::False)),
+                    AstNodeType::Expression(Expression::Boolean(Bool::False)),
                     RuntimeType::string(token.value.clone()),
                     Vec::new(),
                 ));
@@ -82,7 +85,7 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
             }
             LexerTokenType::AddOperator => {
                 root.add_child(AstNode::new(
-                    AstNodeType::Expression(BinaryOperator),
+                    AstNodeType::Expression(Expression::Binary(BinaryOperator::AddOperator)),
                     RuntimeType::number(token.value.parse().unwrap()),
                     Vec::new(),
                 ));
@@ -311,7 +314,7 @@ fn lookahead(
                 LexerTokenType::TrueKeyword => {
                     let boolean = if token.value == "true" { true } else { false };
                     root.add_child(AstNode::new(
-                        AstNodeType::Expression(Expression::Boolean(Boolean::True)),
+                        AstNodeType::Expression(Expression::Boolean(Bool::True)),
                         RuntimeType::boolean(boolean),
                         Vec::new(),
                     ));
@@ -320,7 +323,7 @@ fn lookahead(
                 LexerTokenType::FalseKeyword => {
                     let boolean = if token.value == "true" { true } else { false };
                     root.add_child(AstNode::new(
-                        AstNodeType::Expression(Expression::Boolean(Boolean::False)),
+                        AstNodeType::Expression(Expression::Boolean(Bool::False)),
                         RuntimeType::boolean(boolean),
                         Vec::new(),
                     ));
@@ -352,7 +355,7 @@ fn lookahead(
                 }
                 LexerTokenType::AddOperator => {
                     root.add_child(AstNode::new(
-                        AstNodeType::Expression(BinaryOperator),
+                        AstNodeType::Expression(Expression::Binary(BinaryOperator::AddOperator)),
                         RuntimeType::string(token.value.clone()),
                         Vec::new(),
                     ));
@@ -397,7 +400,7 @@ fn lookahead_expression(tokens: &Vec<LexerToken>, mut current: usize) -> (usize,
     ];
 
     let mut expressions_counter = 0;
-    let mut expression_stack: Vec<&LexerToken> = vec![];
+    let mut expression_stack: Vec<AstNode> = vec![];
 
     while current < tokens.len() {
         let token = &tokens[current];
@@ -406,10 +409,49 @@ fn lookahead_expression(tokens: &Vec<LexerToken>, mut current: usize) -> (usize,
             match token.token_type {
                 LexerTokenType::Number => {
                     if expression_stack.len() < 1 {
-                        expression_stack.push(token);
+                        if let Ok(number) = token.value.parse() {
+                            expression_stack.push(AstNode::new(
+                                AstNodeType::Expression(Expression::NumberLiteral),
+                                RuntimeType::number(number),
+                                vec![],
+                            ));
+                        } else {
+                            println!(
+                                "[cei] Error: Expected number expression found: '{}'",
+                                token.value.to_string()
+                            );
+                            std::process::exit(1);
+                        }
                     } else {
                         println!("[cei] Error: Expected binary operator after '{}' to use as against '{}'"
                             , expression_stack[0].value.to_string(), token.value.to_string());
+                        std::process::exit(1);
+                    }
+                }
+                LexerTokenType::AddOperator => {
+                    if let Some(previous_expression) = expression_stack.get(0) {
+                        let binary_op_node = match token.value.as_str() {
+                            "+" => AstNode::new(
+                                AstNodeType::Expression(Expression::Binary(
+                                    BinaryOperator::AddOperator,
+                                )),
+                                RuntimeType::identifier(token.value.clone()),
+                                vec![],
+                            ),
+                            _ => {
+                                println!(
+                                    "[cei] Error: Expected binary operator and found '{}'",
+                                    token.value.to_string()
+                                );
+                                std::process::exit(1);
+                            }
+                        };
+                        expression_stack.pop(); // clear stack
+                    } else {
+                        println!(
+                            "[cei] Error: Expected expression before '{}' binary operator",
+                            token.value.to_string()
+                        );
                         std::process::exit(1);
                     }
                 }

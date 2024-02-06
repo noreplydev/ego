@@ -12,6 +12,7 @@ pub enum LexerTokenType {
     Identifier,
     AssignmentOperator,
     AddOperator,
+    SubtractOperator,
     StringLiteral,
     Number,
     OpenParenthesis,
@@ -36,6 +37,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::AddOperator => write!(f, "AddOperator"),
+            LexerTokenType::SubtractOperator => write!(f, "SubtractOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
@@ -192,6 +194,7 @@ fn token_with_type(token: String) -> LexerToken {
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
         "+" => LexerToken::new(LexerTokenType::AddOperator, token),
+        "-" => LexerToken::new(LexerTokenType::SubtractOperator, token),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token)
         }
