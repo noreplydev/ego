@@ -260,7 +260,7 @@ fn lookahead(
         let token = &tokens[current];
         let (tokens_types, error_message) = &types[pattern_index];
 
-        println!("{}----{:?}", token.token_type, tokens_types);
+        //println!("{}----{:?}", token.token_type, tokens_types);
 
         if tokens_types.contains(&LexerTokenType::Expression) {
             let (tokens_offset, node, error) = lookahead_expression(tokens, current);
@@ -397,13 +397,24 @@ fn lookahead_expression(tokens: &Vec<LexerToken>, mut current: usize) -> (usize,
     ];
 
     let mut expressions_counter = 0;
+    let mut expression_stack: Vec<&LexerToken> = vec![];
 
     while current < tokens.len() {
         let token = &tokens[current];
 
         if expression_types.contains(&token.token_type) {
-            // here goes the logic to know how to handle
-            // a expression
+            match token.token_type {
+                LexerTokenType::Number => {
+                    if expression_stack.len() < 1 {
+                        expression_stack.push(token);
+                    } else {
+                        println!("[cei] Error: Expected binary operator after '{}' to use as against '{}'"
+                            , expression_stack[0].value.to_string(), token.value.to_string());
+                        std::process::exit(1);
+                    }
+                }
+                _ => {}
+            }
         } else if expressions_counter == 0 {
             // means no expression at all
             return (
