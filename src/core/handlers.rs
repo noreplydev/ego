@@ -1,6 +1,6 @@
 use crate::{
-    ast::{AstNode, AstNodeType, Bool, Expression},
     runtime::ScopesStack,
+    syntax::{AstNode, AstNodeType, Bool, Expression},
 };
 
 pub fn print(node: AstNode, scopes: &ScopesStack) {

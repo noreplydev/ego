@@ -1,7 +1,7 @@
 use super::ScopesStack;
 use crate::{
-    ast::{AstNode, AstNodeType, AstTree, BinaryOperator, Bool, Expression},
     core::handlers::print,
+    syntax::{AstNode, AstNodeType, AstTree, BinaryOperator, Bool, Expression},
 };
 
 pub struct Interpreter {

@@ -1,12 +1,12 @@
-mod ast;
 mod core;
 mod runtime;
+mod syntax;
 
-use ast::lex;
-use ast::parse;
 use runtime::Interpreter;
 use std::env;
 use std::fs;
+use syntax::lex;
+use syntax::parse;
 
 use crate::runtime::ScopesStack;
 
