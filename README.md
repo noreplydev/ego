@@ -6,11 +6,15 @@
 
 - [#] Indentifiers scope and storage
 - [#] Runtime types
-- [_] Function definition
-- [#] Function call
-- [_] Conditional structures
 - [#] Boolean types
-- [_] Binary operators
+- [#] Function call
+- [_] Function definition
 - [_] Expression parsing and return value calculation
+- [_] Binary operators
+- [_] Error handling on ego core library 
+- [_] Conditional structures
 - [_] Iteration structures
 - ... more will be unlocked once I now which ones are. Like, I don't know what I don't know.
+
+
+💿 building things - @noreplydev
