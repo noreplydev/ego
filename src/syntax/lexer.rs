@@ -63,11 +63,16 @@ impl PartialEq for LexerTokenType {
 pub struct LexerToken {
     pub token_type: LexerTokenType,
     pub value: String,
+    pub line: usize,
 }
 
 impl LexerToken {
-    fn new(token_type: LexerTokenType, value: String) -> LexerToken {
-        LexerToken { token_type, value }
+    fn new(token_type: LexerTokenType, value: String, line: usize) -> LexerToken {
+        LexerToken {
+            token_type,
+            value,
+            line,
+        }
     }
 }
 
@@ -87,6 +92,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     let mut chars_counter = 0;
+    let mut line_counter = 0; // for error handling
 
     while let Some(c) = chars.next() {
         // inside comment
@@ -102,7 +108,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     current_token.push(c);
 
                     if is_string {
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(current_token, line_counter));
                         current_token = String::new();
                     }
 
@@ -118,17 +124,18 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         current_token.push(c);
                     } else {
                         if current_token.len() > 0 {
-                            tokens.push(token_with_type(current_token)); // push previous token
+                            tokens.push(token_with_type(current_token, line_counter)); // push previous token
                             current_token = String::new();
                         }
-                        tokens.push(token_with_type(c.to_string())); // push current
+                        tokens.push(token_with_type(c.to_string(), line_counter));
+                        // push current
                     }
                 }
                 '=' | '+' => {
                     if is_string {
                         current_token.push(c);
                     } else {
-                        tokens.push(token_with_type(c.to_string()));
+                        tokens.push(token_with_type(c.to_string(), line_counter));
                         current_token = String::new();
                     }
                 }
@@ -137,12 +144,16 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     if is_string {
                         current_token.push(c);
                     } else if keywords.contains(&current_token.as_str()) {
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(current_token, line_counter));
                         current_token = String::new();
                     } else if current_token.len() > 0 {
                         // if not empty
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(current_token, line_counter));
                         current_token = String::new();
+                    }
+
+                    if c == '\n' {
+                        line_counter += 1
                     }
                 }
                 // accumulating numbers
@@ -151,7 +162,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         current_token.push(c);
                     } else {
                         current_token.push(c);
-                        tokens.push(token_with_type(current_token));
+                        tokens.push(token_with_type(current_token, line_counter));
                         current_token = String::new();
                     }
                 }
@@ -166,7 +177,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
         // last character in the source code
         if chars_counter == source.len() - 1 && current_token.len() > 0 {
-            tokens.push(token_with_type(current_token));
+            tokens.push(token_with_type(current_token, line_counter));
             current_token = String::new()
         }
 
@@ -179,30 +190,32 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
 // Also, it doesn't handle the last token if it's not followed by whitespace.
 
-fn token_with_type(token: String) -> LexerToken {
+fn token_with_type(token: String, line: usize) -> LexerToken {
     match token.as_str() {
-        "print" => LexerToken::new(LexerTokenType::FunctionCall, token),
-        "let" => LexerToken::new(LexerTokenType::LetKeyword, token),
-        "if" => LexerToken::new(LexerTokenType::IfKeyword, token),
-        "true" => LexerToken::new(LexerTokenType::TrueKeyword, token),
-        "false" => LexerToken::new(LexerTokenType::FalseKeyword, token),
-        "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token),
-        ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token),
-        "{" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token),
-        "}" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token),
-        "," => LexerToken::new(LexerTokenType::Comma, token),
-        ";" => LexerToken::new(LexerTokenType::EndOfStatement, token),
-        "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token),
-        "+" => LexerToken::new(LexerTokenType::AddOperator, token),
-        "-" => LexerToken::new(LexerTokenType::SubtractOperator, token),
+        "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line),
+        "let" => LexerToken::new(LexerTokenType::LetKeyword, token, line),
+        "if" => LexerToken::new(LexerTokenType::IfKeyword, token, line),
+        "true" => LexerToken::new(LexerTokenType::TrueKeyword, token, line),
+        "false" => LexerToken::new(LexerTokenType::FalseKeyword, token, line),
+        "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token, line),
+        ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token, line),
+        "{" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token, line),
+        "}" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token, line),
+        "," => LexerToken::new(LexerTokenType::Comma, token, line),
+        ";" => LexerToken::new(LexerTokenType::EndOfStatement, token, line),
+        "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token, line),
+        "+" => LexerToken::new(LexerTokenType::AddOperator, token, line),
+        "-" => LexerToken::new(LexerTokenType::SubtractOperator, token, line),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
-            LexerToken::new(LexerTokenType::StringLiteral, token)
+            LexerToken::new(LexerTokenType::StringLiteral, token, line)
         }
         _ if token.chars().all(|c| c.is_numeric()) => {
-            LexerToken::new(LexerTokenType::Number, token)
+            LexerToken::new(LexerTokenType::Number, token, line)
         }
-        _ if is_identifier(token.clone()) => LexerToken::new(LexerTokenType::Identifier, token),
-        _ => LexerToken::new(LexerTokenType::Unknown, token),
+        _ if is_identifier(token.clone()) => {
+            LexerToken::new(LexerTokenType::Identifier, token, line)
+        }
+        _ => LexerToken::new(LexerTokenType::Unknown, token, line),
     }
 }
 
