@@ -269,7 +269,7 @@ fn lookahead(
             let (tokens_offset, node, error) = lookahead_expression(tokens, current);
 
             if error {
-                println!("{}", error_message);
+                println!("{}\n      └ on line: {}", error_message, token.line);
                 std::process::exit(1);
             } else {
                 current += tokens_offset;
@@ -366,7 +366,7 @@ fn lookahead(
                 }
             }
         } else {
-            println!("{}", error_message);
+            println!("{}\n      └ on line: {}", error_message, token.line);
             std::process::exit(1);
         }
 
@@ -379,8 +379,9 @@ fn lookahead(
     // if we've look less tokens than required minimun by
     // the lookahead function pattern, return error
     if (current - called_on) < types.len() {
+        let token = &tokens[current - 1];
         let error_message = types[pattern_index].1;
-        println!("{}", error_message);
+        println!("{}\n      └ on line: {}", error_message, token.line);
         std::process::exit(1);
     }
 
