@@ -105,13 +105,10 @@ fn tree(tokens: Vec<LexerToken>) -> AstNode {
 // e.g: block() starts lookahead with ::Any instead of ::OpenCurlyBrace
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
-        (
-            vec![LexerTokenType::Any],
-            "[cei] Expected expression before '}'",
-        ),
+        (vec![LexerTokenType::Any], "Expected expression before '}'"),
         (
             vec![LexerTokenType::CloseCurlyBrace],
-            "[cei] Expected '}' to close a function call",
+            "Expected '}' to close a function call",
         ),
     ];
 
@@ -125,13 +122,10 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
 
 fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
-        (
-            vec![LexerTokenType::Any],
-            "[cei] Expected expression before '}'",
-        ),
+        (vec![LexerTokenType::Any], "Expected expression before '}'"),
         (
             vec![LexerTokenType::CloseParenthesis],
-            "[cei] Expected '}' to close a function call",
+            "Expected '}' to close a function call",
         ),
     ];
 
@@ -147,19 +141,19 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
             vec![LexerTokenType::OpenParenthesis],
-            "[cei] Expected '(' after function call",
+            "Expected '(' after function call",
         ),
         (
             vec![LexerTokenType::Any],
-            "[cei] Something went wrong while parsing a function call",
+            "Something went wrong while parsing a function call",
         ),
         (
             vec![LexerTokenType::CloseParenthesis],
-            "[cei] Expected ')' to close a function call",
+            "Expected ')' to close a function call",
         ),
         (
             vec![LexerTokenType::EndOfStatement],
-            "[cei] Expected ';' to close a function call",
+            "Expected ';' to close a function call",
         ),
     ];
 
@@ -180,19 +174,19 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     let pattern = vec![
         (
             vec![LexerTokenType::Identifier],
-            "[cei] Expected identifier after 'let'",
+            "Expected identifier after 'let'",
         ),
         (
             vec![LexerTokenType::AssignmentOperator],
-            "[cei] Expected '=' after identifier",
+            "Expected '=' after identifier",
         ),
         (
             vec![LexerTokenType::Expression],
-            "[cei] Expected expression after '='",
+            "Expected expression after '='",
         ),
         (
             vec![LexerTokenType::EndOfStatement],
-            "[cei] Expected ';' after variable declaration",
+            "Expected ';' after variable declaration",
         ),
     ];
 
@@ -213,27 +207,24 @@ fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {
     let pattern = vec![
         (
             vec![LexerTokenType::OpenParenthesis],
-            "[cei] Expected '(' after if statement",
+            "Expected '(' after if statement",
         ),
-        (
-            vec![LexerTokenType::Any],
-            "[cei] Bad 'if' structure after '('",
-        ),
+        (vec![LexerTokenType::Any], "Bad 'if' structure after '('"),
         (
             vec![LexerTokenType::CloseParenthesis],
-            "[cei] Expected ')' to close expression on 'if' statement",
+            "Expected ')' to close expression on 'if' statement",
         ),
         (
             vec![LexerTokenType::OpenCurlyBrace],
-            "[cei] Expected '{' after parentheses on 'if' statement",
+            "Expected '{' after parentheses on 'if' statement",
         ),
         (
             vec![LexerTokenType::Any],
-            "[cei] Bad 'if' block structure after '{'",
+            "Bad 'if' block structure after '{'",
         ),
         (
             vec![LexerTokenType::CloseCurlyBrace],
-            "[cei] Expected '}' to close 'if' statement block",
+            "Expected '}' to close 'if' statement block",
         ),
     ];
 
@@ -269,7 +260,7 @@ fn lookahead(
             let (tokens_offset, node, error) = lookahead_expression(tokens, current);
 
             if error {
-                println!("{}\n      └ on line: {}", error_message, token.line);
+                println!("[cei] {}\n      └ on line: {}", error_message, token.line);
                 std::process::exit(1);
             } else {
                 current += tokens_offset;
@@ -366,7 +357,7 @@ fn lookahead(
                 }
             }
         } else {
-            println!("{}\n      └ on line: {}", error_message, token.line);
+            println!("[cei] {}\n      └ on line: {}", error_message, token.line);
             std::process::exit(1);
         }
 
@@ -381,7 +372,7 @@ fn lookahead(
     if (current - called_on) < types.len() {
         let token = &tokens[current - 1];
         let error_message = types[pattern_index].1;
-        println!("{}\n      └ on line: {}", error_message, token.line);
+        println!("[cei] {}\n      └ on line: {}", error_message, token.line);
         std::process::exit(1);
     }
 
