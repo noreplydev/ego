@@ -92,13 +92,14 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     let mut chars_counter = 0;
-    let mut line_counter = 0; // for error handling
+    let mut line_counter = 1; // for error handling
 
     while let Some(c) = chars.next() {
         // inside comment
         if is_comment > 1 {
             if c == '\n' {
                 is_comment = 0;
+                line_counter += 1;
             }
         // normal mode
         } else {
