@@ -8,9 +8,9 @@
 - [#] Runtime types
 - [#] Boolean types
 - [#] Function call
-- [_] Function definition
 - [_] Expression parsing and return value calculation
 - [_] Binary operators
+- [_] Function definition
 - [_] Error handling on ego core library 
 - [_] Conditional structures
 - [_] Iteration structures
