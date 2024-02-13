@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, process::exit};
+
+use crate::core::error::{self, ErrorType};
 
 #[derive(Debug, Clone)]
 pub struct ScopesStack {
@@ -25,13 +27,18 @@ impl ScopesStack {
             if let Some(identifier_value) = self.scopes[counter].get(identifier) {
                 return Some(identifier_value);
             } else if counter == 0 {
-                println!("[cei] identifier '{identifier}' was not declared");
-                std::process::exit(1);
+                error::throw(
+                    ErrorType::ReferenceError,
+                    format!("identifier '{identifier}' was not declared").as_str(),
+                );
             }
             counter -= 1;
         }
 
-        println!("[cei] identifier '{identifier}' was not declared");
+        error::throw(
+            ErrorType::ReferenceError,
+            format!("identifier '{identifier}' was not declared").as_str(),
+        );
         std::process::exit(1);
     }
 
@@ -42,8 +49,10 @@ impl ScopesStack {
     pub fn pop(&mut self) {
         let pop_status = self.scopes.pop();
         if pop_status.is_none() {
-            println!("[cei] Error: Stack Underflow Detected\nThe program attempted to exit a scope when none are active. This usually indicates a mismatch in the creation and destruction of scopes, such as exiting more blocks or functions than were entered. Please review your code for any discrepancies in scope management, ensuring that each entered scope or function block is properly exited.");
-            std::process::exit(1);
+            error::throw(
+                ErrorType::StackUnderflowError,
+                "Error: Stack Underflow Detected\nThe program attempted to exit a scope when none are active. This usually indicates a mismatch in the creation and destruction of scopes, such as exiting more blocks or functions than were entered. Please review your code for any discrepancies in scope management, ensuring that each entered scope or function block is properly exited."
+            );
         }
     }
 
@@ -86,14 +95,19 @@ impl Scope {
 
     fn add(&mut self, identifier: String, value: String) -> bool {
         if self.vars.contains_key(&identifier) {
-            println!("[cei] Cannot redeclare '{identifier}' in the scope");
-            std::process::exit(1);
+            error::throw(
+                ErrorType::ReferenceError,
+                format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+            );
         }
 
         match self.vars.insert(identifier.clone(), value) {
             Some(_) => {
-                println!("[cei] Cannot redeclare '{identifier}' in the scope");
-                std::process::exit(1);
+                error::throw(
+                    ErrorType::ReferenceError,
+                    format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+                );
+                std::process::exit(1)
             }
             _ => true,
         }

@@ -2,6 +2,8 @@ pub enum ErrorType {
     SyntaxError,
     CeiUsageError,
     FatalError,
+    ReferenceError,
+    StackUnderflowError,
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str) {
@@ -10,6 +12,8 @@ pub fn throw(error_type: ErrorType, error_message: &str) {
         ErrorType::SyntaxError => error_string = "Syntax error:",
         ErrorType::CeiUsageError => error_string = "Cei usage error:",
         ErrorType::FatalError => error_string = "Fatal error:",
+        ErrorType::ReferenceError => error_string = "Reference error:",
+        ErrorType::StackUnderflowError => error_string = "Stack underflow error:",
         _ => {}
     }
 
