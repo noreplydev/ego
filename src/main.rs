@@ -7,7 +7,6 @@ use core::error::ErrorType;
 use runtime::Interpreter;
 use std::env;
 use std::fs;
-use std::process::exit;
 use syntax::lex;
 use syntax::parse;
 

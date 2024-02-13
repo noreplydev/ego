@@ -1,6 +1,9 @@
 use super::ScopesStack;
 use crate::{
-    core::handlers::print,
+    core::{
+        error::{self, ErrorType},
+        handlers::print,
+    },
     syntax::{AstNode, AstNodeType, AstTree, BinaryOperator, Bool, Expression},
 };
 
@@ -28,8 +31,7 @@ impl Interpreter {
                 }
                 AstNodeType::IfStatement => {
                     if node.children.len() < 1 {
-                        println!("[cei] Error: 'if' statement AST node was provided with no children. This occurs if an 'if' statement has no group and block nodes inside of it");
-                        std::process::exit(1);
+                        error::throw(ErrorType::SyntaxError, "'if' statement AST node was provided with no children. This occurs if an 'if' statement has no group and block nodes inside of it");
                     }
 
                     if Self::resolve_group(&node.children[0]) {
@@ -87,11 +89,11 @@ impl Interpreter {
                             value.unwrap().to_string(),
                         );
                     } else {
-                        println!(
-                            "[cei] Cannot declare varible '{}'",
+                        let error_message = format!(
+                            "Cannot declare varible '{}'",
                             identifier.unwrap_or("unknown".to_string())
                         );
-                        std::process::exit(1);
+                        error::throw(ErrorType::SyntaxError, &error_message);
                     }
                 }
                 _ => {}
