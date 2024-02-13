@@ -2,9 +2,12 @@ mod core;
 mod runtime;
 mod syntax;
 
+use core::error;
+use core::error::ErrorType;
 use runtime::Interpreter;
 use std::env;
 use std::fs;
+use std::process::exit;
 use syntax::lex;
 use syntax::parse;
 
@@ -18,16 +21,18 @@ fn main() {
     let filename = if args.len() > 1 {
         &args[1]
     } else {
-        println!("[cei] an ego file is required");
-        std::process::exit(1);
+        error::throw(ErrorType::CeiUsageError, "an ego file is required");
+        std::process::exit(1); // to avoid types error
     };
 
     if !filename.ends_with(".e") {
-        println!("[cei] This is not .e (ego) file");
-        std::process::exit(1);
+        error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file");
     }
 
-    let file_content = fs::read_to_string(filename).expect("[cei] This is not .e (ego) file");
+    let file_content = fs::read_to_string(filename).unwrap_or_else(|_| {
+        error::throw(ErrorType::FatalError, "Something went wrong reading file");
+        std::process::exit(1); // to avoid types error
+    });
 
     let tokens = lex(file_content);
     if args.len() > 2 && args[2] == "-d" {
