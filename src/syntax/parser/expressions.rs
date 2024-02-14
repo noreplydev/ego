@@ -1,5 +1,8 @@
 use crate::{
-    core::types::RuntimeType,
+    core::{
+        error::{self, ErrorType},
+        types::RuntimeType,
+    },
     syntax::{AstNode, AstNodeType, BinaryOperator, Expression, LexerToken, LexerTokenType},
 };
 
@@ -35,15 +38,27 @@ pub fn lookahead_expression(
                                 vec![],
                             ));
                         } else {
-                            println!(
-                                "[cei] Error: Expected number expression found: '{}'",
-                                token.value.to_string()
+                            error::throw(
+                                ErrorType::ExpressionError,
+                                format!(
+                                    "Error: Expected number expression found: '{}'",
+                                    token.value.to_string()
+                                )
+                                .as_str(),
+                                -1,
                             );
-                            std::process::exit(1);
                         }
                     } else {
-                        println!("[cei] Error: Expected binary operator after '{}' to use as against '{}'"
-                            , expression_stack[0].value.to_string(), token.value.to_string());
+                        error::throw(
+                            ErrorType::ExpressionError,
+                            format!(
+                                "Expected binary operator after '{}' to use as against '{}'",
+                                expression_stack[0].value.to_string(),
+                                token.value.to_string()
+                            )
+                            .as_str(),
+                            -1,
+                        );
                         std::process::exit(1);
                     }
                 }
@@ -58,18 +73,29 @@ pub fn lookahead_expression(
                                 vec![],
                             ),
                             _ => {
-                                println!(
-                                    "[cei] Error: Expected binary operator and found '{}'",
-                                    token.value.to_string()
+                                error::throw(
+                                    ErrorType::ExpressionError,
+                                    format!(
+                                        "Expected binary operator and found '{}'",
+                                        token.value.to_string()
+                                    )
+                                    .as_str(),
+                                    -1,
                                 );
+
                                 std::process::exit(1);
                             }
                         };
                         expression_stack.pop(); // clear stack
                     } else {
-                        println!(
-                            "[cei] Error: Expected expression before '{}' binary operator",
-                            token.value.to_string()
+                        error::throw(
+                            ErrorType::ExpressionError,
+                            format!(
+                                "Expected expression before '{}' binary operator",
+                                token.value.to_string()
+                            )
+                            .as_str(),
+                            -1,
                         );
                         std::process::exit(1);
                     }

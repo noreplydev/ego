@@ -100,7 +100,7 @@ impl Scope {
         if self.vars.contains_key(&identifier) {
             error::throw(
                 ErrorType::ReferenceError,
-                format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+                format!("Cannot redeclare '{identifier}' in the scope").as_str(),
                 -1,
             );
         }
@@ -109,7 +109,7 @@ impl Scope {
             Some(_) => {
                 error::throw(
                     ErrorType::ReferenceError,
-                    format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+                    format!("Cannot redeclare '{identifier}' in the scope").as_str(),
                     -1,
                 );
                 std::process::exit(1)
