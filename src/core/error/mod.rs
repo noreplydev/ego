@@ -4,6 +4,7 @@ pub enum ErrorType {
     FatalError,
     ReferenceError,
     StackUnderflowError,
+    ExpressionError,
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str, line: isize) {
@@ -14,6 +15,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: isize) {
         ErrorType::FatalError => error_string = "Fatal error:",
         ErrorType::ReferenceError => error_string = "Reference error:",
         ErrorType::StackUnderflowError => error_string = "Stack underflow error:",
+        ErrorType::ExpressionError => error_string = "Expression error:",
         _ => {}
     }
 

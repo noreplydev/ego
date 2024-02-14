@@ -63,11 +63,11 @@ impl PartialEq for LexerTokenType {
 pub struct LexerToken {
     pub token_type: LexerTokenType,
     pub value: String,
-    pub line: usize,
+    pub line: isize,
 }
 
 impl LexerToken {
-    fn new(token_type: LexerTokenType, value: String, line: usize) -> LexerToken {
+    fn new(token_type: LexerTokenType, value: String, line: isize) -> LexerToken {
         LexerToken {
             token_type,
             value,
@@ -191,7 +191,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
 // Also, it doesn't handle the last token if it's not followed by whitespace.
 
-fn token_with_type(token: String, line: usize) -> LexerToken {
+fn token_with_type(token: String, line: isize) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token, line),

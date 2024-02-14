@@ -1,13 +1,14 @@
+use crate::error;
 use std::vec;
 
 use super::expressions::lookahead_expression;
 
 use crate::{
-    core::types::RuntimeType,
+    core::{error::ErrorType, types::RuntimeType},
     syntax::{
         tree::{BinaryOperator, Bool},
-        AstNode, AstNodeType, AstTree, Expression,
-        Expression::{Binary, Identifier, NumberLiteral, StringLiteral},
+        AstNode, AstNodeType, AstTree,
+        Expression::{self, Binary, Identifier, NumberLiteral, StringLiteral},
         LexerToken, LexerTokenType,
     },
 };
@@ -260,8 +261,7 @@ fn lookahead(
             let (tokens_offset, node, error) = lookahead_expression(tokens, current);
 
             if error {
-                println!("[cei] {}\n      └ on line: {}", error_message, token.line);
-                std::process::exit(1);
+                error::throw(ErrorType::ExpressionError, error_message, token.line);
             } else {
                 current += tokens_offset;
                 root.add_child(node);
@@ -357,8 +357,7 @@ fn lookahead(
                 }
             }
         } else {
-            println!("[cei] {}\n      └ on line: {}", error_message, token.line);
-            std::process::exit(1);
+            error::throw(ErrorType::SyntaxError, error_message, token.line);
         }
 
         // if Many or ManyAny present, start loop
@@ -372,7 +371,7 @@ fn lookahead(
     if (current - called_on) < types.len() {
         let token = &tokens[current - 1];
         let error_message = types[pattern_index].1;
-        println!("[cei] {}\n      └ on line: {}", error_message, token.line);
+        error::throw(ErrorType::SyntaxError, error_message, token.line);
         std::process::exit(1);
     }
 
