@@ -30,6 +30,7 @@ impl ScopesStack {
                 error::throw(
                     ErrorType::ReferenceError,
                     format!("identifier '{identifier}' was not declared").as_str(),
+                    -1,
                 );
             }
             counter -= 1;
@@ -38,6 +39,7 @@ impl ScopesStack {
         error::throw(
             ErrorType::ReferenceError,
             format!("identifier '{identifier}' was not declared").as_str(),
+            -1,
         );
         std::process::exit(1);
     }
@@ -51,7 +53,8 @@ impl ScopesStack {
         if pop_status.is_none() {
             error::throw(
                 ErrorType::StackUnderflowError,
-                "Error: Stack Underflow Detected\nThe program attempted to exit a scope when none are active. This usually indicates a mismatch in the creation and destruction of scopes, such as exiting more blocks or functions than were entered. Please review your code for any discrepancies in scope management, ensuring that each entered scope or function block is properly exited."
+                "Error: Stack Underflow Detected\nThe program attempted to exit a scope when none are active. This usually indicates a mismatch in the creation and destruction of scopes, such as exiting more blocks or functions than were entered. Please review your code for any discrepancies in scope management, ensuring that each entered scope or function block is properly exited.", 
+                -1
             );
         }
     }
@@ -98,6 +101,7 @@ impl Scope {
             error::throw(
                 ErrorType::ReferenceError,
                 format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+                -1,
             );
         }
 
@@ -106,6 +110,7 @@ impl Scope {
                 error::throw(
                     ErrorType::ReferenceError,
                     format!("[cei] Cannot redeclare '{identifier}' in the scope").as_str(),
+                    -1,
                 );
                 std::process::exit(1)
             }

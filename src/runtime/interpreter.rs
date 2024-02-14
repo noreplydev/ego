@@ -31,7 +31,7 @@ impl Interpreter {
                 }
                 AstNodeType::IfStatement => {
                     if node.children.len() < 1 {
-                        error::throw(ErrorType::SyntaxError, "'if' statement AST node was provided with no children. This occurs if an 'if' statement has no group and block nodes inside of it");
+                        error::throw(ErrorType::SyntaxError, "'if' statement AST node was provided with no children. This occurs if an 'if' statement has no group and block nodes inside of it", -1);
                     }
 
                     if Self::resolve_group(&node.children[0]) {
@@ -93,7 +93,7 @@ impl Interpreter {
                             "Cannot declare varible '{}'",
                             identifier.unwrap_or("unknown".to_string())
                         );
-                        error::throw(ErrorType::SyntaxError, &error_message);
+                        error::throw(ErrorType::SyntaxError, &error_message, -1);
                     }
                 }
                 _ => {}

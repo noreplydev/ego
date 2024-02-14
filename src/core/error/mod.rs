@@ -6,7 +6,7 @@ pub enum ErrorType {
     StackUnderflowError,
 }
 
-pub fn throw(error_type: ErrorType, error_message: &str) {
+pub fn throw(error_type: ErrorType, error_message: &str, line: isize) {
     let mut error_string = "";
     match error_type {
         ErrorType::SyntaxError => error_string = "Syntax error:",
@@ -18,5 +18,8 @@ pub fn throw(error_type: ErrorType, error_message: &str) {
     }
 
     println!("[cei] {error_string} {error_message}");
+    if line >= 0 {
+        println!("      └ on line: {line}");
+    }
     std::process::exit(1);
 }
