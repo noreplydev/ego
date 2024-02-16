@@ -6,8 +6,7 @@ use super::expressions::lookahead_expression;
 use crate::{
     core::{error::ErrorType, types::RuntimeType},
     syntax::{
-        tree::{BinaryOperator, Bool},
-        AstNode, AstNodeType, AstTree,
+        AstNode, AstNodeType, AstTree, BinaryOperator, Bool,
         Expression::{self, Binary, Identifier, NumberLiteral, StringLiteral},
         LexerToken, LexerTokenType,
     },
