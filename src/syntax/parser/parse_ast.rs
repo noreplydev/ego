@@ -1,7 +1,7 @@
 use crate::error;
 use std::vec;
 
-use super::expressions::lookahead_expression;
+use super::parse_expression::lookahead_expression;
 
 use crate::{
     core::{error::ErrorType, types::RuntimeType},
