@@ -45,7 +45,7 @@ pub fn lookahead_expression(
                                     token.value.to_string()
                                 )
                                 .as_str(),
-                                -1,
+                                None,
                             );
                         }
                     } else {
@@ -57,7 +57,7 @@ pub fn lookahead_expression(
                                 token.value.to_string()
                             )
                             .as_str(),
-                            -1,
+                            None,
                         );
                         std::process::exit(1);
                     }
@@ -80,7 +80,7 @@ pub fn lookahead_expression(
                                         token.value.to_string()
                                     )
                                     .as_str(),
-                                    -1,
+                                    None,
                                 );
 
                                 std::process::exit(1);
@@ -95,7 +95,7 @@ pub fn lookahead_expression(
                                 token.value.to_string()
                             )
                             .as_str(),
-                            -1,
+                            None,
                         );
                         std::process::exit(1);
                     }

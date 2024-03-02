@@ -260,7 +260,7 @@ fn lookahead(
             let (tokens_offset, node, error) = lookahead_expression(tokens, current);
 
             if error {
-                error::throw(ErrorType::ExpressionError, error_message, token.line);
+                error::throw(ErrorType::ExpressionError, error_message, Some(token.line));
             } else {
                 current += tokens_offset;
                 root.add_child(node);
@@ -356,7 +356,7 @@ fn lookahead(
                 }
             }
         } else {
-            error::throw(ErrorType::SyntaxError, error_message, token.line);
+            error::throw(ErrorType::SyntaxError, error_message, Some(token.line));
         }
 
         // if Many or ManyAny present, start loop
@@ -370,7 +370,7 @@ fn lookahead(
     if (current - called_on) < types.len() {
         let token = &tokens[current - 1];
         let error_message = types[pattern_index].1;
-        error::throw(ErrorType::SyntaxError, error_message, token.line);
+        error::throw(ErrorType::SyntaxError, error_message, Some(token.line));
         std::process::exit(1);
     }
 

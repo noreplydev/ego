@@ -20,19 +20,19 @@ fn main() {
     let filename = if args.len() > 1 {
         &args[1]
     } else {
-        error::throw(ErrorType::CeiUsageError, "an ego file is required", -1);
+        error::throw(ErrorType::CeiUsageError, "an ego file is required", None);
         std::process::exit(1); // to avoid types error
     };
 
     if !filename.ends_with(".e") {
-        error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file", -1);
+        error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file", None);
     }
 
     let file_content = fs::read_to_string(filename).unwrap_or_else(|_| {
         error::throw(
             ErrorType::FatalError,
             "Something went wrong reading file",
-            -1,
+            None,
         );
         std::process::exit(1); // to avoid types error
     });

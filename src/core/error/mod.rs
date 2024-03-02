@@ -7,7 +7,7 @@ pub enum ErrorType {
     ExpressionError,
 }
 
-pub fn throw(error_type: ErrorType, error_message: &str, line: isize) {
+pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
     let mut error_string = "";
     match error_type {
         ErrorType::SyntaxError => error_string = "Syntax error:",
@@ -20,7 +20,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: isize) {
     }
 
     println!("[cei] {error_string} {error_message}");
-    if line >= 0 {
+    if let Some(line) = line {
         println!("      └ on line: {line}");
     }
     std::process::exit(1);
