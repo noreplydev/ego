@@ -1,4 +1,4 @@
-use crate::{
+/* use crate::{
     runtime::ScopesStack,
     syntax::{AstNode, AstNodeType, Bool, Expression},
 };
@@ -46,3 +46,4 @@ pub fn print(node: AstNode, scopes: &ScopesStack) {
 
     println!("{}", values.join(" "));
 }
+ */

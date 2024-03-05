@@ -1,27 +1,11 @@
+pub mod call_expression;
+pub mod identifier;
+pub mod root;
 use std::fmt;
 
-use crate::core::types::RuntimeType;
+use self::call_expression::CallExpressionNode;
 
-/* AST TREE */
-#[derive(Debug, Clone)]
-pub struct AstTree {
-    pub root: AstNode,
-}
-
-impl AstTree {
-    pub fn new(root_node: AstNode) -> AstTree {
-        AstTree {
-            root: AstNode::new(root_node.node_type, root_node.value, root_node.children),
-        }
-    }
-}
-
-impl fmt::Display for AstTree {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "\nAST Tree \n {}", self.root)
-    }
-}
-
+/*
 /* AST TOKEN */
 #[derive(Debug, Clone)]
 pub struct AstNode {
@@ -61,15 +45,15 @@ impl fmt::Display for AstNode {
 
         Ok(())
     }
-}
+} */
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum AstNodeType {
     Root,
     Empty,
     Block,
     Group,
-    FunctionCall,
+    FunctionCall(CallExpressionNode),
     IfStatement,
     VariableDeclaration,
     Expression(Expression),
@@ -82,7 +66,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Empty => write!(f, "Empty"),
             AstNodeType::Block => write!(f, "Block"),
             AstNodeType::Group => write!(f, "Group"),
-            AstNodeType::FunctionCall => write!(f, "FunctionCall"),
+            AstNodeType::FunctionCall(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),

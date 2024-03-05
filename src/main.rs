@@ -4,7 +4,7 @@ mod syntax;
 
 use core::error;
 use core::error::ErrorType;
-use runtime::Interpreter;
+//use runtime::Interpreter;
 use std::env;
 use std::fs;
 use syntax::lex;
@@ -50,5 +50,5 @@ fn main() {
         println!("\nAST:\n----\n{:#?}\n", ast);
     }
 
-    Interpreter::new(ScopesStack::new(), ast).exec();
+    //Interpreter::new(ScopesStack::new(), ast).exec();
 }

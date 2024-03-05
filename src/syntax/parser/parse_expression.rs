@@ -3,7 +3,7 @@ use crate::{
         error::{self, ErrorType},
         types::RuntimeType,
     },
-    syntax::{AstNode, AstNodeType, BinaryOperator, Expression, LexerToken, LexerTokenType},
+    syntax::{AstNodeType, BinaryOperator, Expression, LexerToken, LexerTokenType},
 };
 
 // returns: offset of tokens index, expression node, error?

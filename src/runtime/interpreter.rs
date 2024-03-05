@@ -1,4 +1,4 @@
-use super::ScopesStack;
+/* use super::ScopesStack;
 use crate::{
     core::{
         error::{self, ErrorType},
@@ -108,3 +108,4 @@ impl Interpreter {
         true
     }
 }
+ */
