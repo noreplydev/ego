@@ -128,12 +128,7 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTyp
 
     (
         offset,
-        AstNodeType::FunctionCall(CallExpressionNode {
-            identifier: identifier_node,
-            line: 0,
-            start: 0,
-            end: 0,
-        }),
+        AstNodeType::FunctionCall(CallExpressionNode::new(identifier_node, 0, 0)),
     )
 }
 /*
