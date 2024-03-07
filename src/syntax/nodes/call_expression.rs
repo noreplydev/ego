@@ -6,7 +6,6 @@ pub struct CallExpressionNode {
     pub identifier: IdentifierNode,
     pub at: usize,
     pub line: usize,
-    //pub arguments
 }
 
 impl CallExpressionNode {

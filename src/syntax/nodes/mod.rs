@@ -1,6 +1,6 @@
 pub mod call_expression;
 pub mod identifier;
-pub mod root;
+pub mod module;
 use std::fmt;
 
 use self::call_expression::CallExpressionNode;

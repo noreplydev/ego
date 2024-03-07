@@ -7,11 +7,13 @@ use crate::{
     syntax::{
         call_expression::CallExpressionNode,
         identifier::{self, IdentifierNode},
+        module::ModuleAst,
         AstNodeType, LexerToken, LexerTokenType,
     },
 };
 
 pub fn parse(tokens: Vec<LexerToken>) {
+    let module = ModuleAst::new();
     let _tree = tree(tokens);
 }
 
@@ -34,7 +36,7 @@ fn tree(tokens: Vec<LexerToken>) {
             } */
             LexerTokenType::FunctionCall => {
                 let (index_offset, function_node) = function_call(&tokens, current);
-                //println!("{index_offset}, {function_node}");
+                println!("{index_offset}, {function_node}");
                 current += index_offset;
             } /*
             LexerTokenType::IfKeyword => {
