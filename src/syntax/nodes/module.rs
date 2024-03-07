@@ -5,12 +5,16 @@ use super::AstNodeType;
 /* AST TREE */
 #[derive(Debug, Clone)]
 pub struct ModuleAst {
+    pub module_name: String,
     pub children: Vec<AstNodeType>,
 }
 
 impl ModuleAst {
-    pub fn new() -> ModuleAst {
-        ModuleAst { children: vec![] }
+    pub fn new(module_name: &str) -> ModuleAst {
+        ModuleAst {
+            module_name: module_name.to_string(),
+            children: vec![],
+        }
     }
 }
 

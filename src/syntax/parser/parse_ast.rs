@@ -12,8 +12,8 @@ use crate::{
     },
 };
 
-pub fn parse(tokens: Vec<LexerToken>) {
-    let module = ModuleAst::new();
+pub fn parse(tokens: Vec<LexerToken>, module_name: &str) {
+    let module = ModuleAst::new(module_name);
     let _tree = tree(tokens);
 }
 

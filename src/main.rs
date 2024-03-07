@@ -8,6 +8,7 @@ use core::error::ErrorType;
 use std::env;
 use std::fs;
 use syntax::lex;
+use syntax::module;
 use syntax::parse;
 
 use crate::runtime::ScopesStack;
@@ -28,6 +29,7 @@ fn main() {
         error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file", None);
     }
 
+    let module_name = filename.split(".").collect::<Vec<&str>>()[0];
     let file_content = fs::read_to_string(filename).unwrap_or_else(|_| {
         error::throw(
             ErrorType::FatalError,
@@ -45,7 +47,7 @@ fn main() {
         }
     }
 
-    let ast = parse(tokens.clone());
+    let ast = parse(tokens.clone(), module_name);
     if args.len() > 2 && args[2] == "-d" {
         println!("\nAST:\n----\n{:#?}\n", ast);
     }
