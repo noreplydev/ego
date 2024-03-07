@@ -12,12 +12,12 @@ use crate::{
     },
 };
 
-pub fn parse(tokens: Vec<LexerToken>, module_name: &str) {
+pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
     let module = ModuleAst::new(module_name);
-    let _tree = tree(tokens);
+    tree(tokens, module)
 }
 
-fn tree(tokens: Vec<LexerToken>) {
+fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
     let mut current = 0;
 
     while current < tokens.len() {
@@ -37,6 +37,7 @@ fn tree(tokens: Vec<LexerToken>) {
             LexerTokenType::FunctionCall => {
                 let (index_offset, function_node) = function_call(&tokens, current);
                 println!("{index_offset}, {function_node}");
+                module_ast.add_child(function_node);
                 current += index_offset;
             } /*
             LexerTokenType::IfKeyword => {
@@ -94,6 +95,8 @@ fn tree(tokens: Vec<LexerToken>) {
             }
         }
     }
+
+    module_ast
 }
 
 // all parsing functions pattern variable takes

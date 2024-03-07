@@ -16,6 +16,9 @@ impl ModuleAst {
             children: vec![],
         }
     }
+    pub fn add_child(&mut self, node: AstNodeType) {
+        self.children.push(node);
+    }
 }
 
 impl fmt::Display for ModuleAst {
