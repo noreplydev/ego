@@ -1,15 +1,7 @@
-use std::vec;
-
-//use super::parse_expression::lookahead_expression;
-
 use crate::{
-    core::{error::ErrorType, types::RuntimeType},
-    syntax::{
-        call_expression::CallExpressionNode,
-        identifier::{self, IdentifierNode},
-        module::ModuleAst,
-        AstNodeType, LexerToken, LexerTokenType,
-    },
+    core::error::{self, ErrorType},
+    syntax::{call_expression::CallExpressionNode, identifier::IdentifierNode, module::ModuleAst},
+    syntax::{AstNodeType, LexerToken, LexerTokenType},
 };
 
 pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
@@ -36,7 +28,6 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
             } */
             LexerTokenType::FunctionCall => {
                 let (index_offset, function_node) = function_call(&tokens, current);
-                println!("{index_offset}, {function_node}");
                 module_ast.add_child(function_node);
                 current += index_offset;
             } /*
@@ -119,12 +110,28 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTyp
     current += 1;
     offset += 1;
 
+    // check '('
+    if tokens[current].token_type == LexerTokenType::OpenParenthesis {
+        current += 1;
+        offset += 1;
+    } else {
+        error::throw(
+            ErrorType::SyntaxError,
+            format!(
+                "Unexpected token '{}' in function call",
+                tokens[current].value
+            )
+            .as_str(),
+            Some(tokens[current].line),
+        )
+    }
+
+    // get params
     while current < tokens.len() {
         let token = &tokens[current];
 
         match token.token_type {
             _ => {
-                println!("token {}", token.value);
                 current += 1;
                 offset += 1;
             }
