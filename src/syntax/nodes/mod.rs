@@ -1,9 +1,10 @@
 pub mod call_expression;
 pub mod identifier;
 pub mod module;
+pub mod string_literal;
 use std::fmt;
 
-use self::call_expression::CallExpressionNode;
+use self::{call_expression::CallExpressionNode, string_literal::StringLiteral};
 
 /*
 /* AST TOKEN */
@@ -54,6 +55,7 @@ pub enum AstNodeType {
     Block,
     Group,
     FunctionCall(CallExpressionNode),
+    StringLiteral(StringLiteral),
     IfStatement,
     VariableDeclaration,
     Expression(Expression),
@@ -67,6 +69,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Block => write!(f, "Block"),
             AstNodeType::Group => write!(f, "Group"),
             AstNodeType::FunctionCall(node) => write!(f, "FunctionCall: {:#?}", node),
+            AstNodeType::StringLiteral(node) => write!(f, "IfStatement: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),

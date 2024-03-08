@@ -1,7 +1,9 @@
 use crate::{
     core::error::{self, ErrorType},
-    syntax::{call_expression::CallExpressionNode, identifier::IdentifierNode, module::ModuleAst},
-    syntax::{AstNodeType, LexerToken, LexerTokenType},
+    syntax::{
+        call_expression::CallExpressionNode, identifier::IdentifierNode, module::ModuleAst,
+        string_literal::StringLiteral, AstNodeType, LexerToken, LexerTokenType,
+    },
 };
 
 pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
@@ -126,21 +128,95 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTyp
         )
     }
 
-    // get params
+    // get arguments
+    fn is_valid_type(prev: Option<LexerTokenType>) -> bool {
+        if let Some(_prev) = prev {
+            if _prev == LexerTokenType::Comma {
+                return true;
+            }
+
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    let mut arguments: Vec<Option<AstNodeType>> = vec![];
+    let mut last_token = None;
     while current < tokens.len() {
         let token = &tokens[current];
 
+        // offset & current are incremented inside each type
+        // to avoid "tokens[overflowed_index]"" if loops ends
+        // before a '{'
         match token.token_type {
-            _ => {
+            LexerTokenType::Comma => {
+                last_token = Some(LexerTokenType::Comma);
+                arguments.push(None);
                 current += 1;
                 offset += 1;
+            }
+            LexerTokenType::StringLiteral => {
+                last_token = Some(LexerTokenType::Comma);
+                arguments.push(Some(AstNodeType::StringLiteral(StringLiteral::new(
+                    token.value.clone(),
+                    token.at,
+                    token.line,
+                ))));
+                current += 1;
+                offset += 1;
+            }
+            LexerTokenType::CloseParenthesis => {
+                current += 1;
+                offset += 1;
+                break;
+            }
+            _ => {
+                error::throw(
+                    ErrorType::SyntaxError,
+                    format!(
+                        "Unexpected token '{}' as argument for {}(..)",
+                        token.value, identifier_node.name
+                    )
+                    .as_str(),
+                    Some(token.line),
+                );
             }
         }
     }
 
+    // avoid early end of file
+    if current >= tokens.len() {
+        error::throw(
+            ErrorType::SyntaxError,
+            format!(
+                "Expected ';' but got '{}' as end of statement",
+                tokens[current - 1].value
+            )
+            .as_str(),
+            Some(tokens[current - 1].line),
+        )
+    }
+
+    // get final ;
+    if tokens[current].token_type == LexerTokenType::EndOfStatement {
+        current += 1;
+        offset += 1;
+    } else {
+        error::throw(
+            ErrorType::SyntaxError,
+            format!(
+                "Expected ';' but got '{}' as end of statement",
+                tokens[current].value
+            )
+            .as_str(),
+            Some(tokens[current].line),
+        )
+    }
+
     (
         offset,
-        AstNodeType::FunctionCall(CallExpressionNode::new(identifier_node, 0, 0)),
+        AstNodeType::FunctionCall(CallExpressionNode::new(identifier_node, arguments, 0, 0)),
     )
 }
 /*
