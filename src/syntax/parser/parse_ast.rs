@@ -29,7 +29,7 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
                 current += index_offset;
             } */
             LexerTokenType::FunctionCall => {
-                let (index_offset, function_node) = function_call(&tokens, current);
+                let (index_offset, function_node) = call_expression(&tokens, current);
                 module_ast.add_child(function_node);
                 current += index_offset;
             } /*
@@ -99,7 +99,7 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
 
 fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {} */
 
-fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
+fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
     let mut current = current;
     let mut offset = 0;
 
