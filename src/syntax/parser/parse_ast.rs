@@ -129,18 +129,6 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTyp
     }
 
     // get arguments
-    fn is_valid_type(prev: Option<LexerTokenType>) -> bool {
-        if let Some(_prev) = prev {
-            if _prev == LexerTokenType::Comma {
-                return true;
-            }
-
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     let mut arguments: Vec<Option<AstNodeType>> = vec![];
     let mut last_token = None;
     while current < tokens.len() {
@@ -149,15 +137,19 @@ fn function_call(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTyp
         // offset & current are incremented inside each type
         // to avoid "tokens[overflowed_index]"" if loops ends
         // before a '{'
+        println!("{:#?}", last_token);
         match token.token_type {
             LexerTokenType::Comma => {
+                if last_token == Some(LexerTokenType::Comma) {
+                    arguments.push(None);
+                }
+
                 last_token = Some(LexerTokenType::Comma);
-                arguments.push(None);
                 current += 1;
                 offset += 1;
             }
             LexerTokenType::StringLiteral => {
-                last_token = Some(LexerTokenType::Comma);
+                last_token = Some(LexerTokenType::StringLiteral);
                 arguments.push(Some(AstNodeType::StringLiteral(StringLiteral::new(
                     token.value.clone(),
                     token.at,
