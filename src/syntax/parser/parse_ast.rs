@@ -108,8 +108,8 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     // get the identifier
     let identifier_node = IdentifierNode::new(
         tokens[current].value.clone(),
-        tokens[current].line,
         tokens[current].at,
+        tokens[current].line,
     );
     current += 1;
     offset += 1;
