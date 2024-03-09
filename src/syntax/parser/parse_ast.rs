@@ -169,6 +169,12 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                     ))));
                     current += 1;
                     offset += 1;
+                } else {
+                    error::throw(
+                        ErrorType::ParsingError,
+                        format!("Types inferece error for '{}'", token.value).as_str(),
+                        Some(token.line),
+                    )
                 }
             }
             LexerTokenType::CloseParenthesis => {
