@@ -2,7 +2,7 @@ use crate::{
     core::error::{self, ErrorType},
     syntax::{
         call_expression::CallExpressionNode, identifier::IdentifierNode, module::ModuleAst,
-        string_literal::StringLiteral, AstNodeType, LexerToken, LexerTokenType,
+        number::Number, string_literal::StringLiteral, AstNodeType, LexerToken, LexerTokenType,
     },
 };
 
@@ -99,6 +99,7 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
 
 fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {} */
 
+// print(a, b, c)
 fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
     let mut current = current;
     let mut offset = 0;
@@ -128,7 +129,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         )
     }
 
-    // get arguments
+    // get arguments & check ')'
     let mut arguments: Vec<Option<AstNodeType>> = vec![];
     let mut last_token = None;
     while current < tokens.len() {
@@ -157,6 +158,18 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                 ))));
                 current += 1;
                 offset += 1;
+            }
+            LexerTokenType::Number => {
+                last_token = Some(LexerTokenType::Number);
+                let number: Result<i64, _> = token.value.parse();
+
+                if let Ok(number) = number {
+                    arguments.push(Some(AstNodeType::Number(Number::new(
+                        number, token.at, token.line,
+                    ))));
+                    current += 1;
+                    offset += 1;
+                }
             }
             LexerTokenType::CloseParenthesis => {
                 current += 1;
@@ -211,6 +224,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         AstNodeType::FunctionCall(CallExpressionNode::new(identifier_node, arguments, 0, 0)),
     )
 }
+
 /*
 fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {}
 

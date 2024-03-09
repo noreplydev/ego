@@ -1,5 +1,3 @@
-use super::AstNodeType;
-
 #[derive(Debug, Clone)]
 pub struct StringLiteral {
     pub value: String,
