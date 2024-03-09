@@ -1,3 +1,5 @@
+use std::{os::unix::process, process::exit};
+
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
@@ -221,9 +223,11 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     }
 
     // get final ;
-    if tokens[current].token_type == LexerTokenType::EndOfStatement {
+    let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
+        let call_expression_properties = (tokens[current].at, tokens[current].line);
         current += 1;
         offset += 1;
+        call_expression_properties
     } else {
         error::throw(
             ErrorType::SyntaxError,
@@ -233,12 +237,18 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
             )
             .as_str(),
             Some(tokens[current].line),
-        )
-    }
+        );
+        std::process::exit(1); // for type checking
+    };
 
     (
         offset,
-        AstNodeType::FunctionCall(CallExpressionNode::new(identifier_node, arguments, 0, 0)),
+        AstNodeType::FunctionCall(CallExpressionNode::new(
+            identifier_node,
+            arguments,
+            at,
+            line,
+        )),
     )
 }
 
