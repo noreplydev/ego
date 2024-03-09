@@ -5,13 +5,11 @@ mod syntax;
 use core::error;
 use core::error::ErrorType;
 //use runtime::Interpreter;
+use runtime::exec;
 use std::env;
 use std::fs;
 use syntax::lex;
-use syntax::module;
 use syntax::parse;
-
-use crate::runtime::ScopesStack;
 
 pub const KEYWORDS: [&str; 5] = ["print", "let", "if", "true", "false"];
 
@@ -52,5 +50,5 @@ fn main() {
         println!("\nAST:\n----\n{:#?}\n", ast);
     }
 
-    //Interpreter::new(ScopesStack::new(), ast).exec();
+    exec(ast);
 }

@@ -1,3 +1,18 @@
+use crate::syntax::{module::ModuleAst, AstNodeType};
+
+pub fn exec(ast: ModuleAst) {
+    let mut counter = 0;
+
+    while counter < ast.children.len() {
+        exec_node(&ast.children[counter]);
+        counter += 1;
+    }
+}
+
+fn exec_node(node: &AstNodeType) {
+    println!("{node}");
+}
+
 /* use super::ScopesStack;
 use crate::{
     core::{
