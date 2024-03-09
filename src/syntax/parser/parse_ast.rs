@@ -243,7 +243,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
 
     (
         offset,
-        AstNodeType::FunctionCall(CallExpressionNode::new(
+        AstNodeType::CallExpression(CallExpressionNode::new(
             identifier_node,
             arguments,
             at,
