@@ -1,8 +1,9 @@
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
-        call_expression::CallExpressionNode, identifier::IdentifierNode, module::ModuleAst,
-        number::Number, string_literal::StringLiteral, AstNodeType, LexerToken, LexerTokenType,
+        bool::Bool, call_expression::CallExpressionNode, identifier::IdentifierNode,
+        module::ModuleAst, number::Number, string_literal::StringLiteral, AstNodeType, LexerToken,
+        LexerTokenType,
     },
 };
 
@@ -138,7 +139,6 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         // offset & current are incremented inside each type
         // to avoid "tokens[overflowed_index]"" if loops ends
         // before a '{'
-        println!("{:#?}", last_token);
         match token.token_type {
             LexerTokenType::Comma => {
                 if last_token == Some(LexerTokenType::Comma) {
@@ -175,6 +175,17 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                         format!("Types inferece error for '{}'", token.value).as_str(),
                         Some(token.line),
                     )
+                }
+            }
+            LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
+                last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
+                let bool_value: Result<bool, _> = token.value.parse();
+                if let Ok(bool_value) = bool_value {
+                    arguments.push(Some(AstNodeType::Bool(Bool::new(
+                        bool_value, token.at, token.line,
+                    ))));
+                    current += 1;
+                    offset += 1;
                 }
             }
             LexerTokenType::CloseParenthesis => {

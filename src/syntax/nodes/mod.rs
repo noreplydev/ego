@@ -1,3 +1,4 @@
+pub mod bool;
 pub mod call_expression;
 pub mod identifier;
 pub mod module;
@@ -5,7 +6,9 @@ pub mod number;
 pub mod string_literal;
 use std::fmt;
 
-use self::{call_expression::CallExpressionNode, number::Number, string_literal::StringLiteral};
+use self::{
+    bool::Bool, call_expression::CallExpressionNode, number::Number, string_literal::StringLiteral,
+};
 
 /*
 /* AST TOKEN */
@@ -58,6 +61,7 @@ pub enum AstNodeType {
     FunctionCall(CallExpressionNode),
     StringLiteral(StringLiteral),
     Number(Number),
+    Bool(Bool),
     IfStatement,
     VariableDeclaration,
     Expression(Expression),
@@ -73,13 +77,12 @@ impl fmt::Display for AstNodeType {
             AstNodeType::FunctionCall(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::StringLiteral(node) => write!(f, "StringLiteral: {:#?}", node),
             AstNodeType::Number(node) => write!(f, "NumberLiteral: {:#?}", node),
+            AstNodeType::Bool(node) => write!(f, "Bool: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
             AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier) => write!(f, "Indentifier"),
-            AstNodeType::Expression(Expression::Boolean(Bool::True)) => write!(f, "True"),
-            AstNodeType::Expression(Expression::Boolean(Bool::False)) => write!(f, "False"),
             AstNodeType::Expression(Expression::Binary(BinaryOperator::AddOperator)) => {
                 write!(f, "BinaryOperator")
             }
@@ -107,14 +110,7 @@ pub enum Expression {
     StringLiteral,
     NumberLiteral,
     Identifier,
-    Boolean(Bool),
     Binary(BinaryOperator),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum Bool {
-    True,
-    False,
 }
 
 #[derive(Debug, Clone, Copy)]
