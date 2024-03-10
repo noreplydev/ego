@@ -1,1 +1,2 @@
-print("1", 12, true, ,"2", "3"); 
+print("number: "); 
+print(12); 

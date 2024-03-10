@@ -1,6 +1,7 @@
 use crate::{
     core::{
         error::{self, ErrorType},
+        handlers::print::print,
         types::RuntimeType,
     },
     syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
@@ -38,6 +39,13 @@ fn exec_node(node: &AstNodeType, scopes: &ScopesStack) {
                     }
                 })
                 .collect();
+
+            match node.identifier.name.as_str() {
+                "print" => print(runtime_arguments),
+                _ => {
+                    // runtime declared functions
+                }
+            }
         }
         _ => {}
     }
