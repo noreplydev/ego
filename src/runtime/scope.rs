@@ -1,4 +1,4 @@
-use std::{collections::HashMap, process::exit};
+use std::collections::HashMap;
 
 use crate::core::error::{self, ErrorType};
 

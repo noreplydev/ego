@@ -1,3 +1,15 @@
+use crate::core::types::RuntimeType;
+
+pub fn print(args: Vec<RuntimeType>) {
+    let mut raw_values: Vec<String> = vec![];
+    for arg in args {
+        raw_values.push(arg.to_string());
+    }
+
+    let string = raw_values.join(" ");
+    print!("{string}");
+}
+
 /* use crate::{
     runtime::ScopesStack,
     syntax::{AstNode, AstNodeType, Bool, Expression},

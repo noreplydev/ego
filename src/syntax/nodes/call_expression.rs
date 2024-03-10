@@ -1,13 +1,13 @@
 use super::{
     identifier::{self, IdentifierNode},
-    AstNodeType,
+    AstNodeType, Expression,
 };
 
 #[derive(Debug, Clone)]
 pub struct CallExpressionNode {
     //pub type: String,
     pub identifier: IdentifierNode,
-    pub arguments: Vec<Option<AstNodeType>>,
+    pub arguments: Vec<Option<Expression>>,
     pub at: usize,
     pub line: usize,
 }
@@ -15,7 +15,7 @@ pub struct CallExpressionNode {
 impl CallExpressionNode {
     pub fn new(
         identifier: IdentifierNode,
-        arguments: Vec<Option<AstNodeType>>,
+        arguments: Vec<Option<Expression>>,
         at: usize,
         line: usize,
     ) -> CallExpressionNode {

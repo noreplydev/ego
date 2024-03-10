@@ -20,7 +20,7 @@ impl RuntimeType {
         RuntimeType::RnString(RnString::new(value))
     }
 
-    pub fn number(value: usize) -> RuntimeType {
+    pub fn number(value: i64) -> RuntimeType {
         RuntimeType::RnNumber(RnNumber::new(value))
     }
 

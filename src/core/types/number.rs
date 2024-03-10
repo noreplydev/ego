@@ -1,10 +1,10 @@
 #[derive(Debug, Clone)]
 pub struct RnNumber {
-    val: usize,
+    val: i64,
 }
 
 impl RnNumber {
-    pub fn new(value: usize) -> RnNumber {
+    pub fn new(value: i64) -> RnNumber {
         RnNumber { val: value }
     }
 

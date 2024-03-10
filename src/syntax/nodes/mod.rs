@@ -10,47 +10,7 @@ use self::{
     bool::Bool, call_expression::CallExpressionNode, number::Number, string_literal::StringLiteral,
 };
 
-/*
-/* AST TOKEN */
-#[derive(Debug, Clone)]
-pub struct AstNode {
-    pub node_type: AstNodeType,
-    pub value: RuntimeType,
-    pub children: Vec<AstNode>,
-}
-
-impl AstNode {
-    pub fn new(node_type: AstNodeType, value: RuntimeType, children: Vec<AstNode>) -> AstNode {
-        AstNode {
-            node_type,
-            value,
-            children,
-        }
-    }
-
-    pub fn root() -> AstNode {
-        AstNode {
-            node_type: AstNodeType::Root,
-            value: RuntimeType::nothing(),
-            children: Vec::new(),
-        }
-    }
-
-    pub fn add_child(&mut self, child: AstNode) {
-        self.children.push(child);
-    }
-}
-
-impl fmt::Display for AstNode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "- {}: {}", self.node_type, self.value)?;
-        for child in &self.children {
-            write!(f, "child: {}", child)?;
-        }
-
-        Ok(())
-    }
-} */
+/* AstNodeType */
 
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
@@ -59,9 +19,6 @@ pub enum AstNodeType {
     Block,
     Group,
     CallExpression(CallExpressionNode),
-    StringLiteral(StringLiteral),
-    Number(Number),
-    Bool(Bool),
     IfStatement,
     VariableDeclaration,
     Expression(Expression),
@@ -75,26 +32,11 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Block => write!(f, "Block"),
             AstNodeType::Group => write!(f, "Group"),
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
-            AstNodeType::StringLiteral(node) => write!(f, "StringLiteral: {:#?}", node),
-            AstNodeType::Number(node) => write!(f, "NumberLiteral: {:#?}", node),
-            AstNodeType::Bool(node) => write!(f, "Bool: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::VariableDeclaration => write!(f, "VariableDeclaration"),
-            AstNodeType::Expression(Expression::StringLiteral) => write!(f, "StringLiteral"),
-            AstNodeType::Expression(Expression::NumberLiteral) => write!(f, "Number"),
-            AstNodeType::Expression(Expression::Identifier) => write!(f, "Indentifier"),
-            AstNodeType::Expression(Expression::Binary(BinaryOperator::AddOperator)) => {
-                write!(f, "BinaryOperator")
-            }
-            AstNodeType::Expression(Expression::Binary(BinaryOperator::SubtractOperator)) => {
-                write!(f, "SubtractOperator")
-            }
-            AstNodeType::Expression(Expression::Binary(BinaryOperator::MultiplyOperator)) => {
-                write!(f, "MultiplyOperator")
-            }
-            AstNodeType::Expression(Expression::Binary(BinaryOperator::DivisionOperator)) => {
-                write!(f, "DivisionOperator")
-            }
+            AstNodeType::Expression(Expression::StringLiteral(str)) => write!(f, "StringLiteral"),
+            AstNodeType::Expression(Expression::Number(num)) => write!(f, "Number"),
+            AstNodeType::Expression(Expression::Bool(bool)) => write!(f, "Number"),
         }
     }
 }
@@ -105,18 +47,10 @@ impl PartialEq for AstNodeType {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+/* AstNodeType::Expresssion */
+#[derive(Debug, Clone)]
 pub enum Expression {
-    StringLiteral,
-    NumberLiteral,
-    Identifier,
-    Binary(BinaryOperator),
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum BinaryOperator {
-    AddOperator,
-    SubtractOperator,
-    DivisionOperator,
-    MultiplyOperator,
+    StringLiteral(StringLiteral),
+    Number(Number),
+    Bool(Bool),
 }

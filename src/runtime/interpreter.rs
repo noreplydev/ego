@@ -1,16 +1,46 @@
-use crate::syntax::{module::ModuleAst, AstNodeType};
+use crate::{
+    core::{
+        error::{self, ErrorType},
+        types::RuntimeType,
+    },
+    syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
+};
+
+use super::ScopesStack;
 
 pub fn exec(ast: ModuleAst) {
-    let mut counter = 0;
+    let scopes = ScopesStack::new();
 
+    let mut counter = 0;
     while counter < ast.children.len() {
-        exec_node(&ast.children[counter]);
+        exec_node(&ast.children[counter], &scopes);
         counter += 1;
     }
 }
 
-fn exec_node(node: &AstNodeType) {
-    println!("{node}");
+fn exec_node(node: &AstNodeType, scopes: &ScopesStack) {
+    match node {
+        AstNodeType::CallExpression(node) => {
+            let runtime_arguments: Vec<RuntimeType> = node
+                .arguments
+                .iter()
+                .map(|arg| -> RuntimeType {
+                    if let Some(arg) = arg {
+                        match arg {
+                            Expression::StringLiteral(string) => {
+                                RuntimeType::string(string.value.clone())
+                            }
+                            Expression::Number(number) => RuntimeType::number(number.value),
+                            Expression::Bool(bool) => RuntimeType::boolean(bool.value),
+                        }
+                    } else {
+                        RuntimeType::nothing()
+                    }
+                })
+                .collect();
+        }
+        _ => {}
+    }
 }
 
 /* use super::ScopesStack;

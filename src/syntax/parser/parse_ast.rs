@@ -4,8 +4,8 @@ use crate::{
     core::error::{self, ErrorType},
     syntax::{
         bool::Bool, call_expression::CallExpressionNode, identifier::IdentifierNode,
-        module::ModuleAst, number::Number, string_literal::StringLiteral, AstNodeType, LexerToken,
-        LexerTokenType,
+        module::ModuleAst, number::Number, string_literal::StringLiteral, AstNodeType, Expression,
+        LexerToken, LexerTokenType,
     },
 };
 
@@ -133,7 +133,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     }
 
     // get arguments & check ')'
-    let mut arguments: Vec<Option<AstNodeType>> = vec![];
+    let mut arguments: Vec<Option<Expression>> = vec![];
     let mut last_token = None;
     while current < tokens.len() {
         let token = &tokens[current];
@@ -153,7 +153,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
             }
             LexerTokenType::StringLiteral => {
                 last_token = Some(LexerTokenType::StringLiteral);
-                arguments.push(Some(AstNodeType::StringLiteral(StringLiteral::new(
+                arguments.push(Some(Expression::StringLiteral(StringLiteral::new(
                     token.value.clone(),
                     token.at,
                     token.line,
@@ -166,7 +166,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                 let number: Result<i64, _> = token.value.parse();
 
                 if let Ok(number) = number {
-                    arguments.push(Some(AstNodeType::Number(Number::new(
+                    arguments.push(Some(Expression::Number(Number::new(
                         number, token.at, token.line,
                     ))));
                     current += 1;
@@ -183,7 +183,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                 last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
                 let bool_value: Result<bool, _> = token.value.parse();
                 if let Ok(bool_value) = bool_value {
-                    arguments.push(Some(AstNodeType::Bool(Bool::new(
+                    arguments.push(Some(Expression::Bool(Bool::new(
                         bool_value, token.at, token.line,
                     ))));
                     current += 1;
