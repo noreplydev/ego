@@ -135,6 +135,8 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     // get arguments & check ')'
     let mut arguments: Vec<Option<Expression>> = vec![];
     let mut last_token = None;
+    let mut closed = false;
+
     while current < tokens.len() {
         let token = &tokens[current];
 
@@ -193,6 +195,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
             LexerTokenType::CloseParenthesis => {
                 current += 1;
                 offset += 1;
+                closed = true;
                 break;
             }
             _ => {
@@ -209,7 +212,16 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         }
     }
 
-    // avoid early end of file
+    // non closed CallExpression
+    if !closed {
+        error::throw(
+            ErrorType::SyntaxError,
+            "Expected ')' after function arguments",
+            Some(tokens[current - 1].line),
+        )
+    }
+
+    // avoid early end of file (idk if it's needed)
     if current >= tokens.len() {
         error::throw(
             ErrorType::SyntaxError,
