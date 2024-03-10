@@ -97,7 +97,8 @@ pub fn lex(source: String) -> Vec<LexerToken> {
     let mut is_comment = 0; // inside a comment
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
-    let mut char_counter = 1; // track current chars number
+    let mut char_counter = 1; // all module chars number
+    let mut line_char_counter = 1; // current line chars number
     let mut line_counter = 1; // track current line
 
     while let Some(c) = chars.next() {
@@ -106,7 +107,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             if c == '\n' {
                 is_comment = 0;
                 line_counter += 1;
-                char_counter = 0;
+                line_char_counter = 0;
             }
         // normal mode
         } else {
@@ -116,7 +117,11 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     current_token.push(c);
 
                     if is_string {
-                        tokens.push(token_with_type(current_token, line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            current_token,
+                            line_counter,
+                            line_char_counter,
+                        ));
                         current_token = String::new();
                     }
 
@@ -135,11 +140,15 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                             tokens.push(token_with_type(
                                 current_token,
                                 line_counter,
-                                char_counter - 1,
+                                line_char_counter - 1,
                             )); // push previous token, - 1 since is the previous
                             current_token = String::new();
                         }
-                        tokens.push(token_with_type(c.to_string(), line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            c.to_string(),
+                            line_counter,
+                            line_char_counter,
+                        ));
                         // push current
                     }
                 }
@@ -147,7 +156,11 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     if is_string {
                         current_token.push(c);
                     } else {
-                        tokens.push(token_with_type(c.to_string(), line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            c.to_string(),
+                            line_counter,
+                            line_char_counter,
+                        ));
                         current_token = String::new();
                     }
                 }
@@ -156,17 +169,25 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     if is_string {
                         current_token.push(c);
                     } else if keywords.contains(&current_token.as_str()) {
-                        tokens.push(token_with_type(current_token, line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            current_token,
+                            line_counter,
+                            line_char_counter,
+                        ));
                         current_token = String::new();
                     } else if current_token.len() > 0 {
                         // if not empty
-                        tokens.push(token_with_type(current_token, line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            current_token,
+                            line_counter,
+                            line_char_counter,
+                        ));
                         current_token = String::new();
                     }
 
                     if c == '\n' {
                         line_counter += 1;
-                        char_counter = 0;
+                        line_char_counter = 0;
                     }
                 }
                 // accumulating numbers
@@ -175,7 +196,11 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         current_token.push(c);
                     } else {
                         current_token.push(c);
-                        tokens.push(token_with_type(current_token, line_counter, char_counter));
+                        tokens.push(token_with_type(
+                            current_token,
+                            line_counter,
+                            line_char_counter,
+                        ));
                         current_token = String::new();
                     }
                 }
@@ -189,12 +214,18 @@ pub fn lex(source: String) -> Vec<LexerToken> {
         }
 
         // last character in the source code
-        if char_counter == source.len() - 1 && current_token.len() > 0 {
-            tokens.push(token_with_type(current_token, line_counter, char_counter));
+        if char_counter == source.len() && current_token.len() > 0 {
+            print!("hola");
+            tokens.push(token_with_type(
+                current_token,
+                line_counter,
+                line_char_counter,
+            ));
             current_token = String::new()
         }
 
         // keep track of current char index
+        line_char_counter += 1;
         char_counter += 1;
     }
 
