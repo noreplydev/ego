@@ -1,5 +1,3 @@
-use std::{os::unix::process, process::exit};
-
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
@@ -193,6 +191,10 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                 }
             }
             LexerTokenType::CloseParenthesis => {
+                if last_token == Some(LexerTokenType::Comma) {
+                    arguments.push(None);
+                }
+
                 current += 1;
                 offset += 1;
                 closed = true;
