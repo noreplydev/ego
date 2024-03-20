@@ -1,3 +1,5 @@
+use super::traits::print::Print;
+
 #[derive(Debug, Clone)]
 pub struct RnString {
     val: String,
@@ -18,4 +20,11 @@ fn interpolate(string: String) -> String {
     chars.next();
     chars.next_back();
     chars.collect()
+}
+
+// Default traits implemented by runtime number
+impl Print for RnString {
+    fn print(&self) -> String {
+        self.val.to_string()
+    }
 }

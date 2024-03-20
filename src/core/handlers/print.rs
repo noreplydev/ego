@@ -1,4 +1,4 @@
-use crate::core::types::RuntimeType;
+use crate::core::runtypes::RuntimeType;
 
 pub fn print(args: Vec<RuntimeType>) {
     let mut raw_values: Vec<String> = vec![];

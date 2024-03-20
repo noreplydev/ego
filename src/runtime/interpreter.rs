@@ -2,7 +2,7 @@ use crate::{
     core::{
         error::{self, ErrorType},
         handlers::print::print,
-        types::RuntimeType,
+        runtypes::RuntimeType,
     },
     syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
 };
