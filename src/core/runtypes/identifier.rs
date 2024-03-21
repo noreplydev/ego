@@ -1,4 +1,5 @@
-use super::traits::print::Print;
+use super::RuntimeType;
+use crate::runtime::ScopesStack;
 
 #[derive(Debug, Clone)]
 pub struct RnIdentifier {
@@ -13,11 +14,13 @@ impl RnIdentifier {
     pub fn to_string(&self) -> String {
         self.val.clone()
     }
-}
 
-// Default traits implemented by runtime number
-impl Print for RnIdentifier {
-    fn print(&self) -> String {
-        self.val.to_string()
+    pub fn resolve(&self, scopes: &ScopesStack) -> RuntimeType {
+        let value_runtype = scopes.get_identifier_value(&self.val);
+        if let Some(value) = value_runtype {
+            value.clone()
+        } else {
+            RuntimeType::nothing()
+        }
     }
 }
