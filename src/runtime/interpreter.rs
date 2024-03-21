@@ -1,11 +1,6 @@
 use crate::{
-    core::{
-        error::{self, ErrorType},
-        handlers::print::print,
-        runtypes::{self, traits::print::Print, RuntimeType},
-    },
-    runtime::scope,
-    syntax::{bool::Bool, identifier, module::ModuleAst, AstNodeType, Expression},
+    core::{handlers::print::print, runtypes::RuntimeType},
+    syntax::{module::ModuleAst, AstNodeType, Expression},
 };
 
 use super::ScopesStack;

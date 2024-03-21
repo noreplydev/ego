@@ -35,10 +35,10 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Group => write!(f, "Group"),
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
-            AstNodeType::AssignamentStatement(a) => write!(f, "AssignamentStatement"),
-            AstNodeType::Expression(Expression::StringLiteral(str)) => write!(f, "StringLiteral"),
-            AstNodeType::Expression(Expression::Number(num)) => write!(f, "Number"),
-            AstNodeType::Expression(Expression::Bool(bool)) => write!(f, "Number"),
+            AstNodeType::AssignamentStatement(_) => write!(f, "AssignamentStatement"),
+            AstNodeType::Expression(Expression::StringLiteral(_)) => write!(f, "StringLiteral"),
+            AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
+            AstNodeType::Expression(Expression::Bool(_)) => write!(f, "Number"),
         }
     }
 }
