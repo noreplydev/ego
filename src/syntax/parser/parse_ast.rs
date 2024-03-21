@@ -311,7 +311,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
 
     // get variable value
     let token = &tokens[current];
-    let value_node: Expression = match token.token_type {
+    let node_init: Expression = match token.token_type {
         LexerTokenType::StringLiteral => Expression::StringLiteral(StringLiteral::new(
             token.value.clone(),
             token.at,
@@ -383,7 +383,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
         offset,
         AstNodeType::AssignamentStatement(AssignamentNode::new(
             identifier_node,
-            value_node,
+            node_init,
             var_type,
             at,
             line,

@@ -4,7 +4,7 @@ use super::{identifier::IdentifierNode, Expression};
 pub struct AssignamentNode {
     //pub type: String,
     pub identifier: IdentifierNode,
-    pub value: Expression,
+    pub init: Expression,
     pub var_type: VarType,
     pub at: usize,
     pub line: usize,
@@ -13,14 +13,14 @@ pub struct AssignamentNode {
 impl AssignamentNode {
     pub fn new(
         identifier: IdentifierNode,
-        value: Expression,
+        init: Expression,
         var_type: VarType,
         at: usize,
         line: usize,
     ) -> AssignamentNode {
         AssignamentNode {
             identifier,
-            value,
+            init,
             var_type,
             at,
             line,
