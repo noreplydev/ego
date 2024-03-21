@@ -2,24 +2,25 @@ use crate::{
     core::{
         error::{self, ErrorType},
         handlers::print::print,
-        runtypes::RuntimeType,
+        runtypes::{self, traits::print::Print, RuntimeType},
     },
-    syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
+    runtime::scope,
+    syntax::{bool::Bool, identifier, module::ModuleAst, AstNodeType, Expression},
 };
 
 use super::ScopesStack;
 
 pub fn exec(ast: ModuleAst) {
-    let scopes = ScopesStack::new();
+    let mut scopes = ScopesStack::new();
 
     let mut counter = 0;
     while counter < ast.children.len() {
-        exec_node(&ast.children[counter], &scopes);
+        exec_node(&ast.children[counter], &mut scopes);
         counter += 1;
     }
 }
 
-fn exec_node(node: &AstNodeType, scopes: &ScopesStack) {
+fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     match node {
         AstNodeType::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
@@ -46,6 +47,14 @@ fn exec_node(node: &AstNodeType, scopes: &ScopesStack) {
                     // runtime declared functions
                 }
             }
+        }
+        AstNodeType::AssignamentStatement(node) => {
+            let value_as_runtype = match &node.init {
+                Expression::Bool(b) => RuntimeType::boolean(b.value),
+                Expression::Number(n) => RuntimeType::number(n.value),
+                Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
+            };
+            scopes.add_identifier(node.identifier.name.clone(), value_as_runtype.to_string());
         }
         _ => {}
     }
