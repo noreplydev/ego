@@ -1,9 +1,9 @@
-use crate::core::runtypes::RuntimeType;
+use crate::core::runtypes::{traits::print::Print, RuntimeType};
 
 pub fn print(args: Vec<RuntimeType>) {
     let mut raw_values: Vec<String> = vec![];
     for arg in args {
-        raw_values.push(arg.to_string());
+        raw_values.push(arg.print());
     }
 
     let string = raw_values.join(" ");

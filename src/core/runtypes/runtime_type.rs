@@ -1,6 +1,9 @@
 use std::fmt;
 
-use super::{boolean::RnBoolean, identifier::RnIdentifier, number::RnNumber, string::RnString};
+use super::{
+    boolean::RnBoolean, identifier::RnIdentifier, nothing::Nothing, number::RnNumber,
+    string::RnString, traits::print::Print,
+};
 
 #[derive(Debug, Clone)]
 pub enum RuntimeType {
@@ -55,14 +58,15 @@ impl fmt::Display for RuntimeType {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Nothing {}
-impl Nothing {
-    pub fn new() -> Nothing {
-        Nothing {}
-    }
-
-    pub fn to_string(&self) -> String {
-        String::from("Nothing")
+// custom traits defined for runtime types
+impl Print for RuntimeType {
+    fn print(&self) -> String {
+        match self {
+            RuntimeType::Nothing(t) => t.to_string(),
+            RuntimeType::RnString(t) => t.to_string(),
+            RuntimeType::RnNumber(t) => t.to_string(),
+            RuntimeType::RnIdentifier(t) => t.to_string(),
+            RuntimeType::RnBoolean(t) => t.to_string(),
+        }
     }
 }
