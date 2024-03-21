@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 
-use crate::core::error::{self, ErrorType};
+use crate::core::{
+    error::{self, ErrorType},
+    runtypes::RuntimeType,
+};
 
 #[derive(Debug, Clone)]
 pub struct ScopesStack {
@@ -14,13 +17,13 @@ impl ScopesStack {
         }
     }
 
-    pub fn add_identifier(&mut self, identifier: String, value: String) {
+    pub fn add_identifier(&mut self, identifier: String, value: RuntimeType) {
         if let Some(scope) = self.scopes.last_mut() {
             scope.add(identifier, value);
         }
     }
 
-    pub fn get_identifier_value(&self, identifier: &String) -> Option<&String> {
+    pub fn get_identifier_value(&self, identifier: &String) -> Option<&RuntimeType> {
         let mut counter = self.scopes.len() - 1;
 
         while counter >= 0 {
@@ -86,7 +89,7 @@ impl ScopesStack {
 
 #[derive(Debug, Clone)]
 pub struct Scope {
-    vars: HashMap<String, String>,
+    vars: HashMap<String, RuntimeType>,
 }
 
 impl Scope {
@@ -96,7 +99,7 @@ impl Scope {
         }
     }
 
-    fn add(&mut self, identifier: String, value: String) -> bool {
+    fn add(&mut self, identifier: String, value: RuntimeType) -> bool {
         if self.vars.contains_key(&identifier) {
             error::throw(
                 ErrorType::ReferenceError,
@@ -118,14 +121,14 @@ impl Scope {
         }
     }
 
-    fn set(&mut self, identifier: String, value: String) -> bool {
+    fn set(&mut self, identifier: String, value: RuntimeType) -> bool {
         match self.vars.insert(identifier, value) {
             Some(_) => true,
             None => false,
         }
     }
 
-    fn get(&self, identifier: &String) -> Option<&String> {
+    fn get(&self, identifier: &String) -> Option<&RuntimeType> {
         self.vars.get(identifier)
     }
 

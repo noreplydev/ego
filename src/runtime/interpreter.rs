@@ -54,7 +54,9 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 Expression::Number(n) => RuntimeType::number(n.value),
                 Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
             };
-            scopes.add_identifier(node.identifier.name.clone(), value_as_runtype.to_string());
+            scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+
+            println!("{:#?}", scopes)
         }
         _ => {}
     }
