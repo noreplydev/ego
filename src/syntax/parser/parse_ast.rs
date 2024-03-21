@@ -1,9 +1,16 @@
+use std::os::unix::process;
+
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
-        bool::Bool, call_expression::CallExpressionNode, identifier::IdentifierNode,
-        module::ModuleAst, number::Number, string_literal::StringLiteral, AstNodeType, Expression,
-        LexerToken, LexerTokenType,
+        assignament_statement::{self, AssignamentNode, VarType},
+        bool::Bool,
+        call_expression::CallExpressionNode,
+        identifier::IdentifierNode,
+        module::ModuleAst,
+        number::Number,
+        string_literal::StringLiteral,
+        AstNodeType, Expression, LexerToken, LexerTokenType,
     },
 };
 
@@ -33,15 +40,16 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
                 let (index_offset, function_node) = call_expression(&tokens, current);
                 module_ast.add_child(function_node);
                 current += index_offset;
-            } /*
+            }
+            LexerTokenType::LetKeyword => {
+                let (index_offset, assignment_node) = assignment_statement(&tokens, current);
+                module_ast.add_child(assignment_node);
+                current += index_offset;
+            }
+            /*
             LexerTokenType::IfKeyword => {
             let (index_offset, if_node) = if_statement(&tokens, current);
             root.add_child(if_node);
-            current += index_offset;
-            }
-            LexerTokenType::LetKeyword => {
-            let (index_offset, assignment_node) = assignment_statement(&tokens, current);
-            root.add_child(assignment_node);
             current += index_offset;
             }
             LexerTokenType::TrueKeyword => {
@@ -236,7 +244,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         )
     }
 
-    // get final ;
+    // check for final semicolon
     let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
         let call_expression_properties = (tokens[current].at, tokens[current].line);
         current += 1;
@@ -266,7 +274,122 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     )
 }
 
+// let a = 20
+fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
+    let mut current = current;
+    let mut offset = 0;
+
+    // get assignment type: mutable or constant
+    let var_type = if tokens[current].value == "let" {
+        VarType::Let
+    } else {
+        VarType::Const
+    };
+
+    current += 1;
+    offset += 1;
+
+    // get the identifier
+    let identifier_node = IdentifierNode::new(
+        tokens[current].value.clone(),
+        tokens[current].at,
+        tokens[current].line,
+    );
+    current += 1;
+    offset += 1;
+
+    // check next token is '='
+    if tokens[current].token_type != LexerTokenType::AssignmentOperator {
+        error::throw(
+            ErrorType::SyntaxError,
+            format!("Expected '=' but got '{}'", tokens[current].value).as_str(),
+            Some(tokens[current].line),
+        )
+    };
+    current += 1;
+    offset += 1;
+
+    // get variable value
+    let token = &tokens[current];
+    let value_node: Expression = match token.token_type {
+        LexerTokenType::StringLiteral => Expression::StringLiteral(StringLiteral::new(
+            token.value.clone(),
+            token.at,
+            token.line,
+        )),
+        LexerTokenType::Number => {
+            let num_value: Result<i64, _> = token.value.parse();
+            if let Ok(num_value) = num_value {
+                Expression::Number(Number::new(num_value, token.at, token.line))
+            } else {
+                error::throw(
+                    ErrorType::ParsingError,
+                    format!("Cannot parse '{}' as Number", token.value).as_str(),
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        }
+        LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
+            let bool_value: Result<bool, _> = token.value.parse();
+            if let Ok(bool_value) = bool_value {
+                Expression::Bool(Bool::new(bool_value, token.at, token.line))
+            } else {
+                error::throw(
+                    ErrorType::ParsingError,
+                    format!("Cannot parse '{}' as Boolean", token.value).as_str(),
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        }
+        _ => {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!(
+                    "Expected '<expression>' but got '{}'",
+                    tokens[current].value
+                )
+                .as_str(),
+                Some(tokens[current].line),
+            );
+            std::process::exit(1);
+        }
+    };
+
+    current += 1;
+    offset += 1;
+
+    // check for final semicolon
+    let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
+        let assignament_statement_properties = (tokens[current].at, tokens[current].line);
+        current += 1;
+        offset += 1;
+        assignament_statement_properties
+    } else {
+        error::throw(
+            ErrorType::SyntaxError,
+            format!(
+                "Expected ';' but got '{}' as end of statement",
+                tokens[current].value
+            )
+            .as_str(),
+            Some(tokens[current].line),
+        );
+        std::process::exit(1); // for type checking
+    };
+
+    (
+        offset,
+        AstNodeType::AssignamentStatement(AssignamentNode::new(
+            identifier_node,
+            value_node,
+            var_type,
+            at,
+            line,
+        )),
+    )
+}
 /*
-fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {}
 
 fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {} */
