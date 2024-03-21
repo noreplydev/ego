@@ -198,6 +198,16 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
                     offset += 1;
                 }
             }
+            LexerTokenType::Identifier => {
+                last_token = Some(LexerTokenType::Identifier);
+                arguments.push(Some(Expression::Identifier(IdentifierNode::new(
+                    token.value.clone(),
+                    token.at,
+                    token.line,
+                ))));
+                current += 1;
+                offset += 1;
+            }
             LexerTokenType::CloseParenthesis => {
                 if last_token == Some(LexerTokenType::Comma) {
                     arguments.push(None);

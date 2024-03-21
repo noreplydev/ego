@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::runtime::ScopesStack;
+
 use super::{
     boolean::RnBoolean, identifier::RnIdentifier, nothing::Nothing, number::RnNumber,
     string::RnString, traits::print::Print,
@@ -60,13 +62,13 @@ impl fmt::Display for RuntimeType {
 
 // custom traits defined for runtime types
 impl Print for RuntimeType {
-    fn print(&self) -> String {
+    fn print(&self, scopes: &ScopesStack) -> String {
         match self {
             RuntimeType::Nothing(t) => t.to_string(),
             RuntimeType::RnString(t) => t.to_string(),
             RuntimeType::RnNumber(t) => t.to_string(),
-            RuntimeType::RnIdentifier(t) => t.to_string(),
             RuntimeType::RnBoolean(t) => t.to_string(),
+            RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string(),
         }
     }
 }

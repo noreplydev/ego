@@ -9,7 +9,7 @@ use std::fmt;
 
 use self::{
     assignament_statement::AssignamentNode, bool::Bool, call_expression::CallExpressionNode,
-    number::Number, string_literal::StringLiteral,
+    identifier::IdentifierNode, number::Number, string_literal::StringLiteral,
 };
 
 /* AstNodeType */
@@ -39,6 +39,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::StringLiteral(_)) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Bool(_)) => write!(f, "Number"),
+            AstNodeType::Expression(Expression::Identifier(_)) => write!(f, "Identifier"),
         }
     }
 }
@@ -55,4 +56,5 @@ pub enum Expression {
     StringLiteral(StringLiteral),
     Number(Number),
     Bool(Bool),
+    Identifier(IdentifierNode),
 }

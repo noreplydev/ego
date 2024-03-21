@@ -29,6 +29,9 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                             }
                             Expression::Number(number) => RuntimeType::number(number.value),
                             Expression::Bool(bool) => RuntimeType::boolean(bool.value),
+                            Expression::Identifier(ident) => {
+                                RuntimeType::identifier(ident.name.to_string())
+                            }
                         }
                     } else {
                         RuntimeType::nothing()
@@ -37,7 +40,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 .collect();
 
             match node.identifier.name.as_str() {
-                "print" => print(runtime_arguments),
+                "print" => print(runtime_arguments, &scopes),
                 _ => {
                     // runtime declared functions
                 }
@@ -48,6 +51,8 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 Expression::Bool(b) => RuntimeType::boolean(b.value),
                 Expression::Number(n) => RuntimeType::number(n.value),
                 Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
+                // here will go identifier when assigning one variable to another
+                _ => RuntimeType::nothing(),
             };
             scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
 
