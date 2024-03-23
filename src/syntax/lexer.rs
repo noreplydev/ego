@@ -1,4 +1,4 @@
-use std::{char, fmt};
+use std::fmt;
 
 use crate::KEYWORDS;
 
@@ -6,6 +6,7 @@ use crate::KEYWORDS;
 pub enum LexerTokenType {
     FunctionCall,
     LetKeyword,
+    FnKeyword,
     IfKeyword,
     TrueKeyword,
     FalseKeyword,
@@ -21,8 +22,6 @@ pub enum LexerTokenType {
     CloseCurlyBrace,
     Comma,
     EndOfStatement,
-    Expression, // for parser expressions handling
-    Any,        // many or no apparences of any type of tokens
     Unknown,
 }
 
@@ -31,6 +30,7 @@ impl fmt::Display for LexerTokenType {
         match self {
             LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
+            LexerTokenType::FnKeyword => write!(f, "FnKeyword"),
             LexerTokenType::IfKeyword => write!(f, "IfKeyword"),
             LexerTokenType::TrueKeyword => write!(f, "TrueKeyword"),
             LexerTokenType::FalseKeyword => write!(f, "FalseKeyword"),
@@ -46,8 +46,6 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
-            LexerTokenType::Any => write!(f, "Many"),
-            LexerTokenType::Expression => write!(f, "Expression"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
         }
     }
@@ -237,6 +235,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line, at),
+        "fn" => LexerToken::new(LexerTokenType::FnKeyword, token, line, at),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token, line, at),
         "if" => LexerToken::new(LexerTokenType::IfKeyword, token, line, at),
         "true" => LexerToken::new(LexerTokenType::TrueKeyword, token, line, at),
