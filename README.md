@@ -14,6 +14,7 @@ ego is an interpreted, dynamically typed programming language written in rust.
 - [#] Runtime types
 - [#] Boolean types
 - [#] Function call
+- [#] Errors throws api
 - [_] Expression parsing and return value calculation
 - [_] Binary operators
 - [_] Function definition
