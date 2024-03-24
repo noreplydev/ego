@@ -18,7 +18,6 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::ReferenceError => error_string = "Reference error:",
         ErrorType::StackUnderflowError => error_string = "Stack underflow error:",
         ErrorType::ExpressionError => error_string = "Expression error:",
-        _ => {}
     }
 
     println!("[cei] {error_string} {error_message}");
