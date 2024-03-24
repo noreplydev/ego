@@ -112,7 +112,7 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
     let mut current = current;
     let mut offset = 0;
-    let block_node = Block::new();
+    let mut block_node = Block::new();
 
     // check '{'
     if tokens[current].token_type == LexerTokenType::OpenCurlyBrace {
@@ -145,6 +145,12 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
                 offset += 1;
                 closed = true;
                 break; // break block loop since it reaches the end
+            }
+            LexerTokenType::FunctionCall => {
+                let (index_offset, function_node) = call_expression(&tokens, current);
+                block_node.add_child(function_node);
+                current += index_offset;
+                offset += index_offset;
             }
             _ => {
                 error::throw(
