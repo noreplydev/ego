@@ -3,6 +3,7 @@ pub mod block;
 pub mod bool;
 pub mod call_expression;
 pub mod function_declaration;
+pub mod group;
 pub mod identifier;
 pub mod module;
 pub mod number;
@@ -11,7 +12,7 @@ use std::fmt;
 
 use self::{
     assignament_statement::AssignamentNode, block::Block, bool::Bool,
-    call_expression::CallExpressionNode, function_declaration::FunctionDeclaration,
+    call_expression::CallExpressionNode, function_declaration::FunctionDeclaration, group::Group,
     identifier::IdentifierNode, number::Number, string_literal::StringLiteral,
 };
 
@@ -21,13 +22,13 @@ use self::{
 pub enum AstNodeType {
     Root,
     Empty,
-    Group,
-    Block(Block),
-    FunctionDeclaration(FunctionDeclaration),
-    CallExpression(CallExpressionNode),
     IfStatement,
-    AssignamentStatement(AssignamentNode),
+    Group(Group),
+    Block(Block),
     Expression(Expression),
+    CallExpression(CallExpressionNode),
+    AssignamentStatement(AssignamentNode),
+    FunctionDeclaration(FunctionDeclaration),
 }
 
 impl fmt::Display for AstNodeType {
@@ -35,11 +36,11 @@ impl fmt::Display for AstNodeType {
         match self {
             AstNodeType::Root => write!(f, "Root"),
             AstNodeType::Empty => write!(f, "Empty"),
-            AstNodeType::Group => write!(f, "Group"),
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
-            AstNodeType::Block(_) => write!(f, "Block"),
-            AstNodeType::FunctionDeclaration(_) => write!(f, "FunctionDeclaration"),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
+            AstNodeType::Block(_) => write!(f, "Block"),
+            AstNodeType::Group(_) => write!(f, "Group"),
+            AstNodeType::FunctionDeclaration(_) => write!(f, "FunctionDeclaration"),
             AstNodeType::AssignamentStatement(_) => write!(f, "AssignamentStatement"),
             AstNodeType::Expression(Expression::StringLiteral(_)) => write!(f, "StringLiteral"),
             AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
