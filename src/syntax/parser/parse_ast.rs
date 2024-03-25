@@ -6,6 +6,7 @@ use crate::{
         bool::Bool,
         call_expression::CallExpressionNode,
         function_declaration::FunctionDeclaration,
+        group::Group,
         identifier::IdentifierNode,
         module::ModuleAst,
         number::Number,
@@ -49,6 +50,11 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
             LexerTokenType::FnKeyword => {
                 let (index_offset, assignment_node) = function_declaration(&tokens, current);
                 module_ast.add_child(assignment_node);
+                current += index_offset;
+            }
+            LexerTokenType::Identifier => {
+                let (index_offset, identifier_node) = identifier(&tokens, current);
+                module_ast.add_child(identifier_node);
                 current += index_offset;
             }
             /*
@@ -105,8 +111,6 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
 
     module_ast
 }
-
-//fn group(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {}
 
 // {}
 fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
@@ -176,6 +180,144 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
     }
 
     (offset, AstNodeType::Block(block_node))
+}
+
+// ()
+fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (usize, AstNodeType) {
+    let mut current = current;
+    let mut offset = 0;
+    let mut group_node = Group::new(tokens[current].at, tokens[current].line);
+
+    // check '('
+    if tokens[current].token_type == LexerTokenType::OpenParenthesis {
+        current += 1;
+        offset += 1;
+    } else {
+        let context_msg = if let Some(_context) = context {
+            format!(" in {}", _context)
+        } else {
+            "".to_string()
+        };
+        error::throw(
+            ErrorType::SyntaxError,
+            format!(
+                "Unexpected token '{}'{}",
+                tokens[current].value, context_msg
+            )
+            .as_str(),
+            Some(tokens[current].line),
+        )
+    }
+
+    // get arguments & check ')'
+    let mut last_token = None;
+    let mut closed = false;
+
+    while current < tokens.len() {
+        let token = &tokens[current];
+
+        // offset & current are incremented inside each type
+        // to avoid "tokens[overflowed_index]"" if loops ends
+        // before a '{'
+        match token.token_type {
+            LexerTokenType::Comma => {
+                if last_token == Some(LexerTokenType::Comma) {
+                    group_node.add_child(None);
+                }
+
+                last_token = Some(LexerTokenType::Comma);
+                current += 1;
+                offset += 1;
+            }
+            LexerTokenType::StringLiteral => {
+                last_token = Some(LexerTokenType::StringLiteral);
+                group_node.add_child(Some(Expression::StringLiteral(StringLiteral::new(
+                    token.value.clone(),
+                    token.at,
+                    token.line,
+                ))));
+                current += 1;
+                offset += 1;
+            }
+            LexerTokenType::Number => {
+                last_token = Some(LexerTokenType::Number);
+                let number: Result<i64, _> = token.value.parse();
+
+                if let Ok(number) = number {
+                    group_node.add_child(Some(Expression::Number(Number::new(
+                        number, token.at, token.line,
+                    ))));
+                    current += 1;
+                    offset += 1;
+                } else {
+                    error::throw(
+                        ErrorType::ParsingError,
+                        format!("Types inferece error for '{}'", token.value).as_str(),
+                        Some(token.line),
+                    )
+                }
+            }
+            LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
+                last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
+                let bool_value: Result<bool, _> = token.value.parse();
+                if let Ok(bool_value) = bool_value {
+                    group_node.add_child(Some(Expression::Bool(Bool::new(
+                        bool_value, token.at, token.line,
+                    ))));
+                    current += 1;
+                    offset += 1;
+                }
+            }
+            LexerTokenType::Identifier => {
+                last_token = Some(LexerTokenType::Identifier);
+                group_node.add_child(Some(Expression::Identifier(IdentifierNode::new(
+                    token.value.clone(),
+                    token.at,
+                    token.line,
+                ))));
+                current += 1;
+                offset += 1;
+            }
+            LexerTokenType::CloseParenthesis => {
+                if last_token == Some(LexerTokenType::Comma) {
+                    group_node.add_child(None);
+                }
+
+                current += 1;
+                offset += 1;
+                closed = true;
+                break;
+            }
+            _ => {
+                let context_msg = if let Some(context) = context {
+                    format!(" as argument for {}", context)
+                } else {
+                    "".to_string()
+                };
+                error::throw(
+                    ErrorType::SyntaxError,
+                    format!("Unexpected token '{}'{}", token.value, context_msg).as_str(),
+                    Some(token.line),
+                );
+            }
+        }
+    }
+
+    // non closed CallExpression
+    if !closed {
+        let context_msg = if let Some(context) = context {
+            format!(" after {}", context)
+        } else {
+            "".to_string()
+        };
+        error::throw(
+            ErrorType::SyntaxError,
+            format!("Expected ')' {}", context_msg).as_str(),
+            Some(tokens[current - 1].line),
+        )
+    };
+
+    (offset, AstNodeType::Group(group_node))
 }
 
 // print(a, b, c)
@@ -644,6 +786,70 @@ fn function_declaration(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     )
 }
 
-/*
+// a | a() | a.value | a = 20 + a
+fn identifier(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
+    let mut current = current;
+    let mut offset = 0;
 
-fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {} */
+    // get the identifier
+    let identifier_node = IdentifierNode::new(
+        tokens[current].value.clone(),
+        tokens[current].at,
+        tokens[current].line,
+    );
+    current += 1;
+    offset += 1;
+
+    // check next token of the identifier
+    let (node_offset, node) = match tokens[current].token_type {
+        LexerTokenType::OpenParenthesis => {
+            // a()
+            let (group_offset, group_node) = group(
+                tokens,
+                current,
+                Some(format!("{}()", identifier_node.name).as_str()),
+            );
+
+            let group_node = if let AstNodeType::Group(group_node) = group_node {
+                group_node
+            } else {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Unexpected node type in identifier, expected Group type node",
+                    Some(tokens[current].line),
+                );
+                std::process::exit(1);
+            };
+
+            let call_expression_node =
+                CallExpressionNode::new(identifier_node, vec![], group_node.at, group_node.line);
+            (
+                group_offset,
+                AstNodeType::CallExpression(call_expression_node),
+            )
+        }
+        // [Property acess] should handle <a.value> here
+        //LexerTokenType::Dot => {}
+        // [Variable mutation] should handle <a = ...> here
+        //LexerTokenType::AssignamentOperator => {}
+        _ => {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!(
+                    "Unexpected token '{}' after '{}' identifier",
+                    tokens[current].value, identifier_node.name
+                )
+                .as_str(),
+                Some(tokens[current].line),
+            );
+            std::process::exit(1);
+        }
+    };
+
+    current += offset;
+    offset += node_offset;
+
+    (offset, node)
+}
+
+//fn if_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNode) {}

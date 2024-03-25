@@ -1,16 +1,22 @@
-use super::AstNodeType;
+use super::Expression;
 
 /* AST TREE */
 #[derive(Debug, Clone)]
 pub struct Group {
-    pub children: Vec<AstNodeType>,
+    pub children: Vec<Option<Expression>>,
+    pub at: usize,
+    pub line: usize,
 }
 
 impl Group {
-    pub fn new() -> Group {
-        Group { children: vec![] }
+    pub fn new(at: usize, line: usize) -> Group {
+        Group {
+            children: vec![],
+            at,
+            line,
+        }
     }
-    pub fn add_child(&mut self, node: AstNodeType) {
+    pub fn add_child(&mut self, node: Option<Expression>) {
         self.children.push(node);
     }
 }
