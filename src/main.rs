@@ -19,12 +19,12 @@ fn main() {
     let filename = if args.len() > 1 {
         &args[1]
     } else {
-        error::throw(ErrorType::CeiUsageError, "an ego file is required", None);
+        error::throw(ErrorType::EgoUsageError, "an ego file is required", None);
         std::process::exit(1); // to avoid types error
     };
 
     if !filename.ends_with(".ego") {
-        error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file", None);
+        error::throw(ErrorType::EgoUsageError, "This is not .e (ego) file", None);
     }
 
     let module_name = filename.split(".").collect::<Vec<&str>>()[0];

@@ -1,6 +1,6 @@
 pub enum ErrorType {
     SyntaxError,
-    CeiUsageError,
+    EgoUsageError,
     FatalError,
     ParsingError,
     ReferenceError,
@@ -12,7 +12,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
     let mut error_string = "";
     match error_type {
         ErrorType::SyntaxError => error_string = "Syntax error:",
-        ErrorType::CeiUsageError => error_string = "Usage error:",
+        ErrorType::EgoUsageError => error_string = "Usage error:",
         ErrorType::FatalError => error_string = "Fatal error:",
         ErrorType::ParsingError => error_string = "Parsing error:",
         ErrorType::ReferenceError => error_string = "Reference error:",
@@ -20,7 +20,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::ExpressionError => error_string = "Expression error:",
     }
 
-    println!("[cei] {error_string} {error_message}");
+    println!("[ego] {error_string} {error_message}");
     if let Some(line) = line {
         println!("      └ on line: {line}");
     }

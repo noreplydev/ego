@@ -67,7 +67,7 @@ impl ScopesStack {
         let current_scope = match self.scopes.last() {
             Some(last) => last,
             None => {
-                println!("[cei] ScopesStack it's empty");
+                println!("[ego] ScopesStack it's empty");
                 std::process::exit(1);
             }
         };
@@ -80,7 +80,7 @@ impl ScopesStack {
         }
 
         status
-        /* println!("[cei] '{identifier}' is not declared");
+        /* println!("[ego] '{identifier}' is not declared");
         process::exit(1); */
     } */
     /*
