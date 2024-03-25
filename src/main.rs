@@ -23,7 +23,7 @@ fn main() {
         std::process::exit(1); // to avoid types error
     };
 
-    if !filename.ends_with(".e") {
+    if !filename.ends_with(".ego") {
         error::throw(ErrorType::CeiUsageError, "This is not .e (ego) file", None);
     }
 
