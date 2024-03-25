@@ -1,10 +1,10 @@
-use super::{identifier::IdentifierNode, Expression};
+use super::{group::Group, identifier::IdentifierNode};
 
 #[derive(Debug, Clone)]
 pub struct CallExpressionNode {
     //pub type: String,
     pub identifier: IdentifierNode,
-    pub arguments: Vec<Option<Expression>>,
+    pub arguments: Group,
     pub at: usize,
     pub line: usize,
 }
@@ -12,7 +12,7 @@ pub struct CallExpressionNode {
 impl CallExpressionNode {
     pub fn new(
         identifier: IdentifierNode,
-        arguments: Vec<Option<Expression>>,
+        arguments: Group,
         at: usize,
         line: usize,
     ) -> CallExpressionNode {

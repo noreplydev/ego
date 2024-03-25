@@ -20,6 +20,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
         AstNodeType::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
                 .arguments
+                .children
                 .iter()
                 .map(|arg| -> RuntimeType {
                     if let Some(arg) = arg {
