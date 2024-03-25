@@ -56,8 +56,6 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 _ => RuntimeType::nothing(),
             };
             scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
-
-            println!("{:#?}", scopes)
         }
         _ => {}
     }
