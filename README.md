@@ -13,13 +13,18 @@ After that, you will only need to create a .ego file like this:
 
 ```ego
 // ./hello_world.ego
-
-print("Hello world"); 
+let hi = "Hello world"; 
+print(hi); 
 ```
 
 And that's it, you can run ego with a simple
 ```ego
 $ ego hello_world.ego
+```
+
+As ego is in an experimental phase you can always debug the lexer tokens and the parser generated AST using the `-d` flag, like so: 
+```ego
+$ ego hello_world.ego -d
 ```
 
 ## Features
