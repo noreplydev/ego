@@ -1,3 +1,5 @@
+use core::num;
+
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
@@ -7,13 +9,15 @@ use crate::{
         call_expression::CallExpressionNode,
         function_declaration::FunctionDeclaration,
         group::Group,
-        identifier::IdentifierNode,
+        identifier::Identifier,
         module::ModuleAst,
         number::Number,
         string_literal::StringLiteral,
         AstNodeType, Expression, LexerToken, LexerTokenType,
     },
 };
+
+use super::expressions::parse_expression;
 
 pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
     let module = ModuleAst::new(module_name);
@@ -55,6 +59,11 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
             LexerTokenType::Identifier => {
                 let (index_offset, identifier_node) = identifier(&tokens, current);
                 module_ast.add_child(identifier_node);
+                current += index_offset;
+            }
+            LexerTokenType::Number => {
+                let (index_offset, number_node) = parse_expression(&tokens, current);
+                module_ast.add_child(number_node);
                 current += index_offset;
             }
             /*
@@ -270,7 +279,7 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
             }
             LexerTokenType::Identifier => {
                 last_token = Some(LexerTokenType::Identifier);
-                group_node.add_child(Some(Expression::Identifier(IdentifierNode::new(
+                group_node.add_child(Some(Expression::Identifier(Identifier::new(
                     token.value.clone(),
                     token.at,
                     token.line,
@@ -326,7 +335,7 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     let mut offset = 0;
 
     // get the identifier
-    let identifier_node = IdentifierNode::new(
+    let identifier_node = Identifier::new(
         tokens[current].value.clone(),
         tokens[current].at,
         tokens[current].line,
@@ -413,7 +422,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     offset += 1;
 
     // get the identifier
-    let identifier_node = IdentifierNode::new(
+    let identifier_node = Identifier::new(
         tokens[current].value.clone(),
         tokens[current].at,
         tokens[current].line,
@@ -520,7 +529,7 @@ fn function_declaration(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     let mut offset = 0;
 
     // get the identifier
-    let identifier_node = IdentifierNode::new(
+    let identifier_node = Identifier::new(
         tokens[current].value.clone(),
         tokens[current].at,
         tokens[current].line,
@@ -606,7 +615,7 @@ fn function_declaration(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             }
             LexerTokenType::Identifier => {
                 last_token = Some(LexerTokenType::Identifier);
-                arguments.push(Some(Expression::Identifier(IdentifierNode::new(
+                arguments.push(Some(Expression::Identifier(Identifier::new(
                     token.value.clone(),
                     token.at,
                     token.line,
@@ -693,7 +702,7 @@ fn identifier(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) 
     let mut offset = 0;
 
     // get the identifier
-    let identifier_node = IdentifierNode::new(
+    let identifier_node = Identifier::new(
         tokens[current].value.clone(),
         tokens[current].at,
         tokens[current].line,

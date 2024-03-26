@@ -1,9 +1,9 @@
-use super::{identifier::IdentifierNode, Expression};
+use super::{identifier::Identifier, Expression};
 
 #[derive(Debug, Clone)]
 pub struct AssignamentNode {
     //pub type: String,
-    pub identifier: IdentifierNode,
+    pub identifier: Identifier,
     pub init: Expression,
     pub var_type: VarType,
     pub at: usize,
@@ -12,7 +12,7 @@ pub struct AssignamentNode {
 
 impl AssignamentNode {
     pub fn new(
-        identifier: IdentifierNode,
+        identifier: Identifier,
         init: Expression,
         var_type: VarType,
         at: usize,

@@ -1,4 +1,5 @@
 pub mod assignament_statement;
+pub mod binary_expression;
 pub mod block;
 pub mod bool;
 pub mod call_expression;
@@ -11,9 +12,9 @@ pub mod string_literal;
 use std::fmt;
 
 use self::{
-    assignament_statement::AssignamentNode, block::Block, bool::Bool,
-    call_expression::CallExpressionNode, function_declaration::FunctionDeclaration, group::Group,
-    identifier::IdentifierNode, number::Number, string_literal::StringLiteral,
+    assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
+    bool::Bool, call_expression::CallExpressionNode, function_declaration::FunctionDeclaration,
+    group::Group, identifier::Identifier, number::Number, string_literal::StringLiteral,
 };
 
 /* AstNodeType */
@@ -46,6 +47,9 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Bool(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier(_)) => write!(f, "Identifier"),
+            AstNodeType::Expression(Expression::BinaryExpression(_)) => {
+                write!(f, "BinaryExpression")
+            }
         }
     }
 }
@@ -62,5 +66,6 @@ pub enum Expression {
     StringLiteral(StringLiteral),
     Number(Number),
     Bool(Bool),
-    Identifier(IdentifierNode),
+    Identifier(Identifier),
+    BinaryExpression(BinaryExpression),
 }

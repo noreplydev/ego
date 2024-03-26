@@ -1,9 +1,9 @@
-use super::{block::Block, identifier::IdentifierNode, Expression};
+use super::{block::Block, identifier::Identifier, Expression};
 
 #[derive(Debug, Clone)]
 pub struct FunctionDeclaration {
     //pub type: String,
-    pub identifier: IdentifierNode,
+    pub identifier: Identifier,
     pub parameters: Vec<Option<Expression>>,
     pub body: Block,
     pub at: usize,
@@ -12,7 +12,7 @@ pub struct FunctionDeclaration {
 
 impl FunctionDeclaration {
     pub fn new(
-        identifier: IdentifierNode,
+        identifier: Identifier,
         parameters: Vec<Option<Expression>>,
         body: Block,
         at: usize,

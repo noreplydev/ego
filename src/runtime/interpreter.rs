@@ -33,6 +33,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                             Expression::Identifier(ident) => {
                                 RuntimeType::identifier(ident.name.to_string())
                             }
+                            Expression::BinaryExpression(bin_exp) => RuntimeType::nothing(),
                         }
                     } else {
                         RuntimeType::nothing()

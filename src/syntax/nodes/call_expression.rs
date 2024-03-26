@@ -1,9 +1,9 @@
-use super::{group::Group, identifier::IdentifierNode};
+use super::{group::Group, identifier::Identifier};
 
 #[derive(Debug, Clone)]
 pub struct CallExpressionNode {
     //pub type: String,
-    pub identifier: IdentifierNode,
+    pub identifier: Identifier,
     pub arguments: Group,
     pub at: usize,
     pub line: usize,
@@ -11,7 +11,7 @@ pub struct CallExpressionNode {
 
 impl CallExpressionNode {
     pub fn new(
-        identifier: IdentifierNode,
+        identifier: Identifier,
         arguments: Group,
         at: usize,
         line: usize,
