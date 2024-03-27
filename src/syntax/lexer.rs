@@ -14,6 +14,8 @@ pub enum LexerTokenType {
     AssignmentOperator,
     AddOperator,
     SubtractOperator,
+    MultiplyOperator,
+    DivideOperator,
     StringLiteral,
     Number,
     OpenParenthesis,
@@ -38,6 +40,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::AddOperator => write!(f, "AddOperator"),
             LexerTokenType::SubtractOperator => write!(f, "SubtractOperator"),
+            LexerTokenType::MultiplyOperator => write!(f, "MultiplyOperator"),
+            LexerTokenType::DivideOperator => write!(f, "DivideOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
@@ -92,7 +96,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     let mut current_token = String::new();
     let mut is_string = false; // inside a string flag
-    let mut is_comment = 0; // inside a comment
+    let mut is_comment = false; // inside a comment
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     let mut char_counter = 1; // all module chars number
@@ -101,9 +105,9 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
     while let Some(c) = chars.next() {
         // inside comment
-        if is_comment > 1 {
+        if is_comment {
             if c == '\n' {
-                is_comment = 0;
+                is_comment = false;
                 line_counter += 1;
                 line_char_counter = 0;
             }
@@ -125,9 +129,36 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
                     is_string = !is_string;
                 }
-                // comments
+                // comments & divide operator
                 '/' => {
-                    is_comment += 1;
+                    if let Some(next) = chars.peek() {
+                        if c == '/' && next == &'/' {
+                            is_comment = true;
+                        } else {
+                            if is_string {
+                                current_token.push(c);
+                            } else {
+                                tokens.push(token_with_type(
+                                    c.to_string(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token = String::new();
+                            }
+                        }
+                    }
+                }
+                '=' | '+' | '-' | '*' => {
+                    if is_string {
+                        current_token.push(c);
+                    } else {
+                        tokens.push(token_with_type(
+                            c.to_string(),
+                            line_counter,
+                            line_char_counter,
+                        ));
+                        current_token = String::new();
+                    }
                 }
                 // special characters
                 '(' | ')' | '{' | '}' | ',' | ';' => {
@@ -148,18 +179,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                             line_char_counter,
                         ));
                         // push current
-                    }
-                }
-                '=' | '+' => {
-                    if is_string {
-                        current_token.push(c);
-                    } else {
-                        tokens.push(token_with_type(
-                            c.to_string(),
-                            line_counter,
-                            line_char_counter,
-                        ));
-                        current_token = String::new();
                     }
                 }
                 // whitespace types
@@ -249,6 +268,8 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token, line, at),
         "+" => LexerToken::new(LexerTokenType::AddOperator, token, line, at),
         "-" => LexerToken::new(LexerTokenType::SubtractOperator, token, line, at),
+        "*" => LexerToken::new(LexerTokenType::MultiplyOperator, token, line, at),
+        "/" => LexerToken::new(LexerTokenType::DivideOperator, token, line, at),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token, line, at)
         }
