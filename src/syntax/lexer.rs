@@ -7,6 +7,7 @@ pub enum LexerTokenType {
     FunctionCall,
     LetKeyword,
     FnKeyword,
+    WhileKeyword,
     IfKeyword,
     TrueKeyword,
     FalseKeyword,
@@ -33,6 +34,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
             LexerTokenType::FnKeyword => write!(f, "FnKeyword"),
+            LexerTokenType::WhileKeyword => write!(f, "WhileKeyword"),
             LexerTokenType::IfKeyword => write!(f, "IfKeyword"),
             LexerTokenType::TrueKeyword => write!(f, "TrueKeyword"),
             LexerTokenType::FalseKeyword => write!(f, "FalseKeyword"),
@@ -255,6 +257,7 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line, at),
         "fn" => LexerToken::new(LexerTokenType::FnKeyword, token, line, at),
+        "while" => LexerToken::new(LexerTokenType::WhileKeyword, token, line, at),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token, line, at),
         "if" => LexerToken::new(LexerTokenType::IfKeyword, token, line, at),
         "true" => LexerToken::new(LexerTokenType::TrueKeyword, token, line, at),
