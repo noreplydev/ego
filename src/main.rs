@@ -11,7 +11,9 @@ use std::fs;
 use syntax::lex;
 use syntax::parse;
 
-pub const KEYWORDS: [&str; 7] = ["fn", "let", "if", "while", "true", "false", "print"];
+pub const KEYWORDS: [&str; 8] = [
+    "fn", "let", "if", "while", "true", "false", "print", "import",
+];
 
 fn main() {
     let args: Vec<String> = env::args().collect();

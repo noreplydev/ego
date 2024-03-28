@@ -6,6 +6,7 @@ use crate::KEYWORDS;
 pub enum LexerTokenType {
     FunctionCall,
     LetKeyword,
+    ImportKeyword,
     FnKeyword,
     WhileKeyword,
     IfKeyword,
@@ -36,6 +37,7 @@ impl fmt::Display for LexerTokenType {
         match self {
             LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
+            LexerTokenType::ImportKeyword => write!(f, "ImportKeyword"),
             LexerTokenType::FnKeyword => write!(f, "FnKeyword"),
             LexerTokenType::WhileKeyword => write!(f, "WhileKeyword"),
             LexerTokenType::IfKeyword => write!(f, "IfKeyword"),
@@ -146,6 +148,14 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                             if is_string {
                                 current_token.push(c);
                             } else {
+                                if current_token.len() > 0 {
+                                    tokens.push(token_with_type(
+                                        current_token,
+                                        line_counter,
+                                        line_char_counter - 1,
+                                    )); // push previous token, - 1 since is the previous
+                                    current_token = String::new();
+                                }
                                 tokens.push(token_with_type(
                                     c.to_string(),
                                     line_counter,
@@ -160,6 +170,14 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     if is_string {
                         current_token.push(c);
                     } else {
+                        if current_token.len() > 0 {
+                            tokens.push(token_with_type(
+                                current_token,
+                                line_counter,
+                                line_char_counter - 1,
+                            )); // push previous token, - 1 since is the previous
+                            current_token = String::new();
+                        }
                         tokens.push(token_with_type(
                             c.to_string(),
                             line_counter,
@@ -262,6 +280,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
     match token.as_str() {
         "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line, at),
+        "import" => LexerToken::new(LexerTokenType::ImportKeyword, token, line, at),
         "fn" => LexerToken::new(LexerTokenType::FnKeyword, token, line, at),
         "while" => LexerToken::new(LexerTokenType::WhileKeyword, token, line, at),
         "let" => LexerToken::new(LexerTokenType::LetKeyword, token, line, at),
