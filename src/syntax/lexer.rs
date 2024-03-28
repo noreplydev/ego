@@ -23,7 +23,10 @@ pub enum LexerTokenType {
     CloseParenthesis,
     OpenCurlyBrace,
     CloseCurlyBrace,
+    OpenSquareBracket,
+    CloseSquareBracket,
     Comma,
+    Dot,
     EndOfStatement,
     Unknown,
 }
@@ -50,6 +53,9 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::CloseParenthesis => write!(f, "CloseParenthesis"),
             LexerTokenType::OpenCurlyBrace => write!(f, "OpenCurlyBrace"),
             LexerTokenType::CloseCurlyBrace => write!(f, "CloseCurlyBrace"),
+            LexerTokenType::OpenSquareBracket => write!(f, "OpenSquareBracket"),
+            LexerTokenType::CloseSquareBracket => write!(f, "CloseSquareBracket"),
+            LexerTokenType::Dot => write!(f, "Dot"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
@@ -163,7 +169,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     }
                 }
                 // special characters
-                '(' | ')' | '{' | '}' | ',' | ';' => {
+                '(' | ')' | '{' | '}' | '[' | ']' | '.' | ',' | ';' => {
                     if is_string {
                         current_token.push(c);
                     } else {
@@ -266,6 +272,9 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token, line, at),
         "{" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token, line, at),
         "}" => LexerToken::new(LexerTokenType::CloseCurlyBrace, token, line, at),
+        "[" => LexerToken::new(LexerTokenType::OpenSquareBracket, token, line, at),
+        "]" => LexerToken::new(LexerTokenType::CloseSquareBracket, token, line, at),
+        "." => LexerToken::new(LexerTokenType::Dot, token, line, at),
         "," => LexerToken::new(LexerTokenType::Comma, token, line, at),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token, line, at),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token, line, at),
