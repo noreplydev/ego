@@ -1,8 +1,8 @@
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
-        binary_expression::BinaryExpression, bool::Bool, number::Number, AstNodeType, Expression,
-        LexerToken, LexerTokenType,
+        binary_expression::BinaryExpression, bool::Bool, number::Number,
+        string_literal::StringLiteral, AstNodeType, Expression, LexerToken, LexerTokenType,
     },
 };
 
@@ -173,6 +173,14 @@ fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression)
 
             (1, Expression::Bool(node))
         }
+        LexerTokenType::StringLiteral => (
+            1,
+            Expression::StringLiteral(StringLiteral::new(
+                tokens[current].value.clone(),
+                tokens[current].at,
+                tokens[current].line,
+            )),
+        ),
         _ => {
             error::throw(
                 error::ErrorType::SyntaxError,
