@@ -6,12 +6,18 @@ use crate::{
     },
 };
 
+pub fn expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
+    let (offset, expr) = parse_expression(tokens, current);
+    (offset, AstNodeType::Expression(expr))
+}
+
 // 2 + 3 * 23
-pub fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
+fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
     // will autoincrement current
     // and it will be the root or the left node
     // depending on the expression
-    let (offset, mut node) = parse_term(tokens, current);
+    let (node_offset, mut node) = parse_term(tokens, current);
+    let mut offset = 0 + node_offset;
     let mut current = current + offset;
 
     while current < tokens.len() {
@@ -32,10 +38,12 @@ pub fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
                     std::process::exit(1);
                 };
                 current += 1;
+                offset += 1;
 
                 // get right node
-                let (offset, right) = parse_term(tokens, current);
-                current += offset;
+                let (right_offset, right) = parse_term(tokens, current);
+                current += right_offset;
+                offset += right_offset;
 
                 node = Expression::BinaryExpression(BinaryExpression::new(
                     operator,
@@ -45,34 +53,24 @@ pub fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
                     curr_token.line,
                 ));
             }
-            _ => {
-                error::throw(
-                    error::ErrorType::SyntaxError,
-                    format!(
-                        "Invalid token '{}' inside of a expression",
-                        tokens[current].value
-                    )
-                    .as_str(),
-                    Some(tokens[current].line),
-                );
-                std::process::exit(1);
-            }
+            _ => break,
         }
     }
 
-    (current, AstNodeType::Expression(node))
+    (offset, node)
 }
 
 fn parse_term(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
     // will autoincrement current
     // and it will be the root or the left node
     // depending on the expression
-    let (offset, mut node) = parse_factor(tokens, current);
+    let (node_offset, mut node) = parse_factor(tokens, current);
+    let mut offset = 0 + node_offset;
     let mut current = current + offset;
 
     while current < tokens.len() {
         match tokens[current].token_type {
-            LexerTokenType::AddOperator | LexerTokenType::SubtractOperator => {
+            LexerTokenType::MultiplyOperator | LexerTokenType::DivideOperator => {
                 let curr_token = &tokens[current];
 
                 // consume the operator
@@ -88,10 +86,12 @@ fn parse_term(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
                     std::process::exit(1);
                 };
                 current += 1;
+                offset += 1;
 
                 // get right node
-                let (offset, right) = parse_factor(tokens, current);
-                current += offset;
+                let (right_offset, right) = parse_factor(tokens, current);
+                current += right_offset;
+                offset += right_offset;
 
                 node = Expression::BinaryExpression(BinaryExpression::new(
                     operator,
@@ -101,26 +101,37 @@ fn parse_term(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
                     curr_token.line,
                 ));
             }
-            _ => {
+            _ => break,
+        }
+    }
+
+    (offset, node)
+}
+
+fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
+    match tokens[current].token_type {
+        LexerTokenType::OpenParenthesis => {
+            let mut offset = 1; // to consume open parenthesis
+            let mut current = current + offset;
+            println!("normal current: {}", current);
+
+            let (expr_offset, expr) = parse_expression(tokens, current);
+            current += expr_offset;
+            offset += expr_offset;
+
+            println!("{}-{}-{}", expr_offset, current, tokens.len());
+            if tokens[current].token_type == LexerTokenType::CloseParenthesis {
+                offset += 1; // to consume close parenthesis
+                (offset, expr)
+            } else {
                 error::throw(
-                    error::ErrorType::SyntaxError,
-                    format!(
-                        "Invalid token '{}' inside of a expression",
-                        tokens[current].value
-                    )
-                    .as_str(),
+                    ErrorType::ParsingError,
+                    format!("Unexpected token '{}', expected ')'", tokens[current].value).as_str(),
                     Some(tokens[current].line),
                 );
                 std::process::exit(1);
             }
         }
-    }
-
-    (current, node)
-}
-
-fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
-    match tokens[current].token_type {
         LexerTokenType::Number => {
             let number_node = Number::from_string(
                 tokens[current].value.clone(),

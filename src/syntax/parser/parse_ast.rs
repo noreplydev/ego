@@ -17,7 +17,7 @@ use crate::{
     },
 };
 
-use super::expressions::parse_expression;
+use super::expressions::expression;
 
 pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
     let module = ModuleAst::new(module_name);
@@ -62,7 +62,7 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
                 current += index_offset;
             }
             LexerTokenType::Number => {
-                let (index_offset, number_node) = parse_expression(&tokens, current);
+                let (index_offset, number_node) = expression(&tokens, current);
                 module_ast.add_child(number_node);
                 current += index_offset;
             }
