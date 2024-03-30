@@ -15,7 +15,7 @@ use crate::{
     },
 };
 
-use super::expressions::expression;
+use super::expressions::{expression, parse_expression};
 
 pub fn parse(tokens: Vec<LexerToken>, module_name: &str) -> ModuleAst {
     let module = ModuleAst::new(module_name);
@@ -440,7 +440,8 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     offset += 1;
 
     // get variable value
-    let token = &tokens[current];
+    let (expr_offset, expr) = parse_expression(tokens, current);
+    /* let token = &tokens[current];
     let node_init: Expression = match token.token_type {
         LexerTokenType::StringLiteral => Expression::StringLiteral(StringLiteral::new(
             token.value.clone(),
@@ -485,10 +486,10 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
             );
             std::process::exit(1);
         }
-    };
+    }; */
 
-    current += 1;
-    offset += 1;
+    current += expr_offset;
+    offset += expr_offset;
 
     // check for final semicolon
     let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
@@ -513,7 +514,7 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
         offset,
         AstNodeType::AssignamentStatement(AssignamentNode::new(
             identifier_node,
-            node_init,
+            expr,
             var_type,
             at,
             line,

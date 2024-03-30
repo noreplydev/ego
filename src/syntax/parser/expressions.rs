@@ -12,7 +12,7 @@ pub fn expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeTy
 }
 
 // 2 + 3 * 23
-fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
+pub fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
     // will autoincrement current
     // and it will be the root or the left node
     // depending on the expression
