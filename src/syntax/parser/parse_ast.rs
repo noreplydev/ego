@@ -1,5 +1,3 @@
-use core::num;
-
 use crate::{
     core::error::{self, ErrorType},
     syntax::{

@@ -1,8 +1,8 @@
 use crate::{
     core::error::{self, ErrorType},
     syntax::{
-        binary_expression::BinaryExpression, number::Number, AstNodeType, Expression, LexerToken,
-        LexerTokenType,
+        binary_expression::BinaryExpression, bool::Bool, number::Number, AstNodeType, Expression,
+        LexerToken, LexerTokenType,
     },
 };
 
@@ -154,6 +154,24 @@ fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression)
                 );
                 std::process::exit(1);
             }
+        }
+        LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
+            let node = if let Ok(bool_value) = tokens[current].value.parse::<bool>() {
+                Bool::new(bool_value, tokens[current].at, tokens[current].line)
+            } else {
+                error::throw(
+                    ErrorType::ParsingError,
+                    format!(
+                        "Invalid token '{}' inside of a expression",
+                        tokens[current].value
+                    )
+                    .as_str(),
+                    Some(tokens[current].line),
+                );
+                std::process::exit(1);
+            };
+
+            (1, Expression::Bool(node))
         }
         _ => {
             error::throw(
