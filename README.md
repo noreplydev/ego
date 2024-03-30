@@ -7,7 +7,7 @@
 </p>
 
 # Hello world
-ego is an interpreted, dynamically typed programming language. To start writting ego the interpreter must be compilled locally using cargo. So you would need to clone the repo and create a build for your targeted OS. 
+ego is an interpreted and dynamically typed programming language. To start writting ego the interpreter must be compilled locally using cargo. So you would need to clone the repo and create a build for your targeted OS. 
 
 After that, you will only need to create a .ego file like this: 
 
@@ -26,19 +26,3 @@ As ego is in an experimental phase you can always debug the lexer tokens and the
 ```ego
 $ ego hello_world.ego -d
 ```
-
-## Features
-
-- [#] Indentifiers scope and storage
-- [#] Runtime types
-- [#] Boolean types
-- [#] Function call
-- [#] Errors throws api
-- [#] Function definition
-- [#] Custom functions call
-- [_] Conditional structures
-- [_] Iteration structures
-- [_] Expression parsing and return value calculation
-- [_] Binary operators
-- [_] Error handling on ego core library 
-- ... more will be unlocked once I now which ones are. Like, I don't know what I don't know.
