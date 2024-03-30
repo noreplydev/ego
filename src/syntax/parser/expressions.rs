@@ -113,13 +113,11 @@ fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression)
         LexerTokenType::OpenParenthesis => {
             let mut offset = 1; // to consume open parenthesis
             let mut current = current + offset;
-            println!("normal current: {}", current);
 
             let (expr_offset, expr) = parse_expression(tokens, current);
             current += expr_offset;
             offset += expr_offset;
 
-            println!("{}-{}-{}", expr_offset, current, tokens.len());
             if tokens[current].token_type == LexerTokenType::CloseParenthesis {
                 offset += 1; // to consume close parenthesis
                 (offset, expr)
