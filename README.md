@@ -12,17 +12,41 @@ ego is an interpreted and dynamically typed programming language. To start writt
 After that, you will only need to create a .ego file like this: 
 
 ```ego
-// ./hello_world.ego
-let hi = "Hello world"; 
+// hello_world.ego
+
+let hi = "Hello, world!"; 
 print(hi); 
 ```
 
 And that's it, you can run ego with a simple
 ```ego
-$ ego hello_world.ego
+$ ego hello_world.ego 
+```
+
+You will see something like this in your terminal
+```
+Hello, world!
 ```
 
 As ego is in an experimental phase you can always debug the lexer tokens and the parser generated AST using the `-d` flag, like so: 
 ```ego
 $ ego hello_world.ego -d
+```
+
+## Expressions
+Has just been implemented ego expressions interpretation so now you can make 
+
+```ego
+// test.ego
+
+let string = "Number: "; 
+let sum = (2 + 2) * 2; 
+let result = string + sum + "."; 
+
+print(result); 
+```
+
+After running with ego cli, you will see something like this in your terminal
+```
+Number: 8.
 ```
