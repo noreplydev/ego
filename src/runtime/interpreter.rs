@@ -28,17 +28,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 .iter()
                 .map(|arg| -> RuntimeType {
                     if let Some(arg) = arg {
-                        match arg {
-                            Expression::StringLiteral(string) => {
-                                RuntimeType::string(string.value.clone())
-                            }
-                            Expression::Number(number) => RuntimeType::number(number.value),
-                            Expression::Bool(bool) => RuntimeType::boolean(bool.value),
-                            Expression::Identifier(ident) => {
-                                RuntimeType::identifier(ident.name.to_string())
-                            }
-                            Expression::BinaryExpression(bin_exp) => RuntimeType::nothing(),
-                        }
+                        calc_expression(&arg, scopes)
                     } else {
                         RuntimeType::nothing()
                     }
@@ -78,8 +68,14 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                 }
             }
         }
-        // todo <identifier>: when assigning one variable to another
-        _ => RuntimeType::nothing(),
+        Expression::Identifier(i) => {
+            if let Some(val) = scopes.get_identifier_value(&i.name) {
+                val.clone() // now we are cloning the value, so
+                            // it's not like passing the reference
+            } else {
+                RuntimeType::nothing()
+            }
+        }
     }
 }
 /* use super::ScopesStack;
