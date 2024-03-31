@@ -10,7 +10,7 @@ pub fn print(args: Vec<RuntimeType>, scopes: &ScopesStack) {
     }
 
     let string = raw_values.join(" ");
-    print!("{string}");
+    println!("{string}");
 }
 
 /* use crate::{

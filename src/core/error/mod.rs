@@ -6,6 +6,7 @@ pub enum ErrorType {
     ReferenceError,
     StackUnderflowError,
     ExpressionError,
+    UnknownArithmeticOperator,
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
@@ -18,6 +19,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::ReferenceError => error_string = "Reference error:",
         ErrorType::StackUnderflowError => error_string = "Stack underflow error:",
         ErrorType::ExpressionError => error_string = "Expression error:",
+        ErrorType::UnknownArithmeticOperator => error_string = "Unknown arithmetic operator error:",
     }
 
     println!("[ego] {error_string} {error_message}");

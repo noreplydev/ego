@@ -1,6 +1,10 @@
+use crate::runtime::ScopesStack;
+
+use super::RuntimeType;
+
 #[derive(Debug, Clone)]
 pub struct RnNumber {
-    val: i64,
+    pub val: i64,
 }
 
 impl RnNumber {
@@ -10,5 +14,30 @@ impl RnNumber {
 
     pub fn to_string(&self) -> String {
         self.val.to_string()
+    }
+}
+
+// implement arithmetics
+impl RnNumber {
+    pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
+            RuntimeType::RnString(s) => {
+                // 13 + "hello" -> "13hello"
+                RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
+            }
+            RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(n) => RuntimeType::number(self.val + n.val),
+            RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+        }
+    }
+    pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::nothing()
+    }
+    pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::nothing()
+    }
+    pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::nothing()
     }
 }

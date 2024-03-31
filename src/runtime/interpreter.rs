@@ -1,5 +1,11 @@
+use std::{any::Any, os::unix::process};
+
 use crate::{
-    core::{handlers::print::print, runtypes::RuntimeType},
+    core::{
+        error,
+        handlers::print::print,
+        runtypes::{traits::arithmetic::Arithmetic, RuntimeType},
+    },
     syntax::{module::ModuleAst, AstNodeType, Expression},
 };
 
@@ -49,19 +55,35 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             }
         }
         AstNodeType::AssignamentStatement(node) => {
-            let value_as_runtype = match &node.init {
-                Expression::Bool(b) => RuntimeType::boolean(b.value),
-                Expression::Number(n) => RuntimeType::number(n.value),
-                Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
-                // here will go identifier when assigning one variable to another
-                _ => RuntimeType::nothing(),
-            };
+            let value_as_runtype = calc_expression(&node.init, scopes);
             scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
         }
         _ => {}
     }
 }
 
+fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
+    match node {
+        Expression::Bool(b) => RuntimeType::boolean(b.value),
+        Expression::Number(n) => RuntimeType::number(n.value),
+        Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
+        Expression::BinaryExpression(expr) => {
+            let left = calc_expression(&expr.left, scopes);
+            let right = calc_expression(&expr.right, scopes);
+            let result = left.arithmetic(expr.operator, right, scopes);
+
+            match result {
+                Ok(val) => val,
+                Err(err) => {
+                    error::throw(err, expr.operator.to_string().as_str(), Some(expr.line));
+                    std::process::exit(1);
+                }
+            }
+        }
+        // todo <identifier>: when assigning one variable to another
+        _ => RuntimeType::nothing(),
+    }
+}
 /* use super::ScopesStack;
 use crate::{
     core::{

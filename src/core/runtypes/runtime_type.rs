@@ -1,10 +1,14 @@
-use std::fmt;
+use std::fmt::{self, format};
 
-use crate::runtime::ScopesStack;
+use crate::{core::error::ErrorType, runtime::ScopesStack};
 
 use super::{
-    boolean::RnBoolean, identifier::RnIdentifier, nothing::Nothing, number::RnNumber,
-    string::RnString, traits::print::Print,
+    boolean::RnBoolean,
+    identifier::RnIdentifier,
+    nothing::Nothing,
+    number::RnNumber,
+    string::RnString,
+    traits::{arithmetic::Arithmetic, print::Print},
 };
 
 #[derive(Debug, Clone)]
@@ -60,7 +64,7 @@ impl fmt::Display for RuntimeType {
     }
 }
 
-// custom traits defined for runtime types
+// Traits defined for runtime types
 impl Print for RuntimeType {
     fn print(&self, scopes: &ScopesStack) -> String {
         match self {
@@ -69,6 +73,45 @@ impl Print for RuntimeType {
             RuntimeType::RnNumber(t) => t.to_string(),
             RuntimeType::RnBoolean(t) => t.to_string(),
             RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string(),
+        }
+    }
+}
+
+impl Arithmetic for RuntimeType {
+    fn arithmetic(
+        &self,
+        operator: char,
+        operand: RuntimeType,
+        scopes: &ScopesStack,
+    ) -> Result<RuntimeType, ErrorType> {
+        match self {
+            RuntimeType::Nothing(v) => match operator {
+                '+' => Ok(v.add(operand, scopes)),
+                '-' => Ok(v.substract(operand, scopes)),
+                '*' => Ok(v.mulitply(operand, scopes)),
+                '/' => Ok(v.divide(operand, scopes)),
+                _ => Err(ErrorType::UnknownArithmeticOperator),
+            },
+            RuntimeType::RnNumber(v) => match operator {
+                '+' => Ok(v.add(operand, scopes)),
+                '-' => Ok(v.substract(operand, scopes)),
+                '*' => Ok(v.mulitply(operand, scopes)),
+                '/' => Ok(v.substract(operand, scopes)),
+                _ => Err(ErrorType::UnknownArithmeticOperator),
+            },
+            _ => Err(ErrorType::UnknownArithmeticOperator), /* RuntimeType::RnString(t) => match operator {
+                                                                '+' => Ok(RuntimeType::string(format!(
+                                                                    "{}{}",
+                                                                    t.to_string(),
+                                                                    operand.to_string()
+                                                                ))),
+                                                                '-' => Ok(RuntimeType::nothing()),
+                                                                '*' => Ok(RuntimeType::nothing()),
+                                                                '/' => Ok(RuntimeType::nothing()),
+                                                                _ => Err(ErrorType::UnknownArithmeticOperator),
+                                                            },
+                                                            RuntimeType::RnBoolean(t) => t.to_string(),
+                                                            RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string(), */
         }
     }
 }
