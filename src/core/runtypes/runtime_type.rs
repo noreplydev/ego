@@ -96,7 +96,7 @@ impl Arithmetic for RuntimeType {
                 '+' => Ok(v.add(operand, scopes)),
                 '-' => Ok(v.substract(operand, scopes)),
                 '*' => Ok(v.mulitply(operand, scopes)),
-                '/' => Ok(v.substract(operand, scopes)),
+                '/' => Ok(v.divide(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             _ => Err(ErrorType::UnknownArithmeticOperator), /* RuntimeType::RnString(t) => match operator {
