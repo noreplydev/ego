@@ -503,141 +503,27 @@ fn function_declaration(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
     current += 1;
     offset += 1;
 
-    // check '('
-    if tokens[current].token_type == LexerTokenType::OpenParenthesis {
-        current += 1;
-        offset += 1;
-    } else {
-        error::throw(
-            ErrorType::SyntaxError,
-            format!(
-                "Unexpected token '{}' in function call",
-                tokens[current].value
-            )
-            .as_str(),
-            Some(tokens[current].line),
-        )
-    }
-
-    // get arguments & check ')'
-    let mut arguments: Vec<Option<Expression>> = vec![];
-    let mut last_token = None;
-    let mut closed = false;
-
-    while current < tokens.len() {
-        let token = &tokens[current];
-
-        // offset & current are incremented inside each type
-        // to avoid "tokens[overflowed_index]"" if loops ends
-        // before a '{'
-        match token.token_type {
-            LexerTokenType::Comma => {
-                if last_token == Some(LexerTokenType::Comma) {
-                    arguments.push(None);
-                }
-
-                last_token = Some(LexerTokenType::Comma);
-                current += 1;
-                offset += 1;
-            }
-            LexerTokenType::StringLiteral => {
-                last_token = Some(LexerTokenType::StringLiteral);
-                arguments.push(Some(Expression::StringLiteral(StringLiteral::new(
-                    token.value.clone(),
-                    token.at,
-                    token.line,
-                ))));
-                current += 1;
-                offset += 1;
-            }
-            LexerTokenType::Number => {
-                last_token = Some(LexerTokenType::Number);
-                let number: Result<i64, _> = token.value.parse();
-
-                if let Ok(number) = number {
-                    arguments.push(Some(Expression::Number(Number::new(
-                        number, token.at, token.line,
-                    ))));
-                    current += 1;
-                    offset += 1;
-                } else {
-                    error::throw(
-                        ErrorType::ParsingError,
-                        format!("Types inferece error for '{}'", token.value).as_str(),
-                        Some(token.line),
-                    )
-                }
-            }
-            LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-                last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
-                let bool_value: Result<bool, _> = token.value.parse();
-                if let Ok(bool_value) = bool_value {
-                    arguments.push(Some(Expression::Bool(Bool::new(
-                        bool_value, token.at, token.line,
-                    ))));
-                    current += 1;
-                    offset += 1;
-                }
-            }
-            LexerTokenType::Identifier => {
-                last_token = Some(LexerTokenType::Identifier);
-                arguments.push(Some(Expression::Identifier(Identifier::new(
-                    token.value.clone(),
-                    token.at,
-                    token.line,
-                ))));
-                current += 1;
-                offset += 1;
-            }
-            LexerTokenType::CloseParenthesis => {
-                if last_token == Some(LexerTokenType::Comma) {
-                    arguments.push(None);
-                }
-
-                current += 1;
-                offset += 1;
-                closed = true;
-                break;
-            }
-            _ => {
-                error::throw(
-                    ErrorType::SyntaxError,
-                    format!(
-                        "Unexpected token '{}' as argument for {}(..)",
-                        token.value, identifier_node.name
-                    )
-                    .as_str(),
-                    Some(token.line),
-                );
-            }
+    // check for group
+    let (arguments_offset, arguments) = group(tokens, current, Some("function declaration"));
+    current += arguments_offset;
+    offset += arguments_offset;
+    let arguments = match arguments {
+        AstNodeType::Group(grp) => grp,
+        _ => {
+            error::throw(
+                ErrorType::ParsingError,
+                "Expected (...) as function parameters",
+                Some(tokens[current].at),
+            );
+            std::process::exit(1);
         }
-    }
-
-    // non closed FunctionDeclaration
-    if !closed {
-        error::throw(
-            ErrorType::SyntaxError,
-            "Expected ')' after function arguments",
-            Some(tokens[current - 1].line),
-        )
-    }
-
-    // avoid early end of file (idk if it's needed)
-    if current >= tokens.len() {
-        error::throw(
-            ErrorType::SyntaxError,
-            format!(
-                "Expected ';' but got '{}' as end of statement",
-                tokens[current - 1].value
-            )
-            .as_str(),
-            Some(tokens[current - 1].line),
-        )
-    }
+    };
 
     // check for block
     let (block_offset, block_node) = block(tokens, current);
     offset += block_offset;
+    // not increment current to avoid invex overflow
+    // on the function return
     let function_body = match block_node {
         AstNodeType::Block(b) => b,
         _ => {
