@@ -235,56 +235,56 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
                 last_token = Some(LexerTokenType::Comma);
                 current += 1;
                 offset += 1;
-            }
+            } /*
             LexerTokenType::StringLiteral => {
-                last_token = Some(LexerTokenType::StringLiteral);
-                group_node.add_child(Some(Expression::StringLiteral(StringLiteral::new(
-                    token.value.clone(),
-                    token.at,
-                    token.line,
-                ))));
-                current += 1;
-                offset += 1;
+            last_token = Some(LexerTokenType::StringLiteral);
+            group_node.add_child(Some(Expression::StringLiteral(StringLiteral::new(
+            token.value.clone(),
+            token.at,
+            token.line,
+            ))));
+            current += 1;
+            offset += 1;
             }
             LexerTokenType::Number => {
-                last_token = Some(LexerTokenType::Number);
-                let number: Result<i64, _> = token.value.parse();
+            last_token = Some(LexerTokenType::Number);
+            let number: Result<i64, _> = token.value.parse();
 
-                if let Ok(number) = number {
-                    group_node.add_child(Some(Expression::Number(Number::new(
-                        number, token.at, token.line,
-                    ))));
-                    current += 1;
-                    offset += 1;
-                } else {
-                    error::throw(
-                        ErrorType::ParsingError,
-                        format!("Types inferece error for '{}'", token.value).as_str(),
-                        Some(token.line),
-                    )
-                }
+            if let Ok(number) = number {
+            group_node.add_child(Some(Expression::Number(Number::new(
+            number, token.at, token.line,
+            ))));
+            current += 1;
+            offset += 1;
+            } else {
+            error::throw(
+            ErrorType::ParsingError,
+            format!("Types inferece error for '{}'", token.value).as_str(),
+            Some(token.line),
+            )
+            }
             }
             LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-                last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
-                let bool_value: Result<bool, _> = token.value.parse();
-                if let Ok(bool_value) = bool_value {
-                    group_node.add_child(Some(Expression::Bool(Bool::new(
-                        bool_value, token.at, token.line,
-                    ))));
-                    current += 1;
-                    offset += 1;
-                }
+            last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
+            let bool_value: Result<bool, _> = token.value.parse();
+            if let Ok(bool_value) = bool_value {
+            group_node.add_child(Some(Expression::Bool(Bool::new(
+            bool_value, token.at, token.line,
+            ))));
+            current += 1;
+            offset += 1;
+            }
             }
             LexerTokenType::Identifier => {
-                last_token = Some(LexerTokenType::Identifier);
-                group_node.add_child(Some(Expression::Identifier(Identifier::new(
-                    token.value.clone(),
-                    token.at,
-                    token.line,
-                ))));
-                current += 1;
-                offset += 1;
-            }
+            last_token = Some(LexerTokenType::Identifier);
+            group_node.add_child(Some(Expression::Identifier(Identifier::new(
+            token.value.clone(),
+            token.at,
+            token.line,
+            ))));
+            current += 1;
+            offset += 1;
+            } */
             LexerTokenType::CloseParenthesis => {
                 if last_token == Some(LexerTokenType::Comma) {
                     group_node.add_child(None);
@@ -296,7 +296,21 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
                 break;
             }
             _ => {
-                let context_msg = if let Some(context) = context {
+                let (node_offset, node) = parse_expression(tokens, current);
+                match node {
+                    Expression::Identifier(_) => last_token = Some(LexerTokenType::Identifier),
+                    Expression::Bool(_) => last_token = Some(LexerTokenType::TrueKeyword),
+                    Expression::Number(_) => last_token = Some(LexerTokenType::Number),
+                    Expression::StringLiteral(_) => {
+                        last_token = Some(LexerTokenType::StringLiteral)
+                    }
+                    Expression::BinaryExpression(_) => last_token = Some(LexerTokenType::Number),
+                }
+                current += node_offset;
+                offset += node_offset;
+                group_node.add_child(Some(node));
+
+                /*                 let context_msg = if let Some(context) = context {
                     format!(" as argument for {}", context)
                 } else {
                     "".to_string()
@@ -305,7 +319,7 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
                     ErrorType::SyntaxError,
                     format!("Unexpected token '{}'{}", token.value, context_msg).as_str(),
                     Some(token.line),
-                );
+                ); */
             }
         }
     }
@@ -441,53 +455,6 @@ fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, Ast
 
     // get variable value
     let (expr_offset, expr) = parse_expression(tokens, current);
-    /* let token = &tokens[current];
-    let node_init: Expression = match token.token_type {
-        LexerTokenType::StringLiteral => Expression::StringLiteral(StringLiteral::new(
-            token.value.clone(),
-            token.at,
-            token.line,
-        )),
-        LexerTokenType::Number => {
-            let num_value: Result<i64, _> = token.value.parse();
-            if let Ok(num_value) = num_value {
-                Expression::Number(Number::new(num_value, token.at, token.line))
-            } else {
-                error::throw(
-                    ErrorType::ParsingError,
-                    format!("Cannot parse '{}' as Number", token.value).as_str(),
-                    Some(token.line),
-                );
-                std::process::exit(1);
-            }
-        }
-        LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-            let bool_value: Result<bool, _> = token.value.parse();
-            if let Ok(bool_value) = bool_value {
-                Expression::Bool(Bool::new(bool_value, token.at, token.line))
-            } else {
-                error::throw(
-                    ErrorType::ParsingError,
-                    format!("Cannot parse '{}' as Boolean", token.value).as_str(),
-                    Some(token.line),
-                );
-                std::process::exit(1);
-            }
-        }
-        _ => {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!(
-                    "Expected '<expression>' but got '{}'",
-                    tokens[current].value
-                )
-                .as_str(),
-                Some(tokens[current].line),
-            );
-            std::process::exit(1);
-        }
-    }; */
-
     current += expr_offset;
     offset += expr_offset;
 
