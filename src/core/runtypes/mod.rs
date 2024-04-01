@@ -1,4 +1,5 @@
 mod boolean;
+mod function;
 mod identifier;
 mod nothing;
 mod number;
