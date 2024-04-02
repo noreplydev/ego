@@ -29,6 +29,7 @@ impl RnNumber {
             RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val + n.val),
             RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -38,6 +39,7 @@ impl RnNumber {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val - n.val),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -47,6 +49,7 @@ impl RnNumber {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val * n.val),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -56,6 +59,7 @@ impl RnNumber {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val / n.val),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
 }

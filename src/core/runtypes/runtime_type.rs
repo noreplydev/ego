@@ -1,9 +1,14 @@
-use std::fmt::{self, format};
+use std::fmt::{self};
 
-use crate::{core::error::ErrorType, runtime::ScopesStack};
+use crate::{
+    core::error::ErrorType,
+    runtime::ScopesStack,
+    syntax::{block::Block, group::Group},
+};
 
 use super::{
     boolean::RnBoolean,
+    function::RnFunction,
     identifier::RnIdentifier,
     nothing::Nothing,
     number::RnNumber,
@@ -18,6 +23,7 @@ pub enum RuntimeType {
     RnNumber(RnNumber),
     RnIdentifier(RnIdentifier),
     RnBoolean(RnBoolean),
+    RnFunction(RnFunction),
 }
 
 impl RuntimeType {
@@ -41,6 +47,19 @@ impl RuntimeType {
         RuntimeType::RnBoolean(RnBoolean::new(value))
     }
 
+    // has ast nodes dependencies
+    // in its fields
+    pub fn function(
+        identifier: String,
+        parameters: Group,
+        body: Block,
+        at: usize,
+        line: usize,
+    ) -> RuntimeType {
+        let identifier = RnIdentifier::new(identifier);
+        RuntimeType::RnFunction(RnFunction::new(identifier, parameters, body, at, line))
+    }
+
     pub fn to_string(&self) -> String {
         match self {
             RuntimeType::Nothing(nothing) => nothing.to_string(),
@@ -48,6 +67,7 @@ impl RuntimeType {
             RuntimeType::RnNumber(rn_number) => rn_number.to_string(),
             RuntimeType::RnIdentifier(rn_number) => rn_number.to_string(),
             RuntimeType::RnBoolean(rn_boolean) => rn_boolean.to_string(),
+            RuntimeType::RnFunction(rn_function) => rn_function.to_string(),
         }
     }
 }
@@ -60,6 +80,7 @@ impl fmt::Display for RuntimeType {
             RuntimeType::RnNumber(_) => write!(f, "RnNumber"),
             RuntimeType::RnIdentifier(_) => write!(f, "RnIdentifier"),
             RuntimeType::RnBoolean(_) => write!(f, "RnBoolean"),
+            RuntimeType::RnFunction(_) => write!(f, "RnFunction"),
         }
     }
 }
@@ -73,6 +94,7 @@ impl Print for RuntimeType {
             RuntimeType::RnNumber(t) => t.to_string(),
             RuntimeType::RnBoolean(t) => t.to_string(),
             RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string(),
+            RuntimeType::RnFunction(t) => t.to_string(),
         }
     }
 }

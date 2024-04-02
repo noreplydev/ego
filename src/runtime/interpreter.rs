@@ -1,13 +1,13 @@
 use crate::{
     core::{
-        error,
+        error::{self, ErrorType},
         handlers::print::print,
         runtypes::{traits::arithmetic::Arithmetic, RuntimeType},
     },
-    syntax::{module::ModuleAst, AstNodeType, Expression},
+    syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
 };
 
-use super::ScopesStack;
+use super::{scope, ScopesStack};
 
 pub fn exec(ast: ModuleAst) {
     let mut scopes = ScopesStack::new();
@@ -21,6 +21,24 @@ pub fn exec(ast: ModuleAst) {
 
 fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     match node {
+        AstNodeType::Block(node) => {
+            let mut counter = 0;
+            while counter < node.children.len() {
+                exec_node(&node.children[counter], scopes);
+                counter += 1;
+            }
+        }
+        AstNodeType::FunctionDeclaration(node) => {
+            let identifier = node.identifier.name.clone();
+            let rn_function = RuntimeType::function(
+                identifier.clone(),
+                node.parameters.clone(),
+                node.body.clone(),
+                node.at,
+                node.line,
+            );
+            scopes.add_identifier(identifier, rn_function);
+        }
         AstNodeType::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
                 .arguments
@@ -39,6 +57,25 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 "print" => print(runtime_arguments, &scopes),
                 _ => {
                     // runtime declared functions
+                    let function = match scopes.get_identifier_value(&node.identifier.name) {
+                        Some(func) => func,
+                        None => {
+                            error::throw(
+                                ErrorType::ReferenceError,
+                                format!("Function '{}' has not been defined", node.identifier.name)
+                                    .as_str(),
+                                Some(node.line),
+                            );
+                            std::process::exit(1);
+                        }
+                    };
+
+                    let function = match function {
+                        RuntimeType::RnFunction(func) => func,
+                        _ => unreachable!(),
+                    };
+
+                    exec_node(&AstNodeType::Block(function.body.clone()), scopes);
                 }
             }
         }

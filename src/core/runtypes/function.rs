@@ -1,17 +1,14 @@
 use crate::{
     runtime::ScopesStack,
-    syntax::{block::Block, Expression},
+    syntax::{block::Block, group::Group},
 };
 
-use super::{
-    identifier::{self, RnIdentifier},
-    RuntimeType,
-};
+use super::{identifier::RnIdentifier, RuntimeType};
 
 #[derive(Debug, Clone)]
 pub struct RnFunction {
     pub identifier: RnIdentifier,
-    pub parameters: Vec<Option<RuntimeType>>,
+    pub parameters: Group,
     pub body: Block,
     pub at: usize,
     pub line: usize,
@@ -20,7 +17,7 @@ pub struct RnFunction {
 impl RnFunction {
     pub fn new(
         identifier: RnIdentifier,
-        parameters: Vec<Option<RuntimeType>>,
+        parameters: Group,
         body: Block,
         at: usize,
         line: usize,
@@ -48,6 +45,7 @@ impl RnFunction {
             RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -57,6 +55,7 @@ impl RnFunction {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -66,6 +65,7 @@ impl RnFunction {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -75,6 +75,7 @@ impl RnFunction {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
 }

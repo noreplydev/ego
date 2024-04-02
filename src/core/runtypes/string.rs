@@ -42,6 +42,7 @@ impl RnString {
                 RuntimeType::string(format!("\"{}{}\"", self.to_string(), n.to_string()))
             }
             RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -51,6 +52,7 @@ impl RnString {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -60,6 +62,7 @@ impl RnString {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
     pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -69,6 +72,7 @@ impl RnString {
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
+            RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
 }
