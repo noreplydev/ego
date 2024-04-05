@@ -29,16 +29,6 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
         let token = &tokens[current];
 
         match token.token_type {
-            /*             LexerTokenType::OpenCurlyBrace => {
-                let (index_offset, block_node) = block(&tokens, current);
-                root.add_child(block_node);
-                current += index_offset;
-            }
-            LexerTokenType::OpenParenthesis => {
-                let (index_offset, group_node) = group(&tokens, current);
-                root.add_child(group_node);
-                current += index_offset;
-            } */
             LexerTokenType::FunctionCall => {
                 let (index_offset, function_node) = call_expression(&tokens, current);
                 module_ast.add_child(function_node);
@@ -64,52 +54,6 @@ fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
                 module_ast.add_child(number_node);
                 current += index_offset;
             }
-            /*
-            LexerTokenType::IfKeyword => {
-            let (index_offset, if_node) = if_statement(&tokens, current);
-            root.add_child(if_node);
-            current += index_offset;
-            }
-            LexerTokenType::TrueKeyword => {
-            root.add_child(AstNode::new(
-            AstNodeType::Expression(Expression::Boolean(Bool::True)),
-            RuntimeType::string(token.value.clone()),
-            Vec::new(),
-            ));
-            current += 1;
-            }
-            LexerTokenType::FalseKeyword => {
-            root.add_child(AstNode::new(
-            AstNodeType::Expression(Expression::Boolean(Bool::False)),
-            RuntimeType::string(token.value.clone()),
-            Vec::new(),
-            ));
-            current += 1;
-            }
-            LexerTokenType::StringLiteral => {
-            root.add_child(AstNode::new(
-            AstNodeType::Expression(StringLiteral),
-            RuntimeType::string(token.value.clone()),
-            Vec::new(),
-            ));
-            current += 1;
-            }
-            LexerTokenType::Number => {
-            root.add_child(AstNode::new(
-            AstNodeType::Expression(NumberLiteral),
-            RuntimeType::number(token.value.parse().unwrap()),
-            Vec::new(),
-            ));
-            current += 1;
-            }
-            LexerTokenType::AddOperator => {
-            root.add_child(AstNode::new(
-            AstNodeType::Expression(Expression::Binary(BinaryOperator::AddOperator)),
-            RuntimeType::number(token.value.parse().unwrap()),
-            Vec::new(),
-            ));
-            current += 1;
-            } */
             _ => {
                 current += 1;
             }
@@ -162,6 +106,26 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
                 block_node.add_child(function_node);
                 current += index_offset;
                 offset += index_offset;
+            }
+            LexerTokenType::FnKeyword => {
+                let (index_offset, assignment_node) = function_declaration(&tokens, current);
+                block_node.add_child(assignment_node);
+                current += index_offset;
+            }
+            LexerTokenType::LetKeyword => {
+                let (index_offset, assignment_node) = assignment_statement(&tokens, current);
+                block_node.add_child(assignment_node);
+                current += index_offset;
+            }
+            LexerTokenType::Identifier => {
+                let (index_offset, identifier_node) = identifier(&tokens, current);
+                block_node.add_child(identifier_node);
+                current += index_offset;
+            }
+            LexerTokenType::Number => {
+                let (index_offset, number_node) = expression(&tokens, current);
+                block_node.add_child(number_node);
+                current += index_offset;
             }
             _ => {
                 error::throw(
