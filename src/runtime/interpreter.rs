@@ -12,6 +12,14 @@ use super::{scope, ScopesStack};
 pub fn exec(ast: ModuleAst) {
     let mut scopes = ScopesStack::new();
 
+    // hoisting
+    let mut counter = 0;
+    while counter < ast.children.len() {
+        hoist_node(&ast.children[counter], &mut scopes);
+        counter += 1;
+    }
+
+    // execution
     let mut counter = 0;
     while counter < ast.children.len() {
         exec_node(&ast.children[counter], &mut scopes);
@@ -19,12 +27,12 @@ pub fn exec(ast: ModuleAst) {
     }
 }
 
-fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
+fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     match node {
         AstNodeType::Block(node) => {
             let mut counter = 0;
             while counter < node.children.len() {
-                exec_node(&node.children[counter], scopes);
+                hoist_node(&node.children[counter], scopes);
                 counter += 1;
             }
         }
@@ -38,6 +46,22 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 node.line,
             );
             scopes.add_identifier(identifier, rn_function);
+        }
+        _ => {}
+    }
+}
+
+fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
+    match node {
+        AstNodeType::Block(node) => {
+            let mut counter = 0;
+            while counter < node.children.len() {
+                exec_node(&node.children[counter], scopes);
+                counter += 1;
+            }
+        }
+        AstNodeType::FunctionDeclaration(node) => {
+            // hoisted before execution
         }
         AstNodeType::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
