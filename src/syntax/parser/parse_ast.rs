@@ -111,27 +111,31 @@ fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
                 let (index_offset, assignment_node) = function_declaration(&tokens, current);
                 block_node.add_child(assignment_node);
                 current += index_offset;
+                offset += index_offset;
             }
             LexerTokenType::LetKeyword => {
                 let (index_offset, assignment_node) = assignment_statement(&tokens, current);
                 block_node.add_child(assignment_node);
                 current += index_offset;
+                offset += index_offset;
             }
             LexerTokenType::Identifier => {
                 let (index_offset, identifier_node) = identifier(&tokens, current);
                 block_node.add_child(identifier_node);
                 current += index_offset;
+                offset += index_offset;
             }
             LexerTokenType::Number => {
                 let (index_offset, number_node) = expression(&tokens, current);
                 block_node.add_child(number_node);
                 current += index_offset;
+                offset += index_offset;
             }
             _ => {
                 error::throw(
                     ErrorType::SyntaxError,
                     format!(
-                        "Unexpected token '{}'", // generic error for unexpected codes for block parsing
+                        "Unexpected token '{}' inside block {{..}}", // generic error for unexpected codes for block parsing
                         token.value,
                     )
                     .as_str(),
@@ -273,17 +277,6 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
                 current += node_offset;
                 offset += node_offset;
                 group_node.add_child(Some(node));
-
-                /*                 let context_msg = if let Some(context) = context {
-                    format!(" as argument for {}", context)
-                } else {
-                    "".to_string()
-                };
-                error::throw(
-                    ErrorType::SyntaxError,
-                    format!("Unexpected token '{}'{}", token.value, context_msg).as_str(),
-                    Some(token.line),
-                ); */
             }
         }
     }
@@ -326,6 +319,8 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
     );
 
     let arguments_node = if let AstNodeType::Group(arguments_node) = arguments_node {
+        current += arguments_offset;
+        offset += arguments_offset;
         arguments_node
     } else {
         error::throw(
@@ -335,9 +330,6 @@ fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeT
         );
         std::process::exit(1);
     };
-
-    current += arguments_offset;
-    offset += arguments_offset;
 
     // avoid early end of file (idk if it's needed)
     if current >= tokens.len() {
@@ -537,6 +529,8 @@ fn identifier(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) 
             );
 
             let group_node = if let AstNodeType::Group(group_node) = group_node {
+                current += group_offset;
+                offset += group_offset;
                 group_node
             } else {
                 error::throw(
@@ -552,10 +546,7 @@ fn identifier(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) 
 
             let call_expression_node =
                 CallExpressionNode::new(identifier_node, group_node, at, line);
-            (
-                group_offset,
-                AstNodeType::CallExpression(call_expression_node),
-            )
+            (offset, AstNodeType::CallExpression(call_expression_node))
         }
         // [Property acess] should handle <a.value> here
         //LexerTokenType::Dot => {}
