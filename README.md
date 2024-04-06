@@ -14,8 +14,12 @@ After that, you will only need to create a .ego file like this:
 ```ego
 // hello_world.ego
 
-let hi = "Hello, world!"; 
-print(hi); 
+fn hi() {
+  let str = "Hello, world!"; 
+  print(str); 
+}
+
+hi();  
 ```
 
 And that's it, you can run ego with a simple
