@@ -9,7 +9,7 @@ use runtime::exec;
 use std::env;
 use std::fs;
 use syntax::lex;
-use syntax::parse;
+use syntax::Module;
 
 pub const KEYWORDS: [&str; 8] = [
     "fn", "let", "if", "while", "true", "false", "print", "import",
@@ -24,6 +24,7 @@ fn main() {
         error::throw(ErrorType::EgoUsageError, "an ego file is required", None);
         std::process::exit(1); // to avoid types error
     };
+    let debug = args.len() > 2 && args[2] == "-d";
 
     if !filename.ends_with(".ego") {
         error::throw(ErrorType::EgoUsageError, "This is not .e (ego) file", None);
@@ -40,16 +41,17 @@ fn main() {
     });
 
     let tokens = lex(file_content);
-    if args.len() > 2 && args[2] == "-d" {
+    if debug {
         println!("\nLexer tokens: \n-------------");
         for (i, token) in tokens.iter().enumerate() {
             println!("{i}. {token}");
         }
     }
 
-    let ast = parse(tokens.clone(), module_name);
-    if args.len() > 2 && args[2] == "-d" {
-        println!("\nAST:\n----\n{:#?}\n", ast);
+    let module = Module::new(module_name.to_string(), tokens);
+    let ast = module.parse();
+    if debug {
+        println!("\nAst nodes: \n---------------\n{:#?}", ast);
     }
 
     exec(ast);
