@@ -17,12 +17,8 @@ use self::{
     group::Group, identifier::Identifier, number::Number, string_literal::StringLiteral,
 };
 
-/* AstNodeType */
-
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
-    Root,
-    Empty,
     IfStatement,
     Group(Group),
     Block(Block),
@@ -35,8 +31,6 @@ pub enum AstNodeType {
 impl fmt::Display for AstNodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AstNodeType::Root => write!(f, "Root"),
-            AstNodeType::Empty => write!(f, "Empty"),
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement => write!(f, "IfStatement"),
             AstNodeType::Block(_) => write!(f, "Block"),
@@ -60,7 +54,7 @@ impl PartialEq for AstNodeType {
     }
 }
 
-/* AstNodeType::Expresssion */
+// AstNodeType::Expresssion
 #[derive(Debug, Clone)]
 pub enum Expression {
     StringLiteral(StringLiteral),

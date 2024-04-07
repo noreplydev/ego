@@ -4,7 +4,6 @@ mod syntax;
 
 use core::error;
 use core::error::ErrorType;
-//use runtime::Interpreter;
 use runtime::exec;
 use std::env;
 use std::fs;

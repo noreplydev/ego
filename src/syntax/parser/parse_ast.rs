@@ -203,56 +203,7 @@ fn group(tokens: &Vec<LexerToken>, current: usize, context: Option<&str>) -> (us
                 last_token = Some(LexerTokenType::Comma);
                 current += 1;
                 offset += 1;
-            } /*
-            LexerTokenType::StringLiteral => {
-            last_token = Some(LexerTokenType::StringLiteral);
-            group_node.add_child(Some(Expression::StringLiteral(StringLiteral::new(
-            token.value.clone(),
-            token.at,
-            token.line,
-            ))));
-            current += 1;
-            offset += 1;
             }
-            LexerTokenType::Number => {
-            last_token = Some(LexerTokenType::Number);
-            let number: Result<i64, _> = token.value.parse();
-
-            if let Ok(number) = number {
-            group_node.add_child(Some(Expression::Number(Number::new(
-            number, token.at, token.line,
-            ))));
-            current += 1;
-            offset += 1;
-            } else {
-            error::throw(
-            ErrorType::ParsingError,
-            format!("Types inferece error for '{}'", token.value).as_str(),
-            Some(token.line),
-            )
-            }
-            }
-            LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-            last_token = Some(LexerTokenType::TrueKeyword); // let's say always true, but doesn't matter at all
-            let bool_value: Result<bool, _> = token.value.parse();
-            if let Ok(bool_value) = bool_value {
-            group_node.add_child(Some(Expression::Bool(Bool::new(
-            bool_value, token.at, token.line,
-            ))));
-            current += 1;
-            offset += 1;
-            }
-            }
-            LexerTokenType::Identifier => {
-            last_token = Some(LexerTokenType::Identifier);
-            group_node.add_child(Some(Expression::Identifier(Identifier::new(
-            token.value.clone(),
-            token.at,
-            token.line,
-            ))));
-            current += 1;
-            offset += 1;
-            } */
             LexerTokenType::CloseParenthesis => {
                 if last_token == Some(LexerTokenType::Comma) {
                     group_node.add_child(None);

@@ -1,6 +1,5 @@
 use super::Expression;
 
-/* AST TREE */
 #[derive(Debug, Clone)]
 pub struct Group {
     pub children: Vec<Option<Expression>>,

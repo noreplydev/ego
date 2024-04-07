@@ -135,8 +135,8 @@ impl Arithmetic for RuntimeType {
                 '/' => Ok(v.divide(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
-            _ => Err(ErrorType::UnknownArithmeticOperator), /*
-                                                            RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string(), */
+            // RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string()
+            _ => Err(ErrorType::UnknownArithmeticOperator),
         }
     }
 }

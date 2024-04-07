@@ -2,7 +2,6 @@ use std::fmt;
 
 use super::AstNodeType;
 
-/* AST TREE */
 #[derive(Debug, Clone)]
 pub struct ModuleAst {
     pub module_name: String,

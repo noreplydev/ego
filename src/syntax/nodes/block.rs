@@ -1,6 +1,5 @@
 use super::AstNodeType;
 
-/* AST TREE */
 #[derive(Debug, Clone)]
 pub struct Block {
     pub children: Vec<AstNodeType>,

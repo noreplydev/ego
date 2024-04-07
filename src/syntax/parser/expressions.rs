@@ -203,14 +203,3 @@ fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression)
         }
     }
 }
-
-/* (
-    3,
-    AstNodeType::Expression(Expression::BinaryExpression(BinaryExpression::new(
-        '+',
-        Box::new(Expression::Bool(Bool::new(true, 0, 0))),
-        Box::new(Expression::Bool(Bool::new(true, 0, 0))),
-        0,
-        0,
-    ))),
-) */
