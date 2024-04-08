@@ -47,7 +47,7 @@ fn main() {
         }
     }
 
-    let module = Module::new(module_name.to_string(), tokens);
+    let mut module = Module::new(module_name.to_string(), tokens);
     let ast = module.parse();
     if debug {
         println!("\nAst nodes: \n---------------\n{:#?}", ast);
