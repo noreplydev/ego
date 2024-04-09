@@ -30,7 +30,7 @@ impl Module {
         }
     }
 
-    pub fn parse(&self) -> ModuleAst {
+    pub fn parse(&mut self) -> ModuleAst {
         let module = ModuleAst::new(&self.module_name);
         Self::tree(self.tokens.clone(), module)
     }
