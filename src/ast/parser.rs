@@ -1,6 +1,5 @@
 use crate::{
-    core::error::{self, ErrorType},
-    syntax::{
+    ast::{
         assignament_statement::{AssignamentNode, VarType},
         block::Block,
         bool::Bool,
@@ -13,6 +12,7 @@ use crate::{
         string_literal::StringLiteral,
         AstNodeType, Expression, LexerToken, LexerTokenType,
     },
+    core::error::{self, ErrorType},
 };
 
 use super::binary_expression::BinaryExpression;

@@ -1,9 +1,9 @@
 use std::fmt::{self};
 
 use crate::{
+    ast::{block::Block, group::Group},
     core::error::ErrorType,
     runtime::ScopesStack,
-    syntax::{block::Block, group::Group},
 };
 
 use super::{

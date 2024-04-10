@@ -1,10 +1,10 @@
 use crate::{
+    ast::{identifier, module::ModuleAst, AstNodeType, Expression},
     core::{
         error::{self, ErrorType},
         handlers::print::print,
         runtypes::{traits::arithmetic::Arithmetic, RuntimeType},
     },
-    syntax::{identifier, module::ModuleAst, AstNodeType, Expression},
 };
 
 use super::{scope, ScopesStack};

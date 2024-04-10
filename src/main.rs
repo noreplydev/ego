@@ -1,14 +1,14 @@
+mod ast;
 mod core;
 mod runtime;
-mod syntax;
 
+use ast::lex;
+use ast::Module;
 use core::error;
 use core::error::ErrorType;
 use runtime::exec;
 use std::env;
 use std::fs;
-use syntax::lex;
-use syntax::Module;
 
 pub const KEYWORDS: [&str; 8] = [
     "fn", "let", "if", "while", "true", "false", "print", "import",

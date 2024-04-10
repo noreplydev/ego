@@ -1,6 +1,6 @@
 use crate::{
+    ast::{block::Block, group::Group},
     runtime::ScopesStack,
-    syntax::{block::Block, group::Group},
 };
 
 use super::{identifier::RnIdentifier, RuntimeType};
