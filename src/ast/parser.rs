@@ -37,6 +37,29 @@ impl Module {
         Self::tree(self.tokens.clone(), module)
     }
 
+    // returns directly the node since only next() method
+    // changes the current index and it checks if it's overflowed
+    fn peek(&mut self) -> &LexerToken {
+        &self.tokens[self.current]
+    }
+
+    fn peek_next(&mut self) -> Option<&LexerToken> {
+        if (self.current + 1) < self.tokens.len() {
+            Some(&self.tokens[self.current + 1])
+        } else {
+            None
+        }
+    }
+
+    fn next(&mut self) -> Result<(), ()> {
+        if (self.current + 1) < self.tokens.len() {
+            self.current += 1;
+            Ok(())
+        } else {
+            Err(())
+        }
+    }
+
     fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
         let mut current = 0;
 
