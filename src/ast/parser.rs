@@ -20,6 +20,7 @@ use super::binary_expression::BinaryExpression;
 pub struct Module {
     module_name: String,
     tokens: Vec<LexerToken>,
+    current: usize,
 }
 
 impl Module {
@@ -27,6 +28,7 @@ impl Module {
         Module {
             module_name,
             tokens,
+            current: 0,
         }
     }
 
