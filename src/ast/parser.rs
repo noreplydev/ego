@@ -117,7 +117,7 @@ impl Module {
         // get inside block ast nodes & check '}'
         let mut closed = false;
 
-        while self.current() < self.tokens.len() {
+        while self.is_peekable() {
             let token = self.peek();
 
             // offset & current are incremented inside each type
@@ -202,7 +202,7 @@ impl Module {
         let mut last_token = None;
         let mut closed = false;
 
-        while self.current() < self.tokens.len() {
+        while self.is_peekable() {
             let token = self.peek();
 
             // offset & current are incremented inside each type
@@ -284,7 +284,7 @@ impl Module {
         };
 
         // avoid early end of file (idk if it's needed)
-        if !self.current() < self.tokens.len() {
+        if !self.is_peekable() {
             error::throw(
                 ErrorType::SyntaxError,
                 format!(
@@ -494,7 +494,7 @@ impl Module {
         // and it will be the root or the left node
         // depending on the expression
         let mut node = self.parse_term();
-        while self.current() < self.tokens.len() {
+        while self.is_peekable() {
             let token = self.peek();
             match token.token_type {
                 LexerTokenType::AddOperator | LexerTokenType::SubtractOperator => {
@@ -535,7 +535,7 @@ impl Module {
         // depending on the expression
         let mut node = self.parse_factor();
 
-        while self.current() < self.tokens.len() {
+        while self.is_peekable() {
             let token = self.peek();
             match token.token_type {
                 LexerTokenType::MultiplyOperator | LexerTokenType::DivideOperator => {
