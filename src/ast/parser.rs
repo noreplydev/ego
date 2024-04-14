@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use crate::{
     ast::{
         assignament_statement::{AssignamentNode, VarType},
@@ -15,12 +17,12 @@ use crate::{
     core::error::{self, ErrorType},
 };
 
-use super::binary_expression::BinaryExpression;
+use super::{binary_expression::BinaryExpression, identifier};
 
 pub struct Module {
     module_name: String,
     tokens: Vec<LexerToken>,
-    current: usize,
+    current: Cell<usize>,
 }
 
 impl Module {
@@ -28,63 +30,69 @@ impl Module {
         Module {
             module_name,
             tokens,
-            current: 0,
+            current: 0.into(),
         }
     }
 
     pub fn parse(&mut self) -> ModuleAst {
         let module = ModuleAst::new(&self.module_name);
-        Self::tree(self.tokens.clone(), module)
+        self.tree(module)
     }
 
     // returns directly the node since only next() method
     // changes the current index and it checks if it's overflowed
-    fn peek(&mut self) -> &LexerToken {
-        &self.tokens[self.current]
+    fn peek(&self) -> &LexerToken {
+        &self.tokens[self.current.get()]
     }
 
-    fn peek_next(&mut self) -> Option<&LexerToken> {
-        if (self.current + 1) < self.tokens.len() {
-            Some(&self.tokens[self.current + 1])
+    fn peek_next(&self) -> Option<&LexerToken> {
+        if (self.current.get() + 1) < self.tokens.len() {
+            Some(&self.tokens[self.current.get() + 1])
         } else {
             None
         }
     }
 
-    fn next(&mut self) -> Result<(), ()> {
-        if (self.current + 1) < self.tokens.len() {
-            self.current += 1;
+    fn next(&self) -> Result<(), ()> {
+        if (self.current.get() + 1) < self.tokens.len() {
+            self.current.set(self.current.get() + 1);
             Ok(())
         } else {
             Err(())
         }
     }
 
-    fn tree(tokens: Vec<LexerToken>, mut module_ast: ModuleAst) -> ModuleAst {
-        let mut current = 0;
+    fn next_token(&self, line: Option<usize>) {
+        if let Err(a) = self.next() {
+            error::throw(ErrorType::ParsingError, "Overflow on tokens peeking", line);
+        }
+    }
 
-        while current < tokens.len() {
-            let token = &tokens[current];
+    fn current(&self) -> usize {
+        self.current.get()
+    }
+
+    fn tree(&mut self, mut module_ast: ModuleAst) -> ModuleAst {
+        while self.current() < self.tokens.len() {
+            let token = self.peek();
 
             match token.token_type {
                 LexerTokenType::FunctionCall => {
-                    let (index_offset, function_node) = Self::call_expression(&tokens, current);
+                    let function_node = self.call_expression();
                     module_ast.add_child(function_node);
-                    current += index_offset;
+                    print!("{}", token);
                 }
                 LexerTokenType::LetKeyword => {
-                    let (index_offset, assignment_node) =
-                        Self::assignment_statement(&tokens, current);
+                    let assignment_node = self.assignment_statement();
                     module_ast.add_child(assignment_node);
-                    current += index_offset;
+                    print!("{}", token);
                 }
                 LexerTokenType::FnKeyword => {
-                    let (index_offset, assignment_node) =
-                        Self::function_declaration(&tokens, current);
-                    module_ast.add_child(assignment_node);
-                    current += index_offset;
+                    let function_node = self.function_declaration();
+                    module_ast.add_child(function_node);
+                    print!("{}", token);
                 }
-                LexerTokenType::Identifier => {
+                /*                 LexerTokenType::Identifier => {
                     let (index_offset, identifier_node) = Self::identifier(&tokens, current);
                     module_ast.add_child(identifier_node);
                     current += index_offset;
@@ -93,9 +101,9 @@ impl Module {
                     let (index_offset, number_node) = Self::expression(&tokens, current);
                     module_ast.add_child(number_node);
                     current += index_offset;
-                }
+                } */
                 _ => {
-                    current += 1;
+                    self.next_token(Some(token.line));
                 }
             }
         }
@@ -104,74 +112,56 @@ impl Module {
     }
 
     // {}
-    fn block(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let mut current = current;
-        let mut offset = 0;
+    fn block(&self) -> AstNodeType {
         let mut block_node = Block::new();
 
         // check '{'
-        if tokens[current].token_type == LexerTokenType::OpenCurlyBrace {
-            current += 1;
-            offset += 1;
+        let token = self.peek();
+        if token.token_type == LexerTokenType::OpenCurlyBrace {
+            self.next_token(Some(token.line));
         } else {
             error::throw(
                 ErrorType::SyntaxError,
-                format!(
-                    "Unexpected token '{}' in block opening",
-                    tokens[current].value
-                )
-                .as_str(),
-                Some(tokens[current].line),
+                format!("Unexpected token '{}' in block opening", token.value).as_str(),
+                Some(token.line),
             )
         }
 
         // get inside block ast nodes & check '}'
         let mut closed = false;
 
-        while current < tokens.len() {
-            let token = &tokens[current];
+        while self.current() < self.tokens.len() {
+            let token = self.peek();
 
             // offset & current are incremented inside each type
             // to avoid "tokens[overflowed_index]"" if loops ends
             // before a '{'
             match token.token_type {
                 LexerTokenType::CloseCurlyBrace => {
-                    current += 1;
-                    offset += 1;
+                    // consume '}'
+                    self.next_token(Some(token.line));
                     closed = true;
                     break; // break block loop since it reaches the end
                 }
                 LexerTokenType::FunctionCall => {
-                    let (index_offset, function_node) = Self::call_expression(&tokens, current);
-                    block_node.add_child(function_node);
-                    current += index_offset;
-                    offset += index_offset;
+                    let call_node = self.call_expression();
+                    block_node.add_child(call_node);
                 }
                 LexerTokenType::FnKeyword => {
-                    let (index_offset, assignment_node) =
-                        Self::function_declaration(&tokens, current);
-                    block_node.add_child(assignment_node);
-                    current += index_offset;
-                    offset += index_offset;
+                    let function_node = self.function_declaration();
+                    block_node.add_child(function_node);
                 }
                 LexerTokenType::LetKeyword => {
-                    let (index_offset, assignment_node) =
-                        Self::assignment_statement(&tokens, current);
+                    let assignment_node = self.assignment_statement();
                     block_node.add_child(assignment_node);
-                    current += index_offset;
-                    offset += index_offset;
                 }
                 LexerTokenType::Identifier => {
-                    let (index_offset, identifier_node) = Self::identifier(&tokens, current);
+                    let identifier_node = self.identifier();
                     block_node.add_child(identifier_node);
-                    current += index_offset;
-                    offset += index_offset;
                 }
                 LexerTokenType::Number => {
-                    let (index_offset, number_node) = Self::expression(&tokens, current);
+                    let number_node = self.expression();
                     block_node.add_child(number_node);
-                    current += index_offset;
-                    offset += index_offset;
                 }
                 _ => {
                     error::throw(
@@ -187,46 +177,38 @@ impl Module {
             }
         }
 
-        // non closed CallExpression
+        // non closed Block
         if !closed {
             error::throw(
                 ErrorType::SyntaxError,
                 "Expected ')' after block openning",
-                Some(tokens[current - 1].line),
+                Some(token.line),
             );
         }
 
-        (offset, AstNodeType::Block(block_node))
+        AstNodeType::Block(block_node)
     }
 
     // ()
-    fn group(
-        tokens: &Vec<LexerToken>,
-        current: usize,
-        context: Option<&str>,
-    ) -> (usize, AstNodeType) {
-        let mut current = current;
-        let mut offset = 0;
-        let mut group_node = Group::new(tokens[current].at, tokens[current].line);
+    fn group(&self, context: Option<&str>) -> AstNodeType {
+        print!("boy {}", self.tokens[self.current() + 1]);
+        // where am i
+        let context_msg = match context {
+            Some(str) => format!(" in {}", str),
+            _ => "".to_string(),
+        };
+
+        let group_token = self.peek();
+        let mut group_node = Group::new(group_token.at, group_token.line);
 
         // check '('
-        if tokens[current].token_type == LexerTokenType::OpenParenthesis {
-            current += 1;
-            offset += 1;
+        if group_token.token_type == LexerTokenType::OpenParenthesis {
+            self.next_token(Some(group_token.line))
         } else {
-            let context_msg = if let Some(_context) = context {
-                format!(" in {}", _context)
-            } else {
-                "".to_string()
-            };
             error::throw(
                 ErrorType::SyntaxError,
-                format!(
-                    "Unexpected token '{}'{}",
-                    tokens[current].value, context_msg
-                )
-                .as_str(),
-                Some(tokens[current].line),
+                format!("Unexpected token '{}'{}", group_token.value, context_msg).as_str(),
+                Some(group_token.line),
             )
         }
 
@@ -234,8 +216,8 @@ impl Module {
         let mut last_token = None;
         let mut closed = false;
 
-        while current < tokens.len() {
-            let token = &tokens[current];
+        while self.current() < self.tokens.len() {
+            let token = self.peek();
 
             // offset & current are incremented inside each type
             // to avoid "tokens[overflowed_index]"" if loops ends
@@ -247,21 +229,18 @@ impl Module {
                     }
 
                     last_token = Some(LexerTokenType::Comma);
-                    current += 1;
-                    offset += 1;
+                    self.next_token(Some(group_node.line));
                 }
                 LexerTokenType::CloseParenthesis => {
                     if last_token == Some(LexerTokenType::Comma) {
                         group_node.add_child(None);
                     }
 
-                    current += 1;
-                    offset += 1;
                     closed = true;
                     break;
                 }
                 _ => {
-                    let (node_offset, node) = Self::parse_expression(tokens, current);
+                    let node = self.parse_expression();
                     match node {
                         Expression::Identifier(_) => last_token = Some(LexerTokenType::Identifier),
                         Expression::Bool(_) => last_token = Some(LexerTokenType::TrueKeyword),
@@ -273,8 +252,6 @@ impl Module {
                             last_token = Some(LexerTokenType::Number)
                         }
                     }
-                    current += node_offset;
-                    offset += node_offset;
                     group_node.add_child(Some(node));
                 }
             }
@@ -282,261 +259,211 @@ impl Module {
 
         // non closed CallExpression
         if !closed {
-            let context_msg = if let Some(context) = context {
-                format!(" after {}", context)
-            } else {
-                "".to_string()
-            };
             error::throw(
                 ErrorType::SyntaxError,
                 format!("Expected ')' {}", context_msg).as_str(),
-                Some(tokens[current - 1].line),
+                Some(group_node.line),
             )
         };
 
-        (offset, AstNodeType::Group(group_node))
+        // consume ')'
+        self.next_token(Some(group_node.line));
+        AstNodeType::Group(group_node)
     }
 
     // print(a, b, c)
-    fn call_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let mut current = current;
-        let mut offset = 0;
-
+    fn call_expression(&self) -> AstNodeType {
         // get the identifier
+        let identifier_token = self.peek();
         let identifier_node = Identifier::new(
-            tokens[current].value.clone(),
-            tokens[current].at,
-            tokens[current].line,
+            identifier_token.value.clone(),
+            identifier_token.at,
+            identifier_token.line,
         );
-        current += 1;
-        offset += 1;
 
-        let (arguments_offset, arguments_node) = Self::group(
-            tokens,
-            current,
-            Some(format!("{}()", identifier_node.name).as_str()),
-        );
+        // consume identifier
+        self.next_token(Some(identifier_node.line));
+
+        let arguments_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
 
         let arguments_node = if let AstNodeType::Group(arguments_node) = arguments_node {
-            current += arguments_offset;
-            offset += arguments_offset;
             arguments_node
         } else {
             error::throw(
                 ErrorType::ParsingError,
                 "Unexpected node type in CallExpression, expected Group type node",
-                Some(tokens[current].line),
+                Some(identifier_token.line),
             );
             std::process::exit(1);
         };
 
         // avoid early end of file (idk if it's needed)
-        if current >= tokens.len() {
+        if !self.current() < self.tokens.len() {
             error::throw(
                 ErrorType::SyntaxError,
                 format!(
                     "Expected ';' but got '{}' as end of statement",
-                    tokens[current - 1].value
+                    identifier_token.value
                 )
                 .as_str(),
-                Some(tokens[current - 1].line),
+                Some(identifier_token.line),
             )
         }
 
+        let token = self.peek();
         // check for final semicolon
-        let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
-            let call_expression_properties = (tokens[current].at, tokens[current].line);
-            current += 1;
-            offset += 1;
+        let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
+            let call_expression_properties = (token.at, token.line);
+            // consume ';'
+            self.next_token(Some(token.line));
             call_expression_properties
         } else {
             error::throw(
                 ErrorType::SyntaxError,
-                format!(
-                    "Expected ';' but got '{}' as end of statement",
-                    tokens[current].value
-                )
-                .as_str(),
-                Some(tokens[current].line),
+                format!("Expected ';' but got '{}' as end of statement", token.value).as_str(),
+                Some(token.line),
             );
             std::process::exit(1); // for type checking
         };
 
-        (
-            offset,
-            AstNodeType::CallExpression(CallExpressionNode::new(
-                identifier_node,
-                arguments_node,
-                at,
-                line,
-            )),
-        )
+        AstNodeType::CallExpression(CallExpressionNode::new(
+            identifier_node,
+            arguments_node,
+            at,
+            line,
+        ))
     }
 
     // let a = 20
-    fn assignment_statement(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let mut current = current;
-        let mut offset = 0;
-
+    fn assignment_statement(&self) -> AstNodeType {
+        let token = self.peek();
         // get assignment type: mutable or constant
-        let var_type = if tokens[current].value == "let" {
+        let var_type = if token.value == "let" {
             VarType::Let
         } else {
             VarType::Const
         };
 
-        current += 1;
-        offset += 1;
+        // consume var type
+        self.next_token(Some(token.line));
 
         // get the identifier
-        let identifier_node = Identifier::new(
-            tokens[current].value.clone(),
-            tokens[current].at,
-            tokens[current].line,
-        );
-        current += 1;
-        offset += 1;
+        let token = self.peek();
+        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+        // consume identifier
+        self.next_token(Some(token.line));
 
+        let token = self.peek();
         // check next token is '='
-        if tokens[current].token_type != LexerTokenType::AssignmentOperator {
+        if token.token_type != LexerTokenType::AssignmentOperator {
             error::throw(
                 ErrorType::SyntaxError,
-                format!("Expected '=' but got '{}'", tokens[current].value).as_str(),
-                Some(tokens[current].line),
+                format!("Expected '=' but got '{}'", token.value).as_str(),
+                Some(token.line),
             )
         };
-        current += 1;
-        offset += 1;
+        // consume '='
+        self.next_token(Some(token.line));
 
         // get variable value
-        let (expr_offset, expr) = Self::parse_expression(tokens, current);
-        current += expr_offset;
-        offset += expr_offset;
+        let expr = self.parse_expression();
 
         // check for final semicolon
-        let (at, line) = if tokens[current].token_type == LexerTokenType::EndOfStatement {
-            let assignament_statement_properties = (tokens[current].at, tokens[current].line);
-            current += 1;
-            offset += 1;
+        let token = self.peek();
+        let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
+            let assignament_statement_properties = (token.at, token.line);
+            // consume ';'
+            self.next_token(Some(token.line));
             assignament_statement_properties
         } else {
             error::throw(
                 ErrorType::SyntaxError,
-                format!(
-                    "Expected ';' but got '{}' as end of statement",
-                    tokens[current].value
-                )
-                .as_str(),
-                Some(tokens[current].line),
+                format!("Expected ';' but got '{}' as end of statement", token.value).as_str(),
+                Some(token.line),
             );
             std::process::exit(1); // for type checking
         };
 
-        (
-            offset,
-            AstNodeType::AssignamentStatement(AssignamentNode::new(
-                identifier_node,
-                expr,
-                var_type,
-                at,
-                line,
-            )),
-        )
+        AstNodeType::AssignamentStatement(AssignamentNode::new(
+            identifier_node,
+            expr,
+            var_type,
+            at,
+            line,
+        ))
     }
 
     // fn a() {}
-    fn function_declaration(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let mut current = current + 1; // start after "fn" token
-        let mut offset = 0;
+    fn function_declaration(&self) -> AstNodeType {
+        // consume 'fn' keyword
+        self.next_token(Some(self.peek().line));
 
         // get the identifier
-        let identifier_node = Identifier::new(
-            tokens[current].value.clone(),
-            tokens[current].at,
-            tokens[current].line,
-        );
-        current += 1;
-        offset += 1;
+        let token = self.peek();
+        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+        // consume identifier
+        self.next_token(Some(self.peek().line));
 
         // check for group
-        let (arguments_offset, arguments) =
-            Self::group(tokens, current, Some("function declaration"));
-        current += arguments_offset;
-        offset += arguments_offset;
+        let arguments = self.group(Some("function declaration"));
         let arguments = match arguments {
             AstNodeType::Group(grp) => grp,
             _ => {
                 error::throw(
                     ErrorType::ParsingError,
                     "Expected (...) as function parameters",
-                    Some(tokens[current].at),
+                    Some(self.peek().at),
                 );
                 std::process::exit(1);
             }
         };
 
         // check for block
-        let (block_offset, block_node) = Self::block(tokens, current);
-        offset += block_offset;
-        // not increment current to avoid invex overflow
-        // on the function return
+        let token = self.peek();
+        let block_node = self.block();
         let function_body = match block_node {
             AstNodeType::Block(b) => b,
             _ => {
                 error::throw(
                     ErrorType::ParsingError,
                     "Expected blockNode as function body",
-                    Some(tokens[current].at),
+                    Some(token.line),
                 );
                 std::process::exit(1);
             }
         };
 
-        (
-            offset,
-            AstNodeType::FunctionDeclaration(FunctionDeclaration::new(
-                identifier_node,
-                arguments,
-                function_body,
-                tokens[current].at,
-                tokens[current].line,
-            )),
-        )
+        AstNodeType::FunctionDeclaration(FunctionDeclaration::new(
+            identifier_node,
+            arguments,
+            function_body,
+            token.at,
+            token.line,
+        ))
     }
 
     // a | a() | a.value | a = 20 + a
-    fn identifier(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let mut current = current;
-        let mut offset = 0;
-
+    fn identifier(&self) -> AstNodeType {
+        let token = self.peek();
         // get the identifier
-        let identifier_node = Identifier::new(
-            tokens[current].value.clone(),
-            tokens[current].at,
-            tokens[current].line,
-        );
-        current += 1;
-        offset += 1;
+        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+        // consume identifier
+        self.next_token(Some(token.line));
 
         // check next token of the identifier
-        let (node_offset, node) = match tokens[current].token_type {
+        let token = self.peek();
+        let node = match token.token_type {
             LexerTokenType::OpenParenthesis => {
                 // a()
-                let (group_offset, group_node) = Self::group(
-                    tokens,
-                    current,
-                    Some(format!("{}()", identifier_node.name).as_str()),
-                );
+                let group_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
 
                 let group_node = if let AstNodeType::Group(group_node) = group_node {
-                    current += group_offset;
-                    offset += group_offset;
                     group_node
                 } else {
                     error::throw(
                         ErrorType::ParsingError,
                         "Unexpected node type in identifier, expected Group type node",
-                        Some(tokens[current].line),
+                        Some(token.line),
                     );
                     std::process::exit(1);
                 };
@@ -546,7 +473,7 @@ impl Module {
 
                 let call_expression_node =
                     CallExpressionNode::new(identifier_node, group_node, at, line);
-                (offset, AstNodeType::CallExpression(call_expression_node))
+                AstNodeType::CallExpression(call_expression_node)
             }
             // [Property acess] should handle <a.value> here
             //LexerTokenType::Dot => {}
@@ -557,215 +484,172 @@ impl Module {
                     ErrorType::SyntaxError,
                     format!(
                         "Unexpected token '{}' after '{}' identifier",
-                        tokens[current].value, identifier_node.name
+                        token.value, identifier_node.name
                     )
                     .as_str(),
-                    Some(tokens[current].line),
+                    Some(token.line),
                 );
                 std::process::exit(1);
             }
         };
 
-        current += offset;
-        offset += node_offset;
-
-        (offset, node)
+        node
     }
 
     // (2 * 2) + 3
-    fn expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, AstNodeType) {
-        let (offset, expr) = Self::parse_expression(tokens, current);
-        (offset, AstNodeType::Expression(expr))
+    fn expression(&self) -> AstNodeType {
+        let expr = self.parse_expression();
+        AstNodeType::Expression(expr)
     }
 
     // 2 + 3 * 23
-    fn parse_expression(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
+    fn parse_expression(&self) -> Expression {
         // will autoincrement current
         // and it will be the root or the left node
         // depending on the expression
-        let (node_offset, mut node) = Self::parse_term(tokens, current);
-        let mut offset = 0 + node_offset;
-        let mut current = current + offset;
-
-        while current < tokens.len() {
-            match tokens[current].token_type {
+        let mut node = self.parse_term();
+        while self.current() < self.tokens.len() {
+            let token = self.peek();
+            match token.token_type {
                 LexerTokenType::AddOperator | LexerTokenType::SubtractOperator => {
-                    let curr_token = &tokens[current];
-
-                    // consume the operator
-                    let operator = if let Some(op) = curr_token.value.chars().next() {
+                    let operator = if let Some(op) = token.value.chars().next() {
                         op
                     } else {
                         error::throw(
                             ErrorType::ParsingError,
-                            format!("Operator '{}' cannot be parsed as char", curr_token.value)
-                                .as_str(),
-                            Some(curr_token.line),
+                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
+                            Some(token.line),
                         );
                         std::process::exit(1);
                     };
-                    current += 1;
-                    offset += 1;
+
+                    // consume the operator
+                    self.next_token(Some(token.line));
 
                     // get right node
-                    let (right_offset, right) = Self::parse_term(tokens, current);
-                    current += right_offset;
-                    offset += right_offset;
-
+                    let right = self.parse_term();
                     node = Expression::BinaryExpression(BinaryExpression::new(
                         operator,
                         Box::new(node),
                         Box::new(right),
-                        curr_token.at,
-                        curr_token.line,
+                        token.at,
+                        token.line,
                     ));
                 }
                 _ => break,
             }
         }
 
-        (offset, node)
+        node
     }
 
-    fn parse_term(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
+    fn parse_term(&self) -> Expression {
         // will autoincrement current
         // and it will be the root or the left node
         // depending on the expression
-        let (node_offset, mut node) = Self::parse_factor(tokens, current);
-        let mut offset = 0 + node_offset;
-        let mut current = current + offset;
+        let mut node = self.parse_factor();
 
-        while current < tokens.len() {
-            match tokens[current].token_type {
+        while self.current() < self.tokens.len() {
+            let token = self.peek();
+            match token.token_type {
                 LexerTokenType::MultiplyOperator | LexerTokenType::DivideOperator => {
-                    let curr_token = &tokens[current];
-
-                    // consume the operator
-                    let operator = if let Some(op) = curr_token.value.chars().next() {
+                    let operator = if let Some(op) = token.value.chars().next() {
                         op
                     } else {
                         error::throw(
                             ErrorType::ParsingError,
-                            format!("Operator '{}' cannot be parsed as char", curr_token.value)
-                                .as_str(),
-                            Some(curr_token.line),
+                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
+                            Some(token.line),
                         );
                         std::process::exit(1);
                     };
-                    current += 1;
-                    offset += 1;
+
+                    // consume the operator
+                    self.next_token(Some(token.line));
 
                     // get right node
-                    let (right_offset, right) = Self::parse_factor(tokens, current);
-                    current += right_offset;
-                    offset += right_offset;
-
+                    let right = self.parse_factor();
                     node = Expression::BinaryExpression(BinaryExpression::new(
                         operator,
                         Box::new(node),
                         Box::new(right),
-                        curr_token.at,
-                        curr_token.line,
+                        token.at,
+                        token.line,
                     ));
                 }
                 _ => break,
             }
         }
 
-        (offset, node)
+        node
     }
 
-    fn parse_factor(tokens: &Vec<LexerToken>, current: usize) -> (usize, Expression) {
-        match tokens[current].token_type {
+    fn parse_factor(&self) -> Expression {
+        let token = self.peek();
+        match token.token_type {
             LexerTokenType::OpenParenthesis => {
-                let mut offset = 1; // to consume open parenthesis
-                let mut current = current + offset;
+                self.next_token(Some(token.line)); // to consume the '('
+                let expr = self.parse_expression();
 
-                let (expr_offset, expr) = Self::parse_expression(tokens, current);
-                current += expr_offset;
-                offset += expr_offset;
-
-                if tokens[current].token_type == LexerTokenType::CloseParenthesis {
-                    offset += 1; // to consume close parenthesis
-                    (offset, expr)
+                if token.token_type == LexerTokenType::CloseParenthesis {
+                    self.next_token(Some(token.line)); // to consume the ')'
+                    expr
                 } else {
                     error::throw(
                         ErrorType::ParsingError,
-                        format!("Unexpected token '{}', expected ')'", tokens[current].value)
-                            .as_str(),
-                        Some(tokens[current].line),
+                        format!("Unexpected token '{}', expected ')'", token.value).as_str(),
+                        Some(token.line),
                     );
                     std::process::exit(1);
                 }
             }
             LexerTokenType::Number => {
-                let number_node = Number::from_string(
-                    tokens[current].value.clone(),
-                    tokens[current].at,
-                    tokens[current].line,
-                );
+                let number_node = Number::from_string(token.value.clone(), token.at, token.line);
 
                 if let Some(node) = number_node {
-                    // 1 since it only consumes the number token.
-                    // in the future this will be inside a struct and
-                    // will mutate internal state
-                    (1, Expression::Number(node))
+                    self.next_token(Some(token.line)); // consume number itself
+                    Expression::Number(node)
                 } else {
                     error::throw(
                         ErrorType::ParsingError,
-                        format!(
-                            "Invalid token '{}' inside of a expression",
-                            tokens[current].value
-                        )
-                        .as_str(),
-                        Some(tokens[current].line),
+                        format!("Invalid token '{}' inside of a expression", token.value).as_str(),
+                        Some(token.line),
                     );
                     std::process::exit(1);
                 }
             }
             LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-                let node = if let Ok(bool_value) = tokens[current].value.parse::<bool>() {
-                    Bool::new(bool_value, tokens[current].at, tokens[current].line)
+                let token = self.peek();
+                let node = if let Ok(bool_value) = token.value.parse::<bool>() {
+                    Bool::new(bool_value, token.at, token.line)
                 } else {
                     error::throw(
                         ErrorType::ParsingError,
-                        format!(
-                            "Invalid token '{}' inside of a expression",
-                            tokens[current].value
-                        )
-                        .as_str(),
-                        Some(tokens[current].line),
+                        format!("Invalid token '{}' inside of a expression", token.value).as_str(),
+                        Some(token.line),
                     );
                     std::process::exit(1);
                 };
 
-                (1, Expression::Bool(node))
+                Expression::Bool(node)
             }
-            LexerTokenType::StringLiteral => (
-                1,
+            LexerTokenType::StringLiteral => {
+                self.next_token(Some(token.line));
                 Expression::StringLiteral(StringLiteral::new(
-                    tokens[current].value.clone(),
-                    tokens[current].at,
-                    tokens[current].line,
-                )),
-            ),
-            LexerTokenType::Identifier => (
-                1,
-                Expression::Identifier(Identifier::new(
-                    tokens[current].value.clone(),
-                    tokens[current].at,
-                    tokens[current].line,
-                )),
-            ),
+                    token.value.clone(),
+                    token.at,
+                    token.line,
+                ))
+            }
+            LexerTokenType::Identifier => {
+                self.next_token(Some(token.line));
+                Expression::Identifier(Identifier::new(token.value.clone(), token.at, token.line))
+            }
             _ => {
                 error::throw(
                     error::ErrorType::SyntaxError,
-                    format!(
-                        "Invalid token '{}' inside of a expression",
-                        tokens[current].value
-                    )
-                    .as_str(),
-                    Some(tokens[current].line),
+                    format!("Invalid token '{}' inside of a expression", token.value).as_str(),
+                    Some(token.line),
                 );
                 std::process::exit(1);
             }
