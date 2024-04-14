@@ -77,6 +77,9 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 })
                 .collect();
 
+            // push new hashmap onto the stack
+            // for function scope
+            scopes.push();
             match node.identifier.name.as_str() {
                 "print" => print(runtime_arguments, &scopes),
                 _ => {
@@ -102,6 +105,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                     exec_node(&AstNodeType::Block(function.body.clone()), scopes);
                 }
             }
+            scopes.pop();
         }
         AstNodeType::AssignamentStatement(node) => {
             let value_as_runtype = calc_expression(&node.init, scopes);
