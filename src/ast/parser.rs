@@ -91,6 +91,10 @@ impl Module {
                     let identifier_node = self.identifier();
                     module_ast.add_child(identifier_node);
                 }
+                LexerTokenType::OpenCurlyBrace => {
+                    let block_node = self.block();
+                    module_ast.add_child(block_node);
+                }
                 /*                 LexerTokenType::Number => {
                     let (index_offset, number_node) = Self::expression(&tokens, current);
                     module_ast.add_child(number_node);
