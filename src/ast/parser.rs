@@ -17,7 +17,7 @@ use crate::{
     core::error::{self, ErrorType},
 };
 
-use super::{binary_expression::BinaryExpression, identifier};
+use super::binary_expression::BinaryExpression;
 
 pub struct Module {
     module_name: String,
@@ -39,33 +39,23 @@ impl Module {
         self.tree(module)
     }
 
+    // Index handlers:
     // returns directly the node since only next() method
     // changes the current index and it checks if it's overflowed
     fn peek(&self) -> &LexerToken {
         &self.tokens[self.current.get()]
     }
 
-    fn peek_next(&self) -> Option<&LexerToken> {
-        if (self.current.get() + 1) < self.tokens.len() {
-            Some(&self.tokens[self.current.get() + 1])
+    fn is_peekable(&self) -> bool {
+        if self.current() < self.tokens.len() {
+            true
         } else {
-            None
+            false
         }
     }
 
-    fn next(&self) -> Result<(), ()> {
-        if (self.current.get() + 1) < self.tokens.len() {
-            self.current.set(self.current.get() + 1);
-            Ok(())
-        } else {
-            Err(())
-        }
-    }
-
-    fn next_token(&self, line: Option<usize>) {
-        if let Err(a) = self.next() {
-            error::throw(ErrorType::ParsingError, "Overflow on tokens peeking", line);
-        }
+    fn next(&self) {
+        self.current.set(self.current.get() + 1);
     }
 
     fn current(&self) -> usize {
@@ -73,24 +63,21 @@ impl Module {
     }
 
     fn tree(&mut self, mut module_ast: ModuleAst) -> ModuleAst {
-        while self.current() < self.tokens.len() {
+        while self.is_peekable() {
             let token = self.peek();
 
             match token.token_type {
                 LexerTokenType::FunctionCall => {
                     let function_node = self.call_expression();
                     module_ast.add_child(function_node);
-                    print!("{}", token);
                 }
                 LexerTokenType::LetKeyword => {
                     let assignment_node = self.assignment_statement();
                     module_ast.add_child(assignment_node);
-                    print!("{}", token);
                 }
                 LexerTokenType::FnKeyword => {
                     let function_node = self.function_declaration();
                     module_ast.add_child(function_node);
-                    print!("{}", token);
                 }
                 /*                 LexerTokenType::Identifier => {
                     let (index_offset, identifier_node) = Self::identifier(&tokens, current);
@@ -103,7 +90,7 @@ impl Module {
                     current += index_offset;
                 } */
                 _ => {
-                    self.next_token(Some(token.line));
+                    self.next();
                 }
             }
         }
@@ -118,7 +105,7 @@ impl Module {
         // check '{'
         let token = self.peek();
         if token.token_type == LexerTokenType::OpenCurlyBrace {
-            self.next_token(Some(token.line));
+            self.next();
         } else {
             error::throw(
                 ErrorType::SyntaxError,
@@ -139,7 +126,7 @@ impl Module {
             match token.token_type {
                 LexerTokenType::CloseCurlyBrace => {
                     // consume '}'
-                    self.next_token(Some(token.line));
+                    self.next();
                     closed = true;
                     break; // break block loop since it reaches the end
                 }
@@ -191,7 +178,6 @@ impl Module {
 
     // ()
     fn group(&self, context: Option<&str>) -> AstNodeType {
-        print!("boy {}", self.tokens[self.current() + 1]);
         // where am i
         let context_msg = match context {
             Some(str) => format!(" in {}", str),
@@ -203,7 +189,7 @@ impl Module {
 
         // check '('
         if group_token.token_type == LexerTokenType::OpenParenthesis {
-            self.next_token(Some(group_token.line))
+            self.next()
         } else {
             error::throw(
                 ErrorType::SyntaxError,
@@ -229,7 +215,7 @@ impl Module {
                     }
 
                     last_token = Some(LexerTokenType::Comma);
-                    self.next_token(Some(group_node.line));
+                    self.next();
                 }
                 LexerTokenType::CloseParenthesis => {
                     if last_token == Some(LexerTokenType::Comma) {
@@ -267,7 +253,7 @@ impl Module {
         };
 
         // consume ')'
-        self.next_token(Some(group_node.line));
+        self.next();
         AstNodeType::Group(group_node)
     }
 
@@ -282,7 +268,7 @@ impl Module {
         );
 
         // consume identifier
-        self.next_token(Some(identifier_node.line));
+        self.next();
 
         let arguments_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
 
@@ -315,7 +301,7 @@ impl Module {
         let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
             let call_expression_properties = (token.at, token.line);
             // consume ';'
-            self.next_token(Some(token.line));
+            self.next();
             call_expression_properties
         } else {
             error::throw(
@@ -345,13 +331,13 @@ impl Module {
         };
 
         // consume var type
-        self.next_token(Some(token.line));
+        self.next();
 
         // get the identifier
         let token = self.peek();
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // consume identifier
-        self.next_token(Some(token.line));
+        self.next();
 
         let token = self.peek();
         // check next token is '='
@@ -363,7 +349,7 @@ impl Module {
             )
         };
         // consume '='
-        self.next_token(Some(token.line));
+        self.next();
 
         // get variable value
         let expr = self.parse_expression();
@@ -373,7 +359,7 @@ impl Module {
         let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
             let assignament_statement_properties = (token.at, token.line);
             // consume ';'
-            self.next_token(Some(token.line));
+            self.next();
             assignament_statement_properties
         } else {
             error::throw(
@@ -396,13 +382,13 @@ impl Module {
     // fn a() {}
     fn function_declaration(&self) -> AstNodeType {
         // consume 'fn' keyword
-        self.next_token(Some(self.peek().line));
+        self.next();
 
         // get the identifier
         let token = self.peek();
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // consume identifier
-        self.next_token(Some(self.peek().line));
+        self.next();
 
         // check for group
         let arguments = self.group(Some("function declaration"));
@@ -448,7 +434,7 @@ impl Module {
         // get the identifier
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // consume identifier
-        self.next_token(Some(token.line));
+        self.next();
 
         // check next token of the identifier
         let token = self.peek();
@@ -524,7 +510,7 @@ impl Module {
                     };
 
                     // consume the operator
-                    self.next_token(Some(token.line));
+                    self.next();
 
                     // get right node
                     let right = self.parse_term();
@@ -565,7 +551,7 @@ impl Module {
                     };
 
                     // consume the operator
-                    self.next_token(Some(token.line));
+                    self.next();
 
                     // get right node
                     let right = self.parse_factor();
@@ -588,11 +574,11 @@ impl Module {
         let token = self.peek();
         match token.token_type {
             LexerTokenType::OpenParenthesis => {
-                self.next_token(Some(token.line)); // to consume the '('
+                self.next(); // to consume the '('
                 let expr = self.parse_expression();
 
                 if token.token_type == LexerTokenType::CloseParenthesis {
-                    self.next_token(Some(token.line)); // to consume the ')'
+                    self.next(); // to consume the ')'
                     expr
                 } else {
                     error::throw(
@@ -607,7 +593,7 @@ impl Module {
                 let number_node = Number::from_string(token.value.clone(), token.at, token.line);
 
                 if let Some(node) = number_node {
-                    self.next_token(Some(token.line)); // consume number itself
+                    self.next(); // consume number itself
                     Expression::Number(node)
                 } else {
                     error::throw(
@@ -634,7 +620,7 @@ impl Module {
                 Expression::Bool(node)
             }
             LexerTokenType::StringLiteral => {
-                self.next_token(Some(token.line));
+                self.next();
                 Expression::StringLiteral(StringLiteral::new(
                     token.value.clone(),
                     token.at,
@@ -642,7 +628,7 @@ impl Module {
                 ))
             }
             LexerTokenType::Identifier => {
-                self.next_token(Some(token.line));
+                self.next();
                 Expression::Identifier(Identifier::new(token.value.clone(), token.at, token.line))
             }
             _ => {
