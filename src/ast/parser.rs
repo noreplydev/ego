@@ -46,6 +46,14 @@ impl Module {
         &self.tokens[self.current.get()]
     }
 
+    fn peek_next(&self) -> Option<&LexerToken> {
+        if ((self.current() + 1) < self.tokens.len()) {
+            Some(&self.tokens[self.current() + 1])
+        } else {
+            None
+        }
+    }
+
     fn is_peekable(&self) -> bool {
         if self.current() < self.tokens.len() {
             true
@@ -79,12 +87,11 @@ impl Module {
                     let function_node = self.function_declaration();
                     module_ast.add_child(function_node);
                 }
-                /*                 LexerTokenType::Identifier => {
-                    let (index_offset, identifier_node) = Self::identifier(&tokens, current);
+                LexerTokenType::Identifier => {
+                    let identifier_node = self.identifier();
                     module_ast.add_child(identifier_node);
-                    current += index_offset;
                 }
-                LexerTokenType::Number => {
+                /*                 LexerTokenType::Number => {
                     let (index_offset, number_node) = Self::expression(&tokens, current);
                     module_ast.add_child(number_node);
                     current += index_offset;
@@ -433,50 +440,33 @@ impl Module {
         let token = self.peek();
         // get the identifier
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
-        // consume identifier
-        self.next();
+        // check next token of the identifier without consuming
+        let token = self.peek_next();
 
-        // check next token of the identifier
-        let token = self.peek();
-        let node = match token.token_type {
-            LexerTokenType::OpenParenthesis => {
-                // a()
-                let group_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
-
-                let group_node = if let AstNodeType::Group(group_node) = group_node {
-                    group_node
-                } else {
+        let node = match token {
+            Some(next) => match next.token_type {
+                LexerTokenType::OpenParenthesis => {
+                    // a();
+                    self.call_expression()
+                }
+                // [Property acess] should handle <a.value> here
+                //LexerTokenType::Dot => {}
+                // [Variable mutation] should handle <a = ...> here
+                //LexerTokenType::AssignamentOperator => {}
+                _ => {
                     error::throw(
-                        ErrorType::ParsingError,
-                        "Unexpected node type in identifier, expected Group type node",
-                        Some(token.line),
+                        ErrorType::SyntaxError,
+                        format!(
+                            "Unexpected token '{}' after '{}' identifier",
+                            next.value, identifier_node.name
+                        )
+                        .as_str(),
+                        Some(next.line),
                     );
                     std::process::exit(1);
-                };
-
-                let at = group_node.line;
-                let line = group_node.line;
-
-                let call_expression_node =
-                    CallExpressionNode::new(identifier_node, group_node, at, line);
-                AstNodeType::CallExpression(call_expression_node)
-            }
-            // [Property acess] should handle <a.value> here
-            //LexerTokenType::Dot => {}
-            // [Variable mutation] should handle <a = ...> here
-            //LexerTokenType::AssignamentOperator => {}
-            _ => {
-                error::throw(
-                    ErrorType::SyntaxError,
-                    format!(
-                        "Unexpected token '{}' after '{}' identifier",
-                        token.value, identifier_node.name
-                    )
-                    .as_str(),
-                    Some(token.line),
-                );
-                std::process::exit(1);
-            }
+                }
+            },
+            None => AstNodeType::Expression(Expression::Identifier(identifier_node)),
         };
 
         node
