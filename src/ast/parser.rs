@@ -17,7 +17,7 @@ use crate::{
     core::error::{self, ErrorType},
 };
 
-use super::binary_expression::BinaryExpression;
+use super::{binary_expression::BinaryExpression, if_statement::IfStatement};
 
 pub struct Module {
     module_name: String,
@@ -95,11 +95,10 @@ impl Module {
                     let block_node = self.block();
                     module_ast.add_child(block_node);
                 }
-                /*                 LexerTokenType::Number => {
-                    let (index_offset, number_node) = Self::expression(&tokens, current);
-                    module_ast.add_child(number_node);
-                    current += index_offset;
-                } */
+                LexerTokenType::IfKeyword => {
+                    let block_node = self.if_statement();
+                    module_ast.add_child(block_node);
+                }
                 _ => {
                     self.next();
                 }
@@ -439,6 +438,48 @@ impl Module {
         ))
     }
 
+    fn if_statement(&self) -> AstNodeType {
+        // consume 'if' keyword
+        self.next();
+
+        // check for group
+        let arguments = self.group(Some("If statement"));
+        let arguments = match arguments {
+            AstNodeType::Group(grp) => grp,
+            _ => {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Expected (...) as function parameters",
+                    Some(self.peek().at),
+                );
+                std::process::exit(1);
+            }
+        };
+
+        // check for block
+        let token = self.peek();
+        let block_node = self.block();
+        let function_body = match block_node {
+            AstNodeType::Block(b) => b,
+            _ => {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Expected blockNode as function body",
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        };
+
+        self.next();
+        AstNodeType::IfStatement(IfStatement::new(
+            arguments,
+            function_body,
+            token.at,
+            token.line,
+        ))
+    }
+
     // a | a() | a.value | a = 20 + a
     fn identifier(&self) -> AstNodeType {
         let token = self.peek();
@@ -611,6 +652,7 @@ impl Module {
                     std::process::exit(1);
                 };
 
+                self.next(); // consume keyword
                 Expression::Bool(node)
             }
             LexerTokenType::StringLiteral => {
