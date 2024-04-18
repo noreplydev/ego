@@ -389,7 +389,7 @@ impl Module {
         ))
     }
 
-    // fn a() {}
+    // fn a() {...}
     fn function_declaration(&self) -> AstNodeType {
         // consume 'fn' keyword
         self.next();
@@ -438,46 +438,74 @@ impl Module {
         ))
     }
 
+    // if (true) {...}
     fn if_statement(&self) -> AstNodeType {
         // consume 'if' keyword
+        let at = self.peek().at;
+        let line = self.peek().line;
+
+        // check '('
         self.next();
-
-        // check for group
-        let arguments = self.group(Some("If statement"));
-        let arguments = match arguments {
-            AstNodeType::Group(grp) => grp,
-            _ => {
-                error::throw(
-                    ErrorType::ParsingError,
-                    "Expected (...) as function parameters",
-                    Some(self.peek().at),
-                );
-                std::process::exit(1);
-            }
-        };
-
-        // check for block
         let token = self.peek();
-        let block_node = self.block();
-        let function_body = match block_node {
-            AstNodeType::Block(b) => b,
+        if token.token_type != LexerTokenType::OpenParenthesis {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Unexpected token '{}'", token.value).as_str(),
+                Some(token.line),
+            );
+        }
+
+        // consume expression
+        self.next();
+        let expr = self.expression();
+        let expr_node = match expr {
+            AstNodeType::Expression(b) => b,
             _ => {
                 error::throw(
                     ErrorType::ParsingError,
-                    "Expected blockNode as function body",
+                    "Expected blockNode as if arm",
                     Some(token.line),
                 );
                 std::process::exit(1);
             }
         };
 
+        // consume ')'
         self.next();
-        AstNodeType::IfStatement(IfStatement::new(
-            arguments,
-            function_body,
-            token.at,
-            token.line,
-        ))
+        let token = self.peek();
+        if token.token_type == LexerTokenType::CloseParenthesis {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Unexpected token '{}' in if statement", token.value).as_str(),
+                Some(token.line),
+            )
+        }
+
+        // consume '{'
+        let token = self.peek();
+        print!("expr: {} {}", token, self.peek());
+        if token.token_type != LexerTokenType::OpenCurlyBrace {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Unexpected token '{}' in if statement", token.value).as_str(),
+                Some(token.line),
+            )
+        }
+
+        let block = self.block();
+        let block_node = match block {
+            AstNodeType::Block(b) => b,
+            _ => {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Expected blockNode as if arm",
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        };
+
+        AstNodeType::IfStatement(IfStatement::new(expr_node, block_node, at, line))
     }
 
     // a | a() | a.value | a = 20 + a
@@ -656,7 +684,7 @@ impl Module {
                 Expression::Bool(node)
             }
             LexerTokenType::StringLiteral => {
-                self.next();
+                self.next(); // consume string literal
                 Expression::StringLiteral(StringLiteral::new(
                     token.value.clone(),
                     token.at,
@@ -664,7 +692,7 @@ impl Module {
                 ))
             }
             LexerTokenType::Identifier => {
-                self.next();
+                self.next(); // consume identifier
                 Expression::Identifier(Identifier::new(token.value.clone(), token.at, token.line))
             }
             _ => {
