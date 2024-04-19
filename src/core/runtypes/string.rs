@@ -15,6 +15,14 @@ impl RnString {
     pub fn to_string(&self) -> String {
         interpolate(self.val.clone())
     }
+
+    pub fn to_boolean(&self) -> bool {
+        if self.val.len() > 0 {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 fn interpolate(string: String) -> String {

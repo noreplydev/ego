@@ -15,6 +15,10 @@ impl RnBoolean {
     pub fn to_string(&self) -> String {
         self.val.to_string()
     }
+
+    pub fn to_boolean(&self) -> bool {
+        self.val
+    }
 }
 
 // implement arithmetics

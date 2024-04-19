@@ -34,6 +34,10 @@ impl RnFunction {
     pub fn to_string(&self) -> String {
         self.identifier.to_string()
     }
+
+    pub fn to_boolean(&self) -> bool {
+        false
+    }
 }
 
 // implement arithmetics

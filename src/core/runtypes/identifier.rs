@@ -15,6 +15,10 @@ impl RnIdentifier {
         self.val.clone()
     }
 
+    pub fn to_boolean(&self) -> bool {
+        false
+    }
+
     pub fn resolve(&self, scopes: &ScopesStack) -> RuntimeType {
         let value_runtype = scopes.get_identifier_value(&self.val);
         if let Some(value) = value_runtype {

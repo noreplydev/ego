@@ -15,6 +15,14 @@ impl RnNumber {
     pub fn to_string(&self) -> String {
         self.val.to_string()
     }
+
+    pub fn to_boolean(&self) -> bool {
+        if self.val > 0 {
+            true
+        } else {
+            false
+        }
+    }
 }
 
 // implement arithmetics

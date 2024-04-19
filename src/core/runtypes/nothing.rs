@@ -12,6 +12,10 @@ impl Nothing {
     pub fn to_string(&self) -> String {
         String::from("nothing")
     }
+
+    pub fn to_boolean(&self) -> bool {
+        false
+    }
 }
 
 // implement arithmetics

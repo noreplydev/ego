@@ -70,6 +70,17 @@ impl RuntimeType {
             RuntimeType::RnFunction(rn_function) => rn_function.to_string(),
         }
     }
+
+    pub fn to_boolean(&self) -> bool {
+        match self {
+            RuntimeType::Nothing(nothing) => nothing.to_boolean(),
+            RuntimeType::RnString(rn_string) => rn_string.to_boolean(),
+            RuntimeType::RnNumber(rn_number) => rn_number.to_boolean(),
+            RuntimeType::RnIdentifier(rn_number) => rn_number.to_boolean(),
+            RuntimeType::RnBoolean(rn_boolean) => rn_boolean.to_boolean(),
+            RuntimeType::RnFunction(rn_function) => rn_function.to_boolean(),
+        }
+    }
 }
 
 impl fmt::Display for RuntimeType {

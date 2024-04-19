@@ -1,5 +1,5 @@
 use crate::{
-    ast::{identifier, module::ModuleAst, AstNodeType, Expression},
+    ast::{module::ModuleAst, AstNodeType, Expression},
     core::{
         error::{self, ErrorType},
         handlers::print::print,
@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-use super::{scope, ScopesStack};
+use super::ScopesStack;
 
 pub fn exec(ast: ModuleAst) {
     let mut scopes = ScopesStack::new();
@@ -112,6 +112,12 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
         AstNodeType::AssignamentStatement(node) => {
             let value_as_runtype = calc_expression(&node.init, scopes);
             scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+        }
+        AstNodeType::IfStatement(node) => {
+            let condition = calc_expression(&node.condition, scopes);
+            if condition.to_boolean() {
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes)
+            }
         }
         _ => {}
     }
