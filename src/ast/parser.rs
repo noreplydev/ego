@@ -483,7 +483,6 @@ impl Module {
 
         // consume '{'
         let token = self.peek();
-        print!("expr: {} {}", token, self.peek());
         if token.token_type != LexerTokenType::OpenCurlyBrace {
             error::throw(
                 ErrorType::SyntaxError,
