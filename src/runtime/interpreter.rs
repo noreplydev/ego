@@ -30,6 +30,7 @@ pub fn exec(ast: ModuleAst) {
 fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     match node {
         AstNodeType::Block(node) => {
+            // block level hoisting
             let mut counter = 0;
             while counter < node.children.len() {
                 hoist_node(&node.children[counter], scopes);
@@ -37,6 +38,7 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             }
         }
         AstNodeType::FunctionDeclaration(node) => {
+            // add declaration to scopes
             let identifier = node.identifier.name.clone();
             let rn_function = RuntimeType::function(
                 identifier.clone(),
@@ -46,6 +48,9 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 node.line,
             );
             scopes.add_identifier(identifier, rn_function);
+
+            // hoisting function level declarations
+            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
         }
         _ => {}
     }
