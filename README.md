@@ -37,8 +37,20 @@ As ego is in an experimental phase you can always debug the lexer tokens and the
 $ ego hello_world.ego -d
 ```
 
+## Conditionals
+Ego supports conditional execution so you could try
+
+```ego
+// test.ego
+
+if (true) {
+  print("Executed"); 
+}
+```
+
+
 ## Expressions
-Has just been implemented ego expressions interpretation so now you can make 
+Ego has expressions interpretation so you can make 
 
 ```ego
 // test.ego
