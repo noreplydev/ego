@@ -3,6 +3,7 @@ pub mod binary_expression;
 pub mod block;
 pub mod bool;
 pub mod call_expression;
+pub mod else_statement;
 pub mod function_declaration;
 pub mod group;
 pub mod identifier;
@@ -14,14 +15,15 @@ use std::fmt;
 
 use self::{
     assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
-    bool::Bool, call_expression::CallExpressionNode, function_declaration::FunctionDeclaration,
-    group::Group, identifier::Identifier, if_statement::IfStatement, number::Number,
-    string_literal::StringLiteral,
+    bool::Bool, call_expression::CallExpressionNode, else_statement::ElseStatement,
+    function_declaration::FunctionDeclaration, group::Group, identifier::Identifier,
+    if_statement::IfStatement, number::Number, string_literal::StringLiteral,
 };
 
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
     IfStatement(IfStatement),
+    ElseStatement(ElseStatement),
     Group(Group),
     Block(Block),
     Expression(Expression),
@@ -35,6 +37,7 @@ impl fmt::Display for AstNodeType {
         match self {
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement(_) => write!(f, "IfStatement"),
+            AstNodeType::ElseStatement(_) => write!(f, "ElseStatement"),
             AstNodeType::Block(_) => write!(f, "Block"),
             AstNodeType::Group(_) => write!(f, "Group"),
             AstNodeType::FunctionDeclaration(_) => write!(f, "FunctionDeclaration"),

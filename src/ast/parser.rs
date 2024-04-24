@@ -17,7 +17,9 @@ use crate::{
     core::error::{self, ErrorType},
 };
 
-use super::{binary_expression::BinaryExpression, if_statement::IfStatement};
+use super::{
+    binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
+};
 
 pub struct Module {
     module_name: String,
@@ -504,7 +506,33 @@ impl Module {
             }
         };
 
-        AstNodeType::IfStatement(IfStatement::new(expr_node, block_node, at, line))
+        // if there is else statement
+        let mut else_node = None;
+
+        if self.peek().token_type == LexerTokenType::ElseKeyword {
+            let token = self.peek();
+            let at = token.at;
+            let line = token.line;
+
+            self.next(); // {
+            let token = self.peek();
+            let block = self.block();
+            let block_node = match block {
+                AstNodeType::Block(b) => b,
+                _ => {
+                    error::throw(
+                        ErrorType::ParsingError,
+                        "Expected blockNode as else arm",
+                        Some(token.line),
+                    );
+                    std::process::exit(1);
+                }
+            };
+
+            else_node = Some(ElseStatement::new(block_node, at, line));
+        }
+
+        AstNodeType::IfStatement(IfStatement::new(expr_node, block_node, else_node, at, line))
     }
 
     // a | a() | a.value | a = 20 + a
