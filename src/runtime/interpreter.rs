@@ -1,5 +1,5 @@
 use crate::{
-    ast::{module::ModuleAst, AstNodeType, Expression},
+    ast::{block::Block, module::ModuleAst, AstNodeType, Expression},
     core::{
         error::{self, ErrorType},
         handlers::print::print,
@@ -36,6 +36,10 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 hoist_node(&node.children[counter], scopes);
                 counter += 1;
             }
+        }
+        AstNodeType::IfStatement(node) => {
+            // block level hoisting
+            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
         }
         AstNodeType::FunctionDeclaration(node) => {
             // add declaration to scopes
