@@ -31,11 +31,13 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     match node {
         AstNodeType::Block(node) => {
             // block level hoisting
+            scopes.push();
             let mut counter = 0;
             while counter < node.children.len() {
                 hoist_node(&node.children[counter], scopes);
                 counter += 1;
             }
+            scopes.pop();
         }
         AstNodeType::IfStatement(node) => {
             // block level hoisting
