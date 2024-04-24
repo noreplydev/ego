@@ -10,8 +10,8 @@ use runtime::exec;
 use std::env;
 use std::fs;
 
-pub const KEYWORDS: [&str; 8] = [
-    "fn", "let", "if", "while", "true", "false", "print", "import",
+pub const KEYWORDS: [&str; 9] = [
+    "fn", "let", "if", "else", "while", "true", "false", "print", "import",
 ];
 
 fn main() {
