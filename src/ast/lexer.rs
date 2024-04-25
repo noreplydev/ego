@@ -260,7 +260,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
         // last character in the source code
         if char_counter == source.len() && current_token.len() > 0 {
-            print!("hola");
             tokens.push(token_with_type(
                 current_token,
                 line_counter,
