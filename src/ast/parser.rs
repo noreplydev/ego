@@ -350,17 +350,14 @@ impl Module {
             VarType::Const
         };
 
-        // consume var type
-        self.next();
-
-        // get the identifier
-        let token = self.peek();
-        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // consume identifier
         self.next();
-
         let token = self.peek();
+        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+
         // check next token is '='
+        self.next();
+        let token = self.peek();
         if token.token_type != LexerTokenType::AssignmentOperator {
             error::throw(
                 ErrorType::SyntaxError,
@@ -368,10 +365,9 @@ impl Module {
                 Some(token.line),
             )
         };
-        // consume '='
-        self.next();
 
-        // get variable value
+        // consume variable value
+        self.next();
         let expr = self.parse_expression();
 
         // check for final semicolon
@@ -675,14 +671,15 @@ impl Module {
                 self.next(); // to consume the '('
                 let expr = self.parse_expression();
 
-                if token.token_type == LexerTokenType::CloseParenthesis {
+                let scoped_token = self.peek();
+                if scoped_token.token_type == LexerTokenType::CloseParenthesis {
                     self.next(); // to consume the ')'
                     expr
                 } else {
                     error::throw(
                         ErrorType::ParsingError,
-                        format!("Unexpected token '{}', expected ')'", token.value).as_str(),
-                        Some(token.line),
+                        format!("Unexpected token '{}', expected ')'", scoped_token.value).as_str(),
+                        Some(scoped_token.line),
                     );
                     std::process::exit(1);
                 }
