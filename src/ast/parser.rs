@@ -65,7 +65,7 @@ impl Module {
     }
 
     fn next(&self) {
-        if self.tokens.len() > (self.current.get() + 1) {
+        if self.tokens.len() >= (self.current.get() + 1) {
             self.current.set(self.current.get() + 1);
         } else {
             error::throw(
