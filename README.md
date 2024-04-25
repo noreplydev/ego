@@ -45,9 +45,12 @@ Ego supports conditional execution so you could try
 
 if (true) {
   print("Executed"); 
+} else {
+  print("Not executed"); 
 }
 ```
 
+You can change the condition to false to see how the else code block is executed.
 
 ## Expressions
 Ego has expressions interpretation so you can make 
