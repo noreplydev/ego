@@ -49,7 +49,7 @@ impl Module {
     }
 
     fn peek_next(&self) -> Option<&LexerToken> {
-        if (self.current() + 1) < self.tokens.len() {
+        if self.tokens.len() > (self.current.get() + 1) {
             Some(&self.tokens[self.current() + 1])
         } else {
             None
