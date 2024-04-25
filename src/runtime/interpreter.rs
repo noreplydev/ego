@@ -128,6 +128,8 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             let condition = calc_expression(&node.condition, scopes);
             if condition.to_boolean() {
                 exec_node(&AstNodeType::Block(node.body.clone()), scopes)
+            } else if let Some(else_body) = &node.else_node {
+                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes)
             }
         }
         _ => {}
