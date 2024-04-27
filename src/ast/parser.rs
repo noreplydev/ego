@@ -1,4 +1,4 @@
-use std::{cell::Cell, os::unix::process};
+use std::cell::Cell;
 
 use crate::{
     ast::{
@@ -214,7 +214,7 @@ impl Module {
         if !closed {
             error::throw(
                 ErrorType::SyntaxError,
-                "Expected ')' after block openning",
+                "Expected '}' for block close",
                 Some(token.line),
             );
         }
