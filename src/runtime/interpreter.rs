@@ -158,8 +158,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             }
         }
         AstNodeType::WhileStatement(node) => {
-            let condition = calc_expression(&node.condition, scopes);
-            while condition.to_boolean() {
+            while calc_expression(&node.condition, scopes).to_boolean() {
                 exec_node(&AstNodeType::Block(node.body.clone()), scopes)
             }
         }
