@@ -14,12 +14,7 @@ After that, you will only need to create a .ego file like this:
 ```ego
 // hello_world.ego
 
-fn hi() {
-  let str = "Hello, world!"; 
-  print(str); 
-}
-
-hi();  
+print("Hello, world!"); 
 ```
 
 And that's it, you can run ego with a simple
@@ -41,8 +36,6 @@ $ ego hello_world.ego -d
 Ego supports conditional execution so you could try
 
 ```ego
-// test.ego
-
 if (true) {
   print("Executed"); 
 } else {
@@ -52,12 +45,22 @@ if (true) {
 
 You can change the condition to false to see how the else code block is executed.
 
+## Loops
+Ego has just one iteration construct. A while loop. That's it.
+
+```ego
+let x = 0; 
+
+while (true) {
+  print(x); 
+  x = x + 1;
+}
+```
+
 ## Expressions
 Ego has expressions interpretation so you can make 
 
 ```ego
-// test.ego
-
 let string = "Number: "; 
 let sum = (2 + 2) * 2; 
 let result = string + sum + "."; 
