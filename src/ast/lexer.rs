@@ -17,6 +17,8 @@ pub enum LexerTokenType {
     SubtractOperator,
     MultiplyOperator,
     DivideOperator,
+    LessThanOperator,
+    GreaterThanOperator,
     StringLiteral,
     Number,
     OpenParenthesis,
@@ -49,6 +51,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::SubtractOperator => write!(f, "SubtractOperator"),
             LexerTokenType::MultiplyOperator => write!(f, "MultiplyOperator"),
             LexerTokenType::DivideOperator => write!(f, "DivideOperator"),
+            LexerTokenType::LessThanOperator => write!(f, "LessThanOperator"),
+            LexerTokenType::GreaterThanOperator => write!(f, "GreaterThanOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
@@ -170,7 +174,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         }
                     }
                 }
-                '=' | '+' | '-' | '*' => {
+                '=' | '+' | '-' | '*' | '>' | '<' => {
                     if is_string {
                         current_token.push(c);
                     } else {
@@ -305,6 +309,8 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "-" => LexerToken::new(LexerTokenType::SubtractOperator, token, line, at),
         "*" => LexerToken::new(LexerTokenType::MultiplyOperator, token, line, at),
         "/" => LexerToken::new(LexerTokenType::DivideOperator, token, line, at),
+        ">" => LexerToken::new(LexerTokenType::GreaterThanOperator, token, line, at),
+        "<" => LexerToken::new(LexerTokenType::LessThanOperator, token, line, at),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token, line, at)
         }
