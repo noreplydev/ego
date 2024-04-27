@@ -542,9 +542,8 @@ impl Module {
         };
 
         // consume ')'
-        self.next();
         let token = self.peek(")");
-        if token.token_type == LexerTokenType::CloseParenthesis {
+        if token.token_type != LexerTokenType::CloseParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
                 format!("Unexpected token '{}' in if statement", token.value).as_str(),
@@ -553,6 +552,7 @@ impl Module {
         }
 
         // consume '{'
+        self.next();
         let token = self.peek("{");
         if token.token_type != LexerTokenType::OpenCurlyBrace {
             error::throw(
@@ -577,7 +577,7 @@ impl Module {
 
         // if there is else statement
         let mut else_node = None;
-        if self.unsafe_peek().token_type == LexerTokenType::ElseKeyword {
+        if self.is_peekable() && self.peek("else").token_type == LexerTokenType::ElseKeyword {
             let token = self.unsafe_peek();
             let at = token.at;
             let line = token.line;
@@ -728,6 +728,7 @@ impl Module {
         AstNodeType::Expression(expr)
     }
 
+    // 2 > 3
     fn parse_comparison(&self) -> Expression {
         let mut node = self.parse_expression();
 
