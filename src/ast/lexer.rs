@@ -1,7 +1,5 @@
 use std::fmt;
 
-use crate::KEYWORDS;
-
 #[derive(Clone, Debug)]
 pub enum LexerTokenType {
     FunctionCall,
@@ -101,6 +99,10 @@ impl fmt::Display for LexerToken {
         )
     }
 }
+
+const KEYWORDS: [&str; 9] = [
+    "fn", "let", "if", "else", "while", "true", "false", "print", "import",
+];
 
 pub fn lex(source: String) -> Vec<LexerToken> {
     let keywords = KEYWORDS.to_vec();

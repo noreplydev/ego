@@ -10,10 +10,6 @@ use runtime::exec;
 use std::env;
 use std::fs;
 
-pub const KEYWORDS: [&str; 9] = [
-    "fn", "let", "if", "else", "while", "true", "false", "print", "import",
-];
-
 fn main() {
     let args: Vec<String> = env::args().collect();
 
