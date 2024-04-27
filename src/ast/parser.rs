@@ -1,4 +1,4 @@
-use std::cell::Cell;
+use std::{cell::Cell, os::unix::process};
 
 use crate::{
     ast::{
@@ -45,7 +45,20 @@ impl Module {
     // Index handlers:
     // returns directly the node since only next() method
     // changes the current index and it checks if it's overflowed
-    fn peek(&self) -> &LexerToken {
+    fn peek(&self, token: &str) -> &LexerToken {
+        if self.is_peekable() {
+            &self.tokens[self.current.get()]
+        } else {
+            error::throw(
+                ErrorType::ParsingError,
+                format!("Expected '{token}' but got and early end of module").as_str(),
+                None,
+            );
+            std::process::exit(1);
+        }
+    }
+
+    fn unsafe_peek(&self) -> &LexerToken {
         &self.tokens[self.current.get()]
     }
 
@@ -72,7 +85,7 @@ impl Module {
             error::throw(
                 ErrorType::ParsingError,
                 "Peeked an out of bounds token",
-                Some(self.peek().line),
+                Some(self.unsafe_peek().line),
             )
         }
     }
@@ -83,7 +96,7 @@ impl Module {
 
     fn tree(&mut self, mut module_ast: ModuleAst) -> ModuleAst {
         while self.is_peekable() {
-            let token = self.peek();
+            let token = self.unsafe_peek();
 
             match token.token_type {
                 LexerTokenType::FunctionCall => {
@@ -128,7 +141,7 @@ impl Module {
         let mut block_node = Block::new();
 
         // check '{'
-        let token = self.peek();
+        let token = self.unsafe_peek();
         if token.token_type == LexerTokenType::OpenCurlyBrace {
             self.next();
         } else {
@@ -143,7 +156,7 @@ impl Module {
         let mut closed = false;
 
         while self.is_peekable() {
-            let token = self.peek();
+            let token = self.unsafe_peek();
 
             // offset & current are incremented inside each type
             // to avoid "tokens[overflowed_index]"" if loops ends
@@ -217,7 +230,7 @@ impl Module {
             _ => "".to_string(),
         };
 
-        let group_token = self.peek();
+        let group_token = self.unsafe_peek();
         let mut group_node = Group::new(group_token.at, group_token.line);
 
         // check '('
@@ -236,7 +249,7 @@ impl Module {
         let mut closed = false;
 
         while self.is_peekable() {
-            let token = self.peek();
+            let token = self.unsafe_peek();
 
             // offset & current are incremented inside each type
             // to avoid "tokens[overflowed_index]"" if loops ends
@@ -293,7 +306,7 @@ impl Module {
     // print(a, b, c)
     fn call_expression(&self) -> AstNodeType {
         // get the identifier
-        let identifier_token = self.peek();
+        let identifier_token = self.unsafe_peek();
         let identifier_node = Identifier::new(
             identifier_token.value.clone(),
             identifier_token.at,
@@ -316,21 +329,8 @@ impl Module {
             std::process::exit(1);
         };
 
-        // avoid early end of file (idk if it's needed)
-        if !self.is_peekable() {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!(
-                    "Expected ';' but got '{}' as end of statement",
-                    identifier_token.value
-                )
-                .as_str(),
-                Some(identifier_token.line),
-            )
-        }
-
-        let token = self.peek();
         // check for final semicolon
+        let token = self.peek(";");
         let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
             let call_expression_properties = (token.at, token.line);
             // consume ';'
@@ -355,7 +355,7 @@ impl Module {
 
     // let a = 20
     fn assignment_statement(&self) -> AstNodeType {
-        let token = self.peek();
+        let token = self.unsafe_peek();
 
         // get assignment type: mutable or constant or reassignment
         let var_type = match token.value.as_str() {
@@ -371,12 +371,12 @@ impl Module {
         };
 
         // consume identifier
-        let token = self.peek();
+        let token = self.peek("<Identifier>");
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
 
         // check next token is '='
         self.next();
-        let token = self.peek();
+        let token = self.peek("=");
         if token.token_type != LexerTokenType::AssignmentOperator {
             error::throw(
                 ErrorType::SyntaxError,
@@ -390,7 +390,7 @@ impl Module {
         let expr = self.parse_expression();
 
         // check for final semicolon
-        let token = self.peek();
+        let token = self.peek(";");
         let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
             let assignament_statement_properties = (token.at, token.line);
             // consume ';'
@@ -420,7 +420,7 @@ impl Module {
         self.next();
 
         // get the identifier
-        let token = self.peek();
+        let token = self.peek("<Identifier>");
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // consume identifier
         self.next();
@@ -433,14 +433,14 @@ impl Module {
                 error::throw(
                     ErrorType::ParsingError,
                     "Expected (...) as function parameters",
-                    Some(self.peek().at),
+                    Some(self.unsafe_peek().at),
                 );
                 std::process::exit(1);
             }
         };
 
         // check for block
-        let token = self.peek();
+        let token = self.peek("{");
         let block_node = self.block();
         let function_body = match block_node {
             AstNodeType::Block(b) => b,
@@ -466,12 +466,13 @@ impl Module {
     // if (true) {...}
     fn if_statement(&self) -> AstNodeType {
         // consume 'if' keyword
-        let at = self.peek().at;
-        let line = self.peek().line;
+        let token = self.unsafe_peek();
+        let at = token.at;
+        let line = token.line;
 
         // check '('
         self.next();
-        let token = self.peek();
+        let token = self.peek("(");
         if token.token_type != LexerTokenType::OpenParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
@@ -497,7 +498,7 @@ impl Module {
 
         // consume ')'
         self.next();
-        let token = self.peek();
+        let token = self.peek(")");
         if token.token_type == LexerTokenType::CloseParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
@@ -507,7 +508,7 @@ impl Module {
         }
 
         // consume '{'
-        let token = self.peek();
+        let token = self.peek("{");
         if token.token_type != LexerTokenType::OpenCurlyBrace {
             error::throw(
                 ErrorType::SyntaxError,
@@ -531,14 +532,13 @@ impl Module {
 
         // if there is else statement
         let mut else_node = None;
-
-        if self.peek().token_type == LexerTokenType::ElseKeyword {
-            let token = self.peek();
+        if self.unsafe_peek().token_type == LexerTokenType::ElseKeyword {
+            let token = self.unsafe_peek();
             let at = token.at;
             let line = token.line;
 
             self.next(); // {
-            let token = self.peek();
+            let token = self.peek("{");
             let block = self.block();
             let block_node = match block {
                 AstNodeType::Block(b) => b,
@@ -561,12 +561,13 @@ impl Module {
     // while (true) {...}
     fn while_statement(&self) -> AstNodeType {
         // consume 'while' keyword
-        let at = self.peek().at;
-        let line = self.peek().line;
+        let token = self.unsafe_peek();
+        let at = token.at;
+        let line = token.line;
 
         // check '('
         self.next();
-        let token = self.peek();
+        let token = self.peek("(");
         if token.token_type != LexerTokenType::OpenParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
@@ -592,7 +593,7 @@ impl Module {
 
         // consume ')'
         self.next();
-        let token = self.peek();
+        let token = self.peek(")");
         if token.token_type == LexerTokenType::CloseParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
@@ -606,7 +607,7 @@ impl Module {
         };
 
         // consume '{'
-        let token = self.peek();
+        let token = self.peek("{");
         if token.token_type != LexerTokenType::OpenCurlyBrace {
             error::throw(
                 ErrorType::SyntaxError,
@@ -637,7 +638,7 @@ impl Module {
 
     // a | a() | a.value | a = 20 + a
     fn identifier(&self) -> AstNodeType {
-        let token = self.peek();
+        let token = self.unsafe_peek();
         // get the identifier
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
         // check next token of the identifier without consuming
@@ -689,7 +690,7 @@ impl Module {
         // depending on the expression
         let mut node = self.parse_term();
         while self.is_peekable() {
-            let token = self.peek();
+            let token = self.unsafe_peek();
             match token.token_type {
                 LexerTokenType::AddOperator | LexerTokenType::SubtractOperator => {
                     let operator = if let Some(op) = token.value.chars().next() {
@@ -730,7 +731,7 @@ impl Module {
         let mut node = self.parse_factor();
 
         while self.is_peekable() {
-            let token = self.peek();
+            let token = self.unsafe_peek();
             match token.token_type {
                 LexerTokenType::MultiplyOperator | LexerTokenType::DivideOperator => {
                     let operator = if let Some(op) = token.value.chars().next() {
@@ -765,13 +766,13 @@ impl Module {
     }
 
     fn parse_factor(&self) -> Expression {
-        let token = self.peek();
+        let token = self.unsafe_peek();
         match token.token_type {
             LexerTokenType::OpenParenthesis => {
                 self.next(); // to consume the '('
                 let expr = self.parse_expression();
 
-                let scoped_token = self.peek();
+                let scoped_token = self.peek(")");
                 if scoped_token.token_type == LexerTokenType::CloseParenthesis {
                     self.next(); // to consume the ')'
                     expr
@@ -800,7 +801,6 @@ impl Module {
                 }
             }
             LexerTokenType::TrueKeyword | LexerTokenType::FalseKeyword => {
-                let token = self.peek();
                 let node = if let Ok(bool_value) = token.value.parse::<bool>() {
                     Bool::new(bool_value, token.at, token.line)
                 } else {
