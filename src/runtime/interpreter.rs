@@ -1,5 +1,7 @@
 use crate::{
-    ast::{block::Block, module::ModuleAst, AstNodeType, Expression},
+    ast::{
+        assignament_statement::VarType, block::Block, module::ModuleAst, AstNodeType, Expression,
+    },
     core::{
         error::{self, ErrorType},
         handlers::print::print,
@@ -25,6 +27,8 @@ pub fn exec(ast: ModuleAst) {
         exec_node(&ast.children[counter], &mut scopes);
         counter += 1;
     }
+
+    print!("{:#?}", scopes);
 }
 
 fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
@@ -126,7 +130,14 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
         }
         AstNodeType::AssignamentStatement(node) => {
             let value_as_runtype = calc_expression(&node.init, scopes);
-            scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+            match node.var_type {
+                VarType::None => {
+                    scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
+                }
+                VarType::Const | VarType::Let => {
+                    scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+                }
+            }
         }
         AstNodeType::IfStatement(node) => {
             let condition = calc_expression(&node.condition, scopes);

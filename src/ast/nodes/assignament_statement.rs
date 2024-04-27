@@ -32,4 +32,5 @@ impl AssignamentNode {
 pub enum VarType {
     Let,
     Const,
+    None,
 }

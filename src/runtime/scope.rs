@@ -23,6 +23,25 @@ impl ScopesStack {
         }
     }
 
+    // this function must to be recursive since the target variable can be defined in another scope
+    pub fn set_indentifier(&mut self, identifier: String, value: RuntimeType) {
+        let mut counter = self.scopes.len() - 1;
+
+        while counter >= 0 {
+            if let Some(_) = self.scopes[counter].get(&identifier) {
+                self.scopes[counter].set(identifier.clone(), value);
+                break;
+            } else if counter == 0 {
+                error::throw(
+                    ErrorType::ReferenceError,
+                    format!("identifier '{identifier}' was not declared").as_str(),
+                    None,
+                );
+            }
+            counter -= 1;
+        }
+    }
+
     pub fn get_identifier_value(&self, identifier: &String) -> Option<&RuntimeType> {
         let mut counter = self.scopes.len() - 1;
 
@@ -61,30 +80,6 @@ impl ScopesStack {
             );
         }
     }
-
-    // this function must to be recursive since the target variable can be defined in another scope
-    /*     pub fn set_indentifier(&self, indentifier: String, value: String) -> bool {
-        let current_scope = match self.scopes.last() {
-            Some(last) => last,
-            None => {
-                println!("[ego] ScopesStack it's empty");
-                std::process::exit(1);
-            }
-        };
-        let status = current_scope.set(indentifier, value);
-
-        if status {
-            println!("inserted");
-        } else {
-            println!("not inserted");
-        }
-
-        status
-        /* println!("[ego] '{identifier}' is not declared");
-        process::exit(1); */
-    } */
-    /*
-    pub fn remove_identifier(&self) -> bool {} */
 }
 
 #[derive(Debug, Clone)]
@@ -131,11 +126,4 @@ impl Scope {
     fn get(&self, identifier: &String) -> Option<&RuntimeType> {
         self.vars.get(identifier)
     }
-
-    /*     fn get(&self, name: &str) -> Option<String> {
-        // here get local value
-    }
-    fn set(&mut self, name: String, value: String) -> bool {
-        true
-    } */
 }

@@ -356,15 +356,21 @@ impl Module {
     // let a = 20
     fn assignment_statement(&self) -> AstNodeType {
         let token = self.peek();
-        // get assignment type: mutable or constant
-        let var_type = if token.value == "let" {
-            VarType::Let
-        } else {
-            VarType::Const
+
+        // get assignment type: mutable or constant or reassignment
+        let var_type = match token.value.as_str() {
+            "let" => {
+                self.next(); // consume var type keyword
+                VarType::Let
+            }
+            "const" => {
+                self.next(); // consume var type keyword
+                VarType::Const
+            }
+            _ => VarType::None, // reassignment
         };
 
         // consume identifier
-        self.next();
         let token = self.peek();
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
 
@@ -552,6 +558,7 @@ impl Module {
         AstNodeType::IfStatement(IfStatement::new(expr_node, block_node, else_node, at, line))
     }
 
+    // while (true) {...}
     fn while_statement(&self) -> AstNodeType {
         // consume 'while' keyword
         let at = self.peek().at;
@@ -638,14 +645,18 @@ impl Module {
 
         let node = match token {
             Some(next) => match next.token_type {
+                // [identifier calling]
                 LexerTokenType::OpenParenthesis => {
                     // a();
                     self.call_expression()
                 }
+                // [identifier value mutation]
+                LexerTokenType::AssignmentOperator => {
+                    // a = ...;
+                    self.assignment_statement()
+                }
                 // [Property acess] should handle <a.value> here
                 //LexerTokenType::Dot => {}
-                // [Variable mutation] should handle <a = ...> here
-                //LexerTokenType::AssignamentOperator => {}
                 _ => {
                     error::throw(
                         ErrorType::SyntaxError,
