@@ -19,6 +19,7 @@ use crate::{
 
 use super::{
     binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
+    while_statement::WhileStatement,
 };
 
 pub struct Module {
@@ -106,8 +107,12 @@ impl Module {
                     module_ast.add_child(block_node);
                 }
                 LexerTokenType::IfKeyword => {
-                    let block_node = self.if_statement();
-                    module_ast.add_child(block_node);
+                    let if_node = self.if_statement();
+                    module_ast.add_child(if_node);
+                }
+                LexerTokenType::WhileKeyword => {
+                    let while_node = self.while_statement();
+                    module_ast.add_child(while_node);
                 }
                 _ => {
                     self.next();
@@ -456,7 +461,7 @@ impl Module {
         if token.token_type != LexerTokenType::OpenParenthesis {
             error::throw(
                 ErrorType::SyntaxError,
-                format!("Unexpected token '{}'", token.value).as_str(),
+                format!("Unexpected token '{}' after if", token.value).as_str(),
                 Some(token.line),
             );
         }
@@ -469,7 +474,7 @@ impl Module {
             _ => {
                 error::throw(
                     ErrorType::ParsingError,
-                    "Expected blockNode as if arm",
+                    "Expected expression after if",
                     Some(token.line),
                 );
                 std::process::exit(1);
@@ -537,6 +542,82 @@ impl Module {
         }
 
         AstNodeType::IfStatement(IfStatement::new(expr_node, block_node, else_node, at, line))
+    }
+
+    fn while_statement(&self) -> AstNodeType {
+        // consume 'while' keyword
+        let at = self.peek().at;
+        let line = self.peek().line;
+
+        // check '('
+        self.next();
+        let token = self.peek();
+        if token.token_type != LexerTokenType::OpenParenthesis {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Expected '(' but got '{}' after while", token.value).as_str(),
+                Some(token.line),
+            );
+        }
+
+        // consume expression
+        self.next();
+        let expr = self.expression();
+        let expr_node = match expr {
+            AstNodeType::Expression(b) => b,
+            _ => {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Expected expression after while",
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        };
+
+        // consume ')'
+        self.next();
+        let token = self.peek();
+        if token.token_type == LexerTokenType::CloseParenthesis {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!(
+                    "Expected ')' but got '{}' to close while condition expression",
+                    token.value
+                )
+                .as_str(),
+                Some(token.line),
+            )
+        };
+
+        // consume '{'
+        let token = self.peek();
+        if token.token_type != LexerTokenType::OpenCurlyBrace {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!(
+                    "Expected '{{' but got '{}' after while condition",
+                    token.value
+                )
+                .as_str(),
+                Some(token.line),
+            )
+        }
+
+        let block = self.block();
+        let block_node = match block {
+            AstNodeType::Block(b) => b,
+            _ => {
+                error::throw(
+                    ErrorType::ParsingError,
+                    "Expected Block {...} after while condition",
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        };
+
+        AstNodeType::WhileStatement(WhileStatement::new(expr_node, block_node, at, line))
     }
 
     // a | a() | a.value | a = 20 + a
