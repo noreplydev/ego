@@ -1,6 +1,7 @@
 use crate::{
     ast::{
-        assignament_statement::VarType, block::Block, module::ModuleAst, AstNodeType, Expression,
+        assignament_statement::VarType, block::Block, identifier, module::ModuleAst, AstNodeType,
+        Expression,
     },
     core::{
         error::{self, ErrorType},
@@ -100,12 +101,11 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             // for function scope
             scopes.push();
             match node.identifier.name.as_str() {
-                "print" => print(runtime_arguments, &scopes),
+                "print" => print(runtime_arguments, scopes),
                 _ => {
-                    // runtime declared functions
-                    let function = match scopes.get_identifier_value(&node.identifier.name) {
-                        Some(func) => func,
-                        None => {
+                    let function = scopes
+                        .get_identifier_value(&node.identifier.name)
+                        .unwrap_or_else(|| {
                             error::throw(
                                 ErrorType::ReferenceError,
                                 format!("Function '{}' has not been defined", node.identifier.name)
@@ -113,15 +113,27 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                                 Some(node.line),
                             );
                             std::process::exit(1);
-                        }
-                    };
+                        });
 
-                    let function = match function {
-                        RuntimeType::RnFunction(func) => func,
+                    let (parameters, body) = match function {
+                        RuntimeType::RnFunction(func) => {
+                            (func.parameters.clone(), func.body.clone())
+                        }
                         _ => unreachable!(),
                     };
 
-                    exec_node(&AstNodeType::Block(function.body.clone()), scopes);
+                    for (i, parameter) in parameters.iter().enumerate() {
+                        if i < runtime_arguments.len() {
+                            scopes.add_identifier(
+                                parameter.name.clone(),
+                                runtime_arguments[i].clone(),
+                            );
+                        } else {
+                            scopes.add_identifier(parameter.name.clone(), RuntimeType::nothing());
+                        }
+                    }
+
+                    exec_node(&AstNodeType::Block(body), scopes);
                 }
             }
             scopes.pop();
