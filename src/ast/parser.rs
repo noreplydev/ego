@@ -724,15 +724,50 @@ impl Module {
 
     // (2 * 2) + 3
     fn expression(&self) -> AstNodeType {
-        let expr = self.parse_expression();
+        let expr = self.parse_comparison();
         AstNodeType::Expression(expr)
+    }
+
+    fn parse_comparison(&self) -> Expression {
+        let mut node = self.parse_expression();
+
+        while self.is_peekable() {
+            let token = self.unsafe_peek();
+            match token.token_type {
+                LexerTokenType::GreaterThanOperator | LexerTokenType::LessThanOperator => {
+                    let operator = if let Some(op) = token.value.chars().next() {
+                        op
+                    } else {
+                        error::throw(
+                            ErrorType::ParsingError,
+                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
+                            Some(token.line),
+                        );
+                        std::process::exit(1);
+                    };
+
+                    // consume the operator
+                    self.next();
+
+                    // get right node
+                    let right = self.parse_expression();
+                    node = Expression::BinaryExpression(BinaryExpression::new(
+                        operator,
+                        Box::new(node),
+                        Box::new(right),
+                        token.at,
+                        token.line,
+                    ));
+                }
+                _ => break,
+            }
+        }
+
+        node
     }
 
     // 2 + 3 * 23
     fn parse_expression(&self) -> Expression {
-        // will autoincrement current
-        // and it will be the root or the left node
-        // depending on the expression
         let mut node = self.parse_term();
         while self.is_peekable() {
             let token = self.unsafe_peek();
