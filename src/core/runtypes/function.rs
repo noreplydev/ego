@@ -1,5 +1,5 @@
 use crate::{
-    ast::{block::Block, group::Group},
+    ast::{block::Block, group::Group, identifier::Identifier},
     runtime::ScopesStack,
 };
 
@@ -8,7 +8,7 @@ use super::{identifier::RnIdentifier, RuntimeType};
 #[derive(Debug, Clone)]
 pub struct RnFunction {
     pub identifier: RnIdentifier,
-    pub parameters: Group,
+    pub parameters: Vec<Identifier>,
     pub body: Block,
     pub at: usize,
     pub line: usize,
@@ -17,7 +17,7 @@ pub struct RnFunction {
 impl RnFunction {
     pub fn new(
         identifier: RnIdentifier,
-        parameters: Group,
+        parameters: Vec<Identifier>,
         body: Block,
         at: usize,
         line: usize,

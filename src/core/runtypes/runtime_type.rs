@@ -1,7 +1,7 @@
 use std::fmt::{self};
 
 use crate::{
-    ast::{block::Block, group::Group},
+    ast::{block::Block, group::Group, identifier::Identifier},
     core::error::ErrorType,
     runtime::ScopesStack,
 };
@@ -51,7 +51,7 @@ impl RuntimeType {
     // in its fields
     pub fn function(
         identifier: String,
-        parameters: Group,
+        parameters: Vec<Identifier>,
         body: Block,
         at: usize,
         line: usize,

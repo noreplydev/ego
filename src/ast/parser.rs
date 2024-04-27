@@ -419,24 +419,69 @@ impl Module {
         // consume 'fn' keyword
         self.next();
 
-        // get the identifier
+        // consume function identifier
         let token = self.peek("<Identifier>");
         let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
-        // consume identifier
         self.next();
 
-        // check for group
-        let arguments = self.group(Some("function declaration"));
-        let arguments = match arguments {
-            AstNodeType::Group(grp) => grp,
-            _ => {
-                error::throw(
-                    ErrorType::ParsingError,
-                    "Expected (...) as function parameters",
-                    Some(self.unsafe_peek().at),
-                );
-                std::process::exit(1);
+        // consume arguments
+        self.next(); // consume '('
+        let mut arguments: Vec<Identifier> = vec![];
+        let mut last_token = LexerTokenType::OpenParenthesis;
+        let mut closed = false;
+
+        while self.is_peekable() {
+            let token = self.unsafe_peek();
+
+            match token.token_type {
+                LexerTokenType::Comma => {
+                    // '(' and '<identifier>'
+                    if last_token != LexerTokenType::Comma {
+                        last_token = LexerTokenType::Comma;
+                        self.next();
+                    } else {
+                        error::throw(
+                            ErrorType::SyntaxError,
+                            format!("Unexpected token '{}' in function arguments", token.value)
+                                .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                LexerTokenType::CloseParenthesis => {
+                    if last_token != LexerTokenType::Comma {
+                        closed = true;
+                        self.next();
+                        break;
+                    } else {
+                        error::throw(
+                            ErrorType::SyntaxError,
+                            format!("Unexpected token ',' before closing function arguments")
+                                .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                LexerTokenType::Identifier => {
+                    arguments.push(Identifier::new(token.value.clone(), token.at, token.line));
+                    last_token = LexerTokenType::Identifier;
+                    self.next();
+                }
+                _ => error::throw(
+                    ErrorType::SyntaxError,
+                    format!("Unexpected token '{}' in function arguments", token.value).as_str(),
+                    Some(token.line),
+                ),
             }
+        }
+
+        // non closed CallExpression
+        if !closed {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Expected ')' to close function arguments").as_str(),
+                Some(token.line),
+            )
         };
 
         // check for block
