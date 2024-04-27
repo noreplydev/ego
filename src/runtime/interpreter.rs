@@ -43,6 +43,10 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             // block level hoisting
             hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
         }
+        AstNodeType::WhileStatement(node) => {
+            // block level hoisting
+            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
+        }
         AstNodeType::FunctionDeclaration(node) => {
             // add declaration to scopes
             let identifier = node.identifier.name.clone();
@@ -130,6 +134,12 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 exec_node(&AstNodeType::Block(node.body.clone()), scopes)
             } else if let Some(else_body) = &node.else_node {
                 exec_node(&AstNodeType::Block(else_body.body.clone()), scopes)
+            }
+        }
+        AstNodeType::WhileStatement(node) => {
+            let condition = calc_expression(&node.condition, scopes);
+            while condition.to_boolean() {
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes)
             }
         }
         _ => {}
