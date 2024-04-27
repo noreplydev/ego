@@ -83,4 +83,24 @@ impl RnString {
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
+    pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
+    pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
 }

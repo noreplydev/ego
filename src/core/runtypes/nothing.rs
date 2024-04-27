@@ -32,4 +32,10 @@ impl Nothing {
     pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::nothing()
     }
+    pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::boolean(false)
+    }
+    pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::boolean(false)
+    }
 }

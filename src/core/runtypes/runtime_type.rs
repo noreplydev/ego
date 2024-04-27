@@ -1,7 +1,7 @@
 use std::fmt::{self};
 
 use crate::{
-    ast::{block::Block, group::Group, identifier::Identifier},
+    ast::{block::Block, identifier::Identifier},
     core::error::ErrorType,
     runtime::ScopesStack,
 };
@@ -123,6 +123,8 @@ impl Arithmetic for RuntimeType {
                 '-' => Ok(v.substract(operand, scopes)),
                 '*' => Ok(v.mulitply(operand, scopes)),
                 '/' => Ok(v.divide(operand, scopes)),
+                '>' => Ok(v.greater_than(operand, scopes)),
+                '<' => Ok(v.less_than(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             RuntimeType::RnNumber(v) => match operator {
@@ -130,6 +132,8 @@ impl Arithmetic for RuntimeType {
                 '-' => Ok(v.substract(operand, scopes)),
                 '*' => Ok(v.mulitply(operand, scopes)),
                 '/' => Ok(v.divide(operand, scopes)),
+                '>' => Ok(v.greater_than(operand, scopes)),
+                '<' => Ok(v.less_than(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             RuntimeType::RnString(v) => match operator {
@@ -137,6 +141,8 @@ impl Arithmetic for RuntimeType {
                 '-' => Ok(v.substract(operand, scopes)),
                 '*' => Ok(v.mulitply(operand, scopes)),
                 '/' => Ok(v.divide(operand, scopes)),
+                '>' => Ok(v.greater_than(operand, scopes)),
+                '<' => Ok(v.less_than(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             RuntimeType::RnBoolean(v) => match operator {
@@ -144,9 +150,12 @@ impl Arithmetic for RuntimeType {
                 '-' => Ok(v.substract(operand, scopes)),
                 '*' => Ok(v.mulitply(operand, scopes)),
                 '/' => Ok(v.divide(operand, scopes)),
+                '>' => Ok(v.greater_than(operand, scopes)),
+                '<' => Ok(v.less_than(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             // RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string()
+            //  `- check every method of every type to handle identifiers using scopes
             _ => Err(ErrorType::UnknownArithmeticOperator),
         }
     }

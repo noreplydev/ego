@@ -29,7 +29,7 @@ impl RnNumber {
 impl RnNumber {
     pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
-            RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
+            RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(s) => {
                 // 13 + "hello" -> "13hello"
                 RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
@@ -42,7 +42,7 @@ impl RnNumber {
     }
     pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
-            RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
+            RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val - n.val),
@@ -52,7 +52,7 @@ impl RnNumber {
     }
     pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
-            RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
+            RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val * n.val),
@@ -62,12 +62,32 @@ impl RnNumber {
     }
     pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
-            RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
+            RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val / n.val),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
+        }
+    }
+    pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(true),
+            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(n) => RuntimeType::boolean(self.val > n.val),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
+    pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(n) => RuntimeType::boolean(self.val < n.val),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
 }
