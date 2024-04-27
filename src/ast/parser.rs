@@ -805,9 +805,6 @@ impl Module {
     }
 
     fn parse_term(&self) -> Expression {
-        // will autoincrement current
-        // and it will be the root or the left node
-        // depending on the expression
         let mut node = self.parse_factor();
 
         while self.is_peekable() {
