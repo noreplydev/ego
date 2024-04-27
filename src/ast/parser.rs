@@ -156,24 +156,32 @@ impl Module {
                     break; // break block loop since it reaches the end
                 }
                 LexerTokenType::FunctionCall => {
-                    let call_node = self.call_expression();
-                    block_node.add_child(call_node);
-                }
-                LexerTokenType::FnKeyword => {
-                    let function_node = self.function_declaration();
+                    let function_node = self.call_expression();
                     block_node.add_child(function_node);
                 }
                 LexerTokenType::LetKeyword => {
                     let assignment_node = self.assignment_statement();
                     block_node.add_child(assignment_node);
                 }
+                LexerTokenType::FnKeyword => {
+                    let function_node = self.function_declaration();
+                    block_node.add_child(function_node);
+                }
                 LexerTokenType::Identifier => {
                     let identifier_node = self.identifier();
                     block_node.add_child(identifier_node);
                 }
-                LexerTokenType::Number => {
-                    let number_node = self.expression();
-                    block_node.add_child(number_node);
+                LexerTokenType::OpenCurlyBrace => {
+                    let inner_block_node = self.block();
+                    block_node.add_child(inner_block_node);
+                }
+                LexerTokenType::IfKeyword => {
+                    let if_node = self.if_statement();
+                    block_node.add_child(if_node);
+                }
+                LexerTokenType::WhileKeyword => {
+                    let while_node = self.while_statement();
+                    block_node.add_child(while_node);
                 }
                 _ => {
                     error::throw(
