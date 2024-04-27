@@ -27,8 +27,6 @@ pub fn exec(ast: ModuleAst) {
         exec_node(&ast.children[counter], &mut scopes);
         counter += 1;
     }
-
-    print!("{:#?}", scopes);
 }
 
 fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
