@@ -19,7 +19,8 @@ use crate::{
 
 use super::{
     binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
-    import_statement::ImportStatement, while_statement::WhileStatement,
+    import_statement::ImportStatement, return_statement::ReturnStatement,
+    while_statement::WhileStatement,
 };
 
 pub struct Module {
@@ -199,6 +200,10 @@ impl Module {
                 LexerTokenType::WhileKeyword => {
                     let while_node = self.while_statement();
                     block_node.add_child(while_node);
+                }
+                LexerTokenType::ReturnKeyword => {
+                    let return_node = self.return_statement();
+                    block_node.add_child(return_node);
                 }
                 _ => {
                     error::throw(
@@ -880,6 +885,35 @@ impl Module {
                 std::process::exit(1);
             }
         }
+    }
+
+    // return "hello";
+    fn return_statement(&self) -> AstNodeType {
+        // consume 'return' keyword
+        let token = self.unsafe_peek();
+        let at = token.at;
+        let line = token.line;
+
+        // consume expression
+        self.next();
+        let expression_node = self.parse_expression();
+
+        // consume ';'
+        let token = self.peek(";");
+        if token.token_type != LexerTokenType::EndOfStatement {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!(
+                    "Expected ';' but got '{}' as end of return statement",
+                    token.value
+                )
+                .as_str(),
+                Some(token.line),
+            )
+        }
+        self.next();
+
+        AstNodeType::ReturnStatement(ReturnStatement::new(expression_node, at, line))
     }
 
     // a | a() | a.value | a = 20 + a
