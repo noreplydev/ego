@@ -45,10 +45,10 @@ impl RnFunction {
     pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
-            RuntimeType::RnString(s) => RuntimeType::nothing(),
-            RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
-            RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnString(_) => RuntimeType::nothing(),
+            RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
+            RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
@@ -57,7 +57,7 @@ impl RnFunction {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
@@ -67,7 +67,7 @@ impl RnFunction {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
@@ -77,7 +77,7 @@ impl RnFunction {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }

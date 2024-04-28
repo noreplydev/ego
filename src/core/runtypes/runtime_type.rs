@@ -65,7 +65,7 @@ impl RuntimeType {
             RuntimeType::Nothing(nothing) => nothing.to_string(),
             RuntimeType::RnString(rn_string) => rn_string.to_string(),
             RuntimeType::RnNumber(rn_number) => rn_number.to_string(),
-            RuntimeType::RnIdentifier(rn_number) => rn_number.to_string(),
+            RuntimeType::RnIdentifier(rn_identifier) => rn_identifier.to_string(),
             RuntimeType::RnBoolean(rn_boolean) => rn_boolean.to_string(),
             RuntimeType::RnFunction(rn_function) => rn_function.to_string(),
         }
@@ -76,7 +76,7 @@ impl RuntimeType {
             RuntimeType::Nothing(nothing) => nothing.to_boolean(),
             RuntimeType::RnString(rn_string) => rn_string.to_boolean(),
             RuntimeType::RnNumber(rn_number) => rn_number.to_boolean(),
-            RuntimeType::RnIdentifier(rn_number) => rn_number.to_boolean(),
+            RuntimeType::RnIdentifier(rn_identifier) => rn_identifier.to_boolean(),
             RuntimeType::RnBoolean(rn_boolean) => rn_boolean.to_boolean(),
             RuntimeType::RnFunction(rn_function) => rn_function.to_boolean(),
         }
@@ -155,7 +155,8 @@ impl Arithmetic for RuntimeType {
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             // RuntimeType::RnIdentifier(t) => t.resolve(scopes).to_string()
-            //  `- check every method of every type to handle identifiers using scopes
+            //  `- Not necessary since the arithmetic operations makes that
+            //     RnIdentifier resolves to the wrapped Runtype value
             _ => Err(ErrorType::UnknownArithmeticOperator),
         }
     }

@@ -30,9 +30,9 @@ impl RnBoolean {
                 // true + "world" -> "trueworld"
                 RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
             }
-            RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
-            RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
+            RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
@@ -41,7 +41,7 @@ impl RnBoolean {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
@@ -51,7 +51,7 @@ impl RnBoolean {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
@@ -61,7 +61,7 @@ impl RnBoolean {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
-            RuntimeType::RnNumber(n) => RuntimeType::nothing(),
+            RuntimeType::RnNumber(_) => RuntimeType::nothing(),
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }

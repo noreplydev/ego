@@ -34,9 +34,9 @@ impl RnNumber {
                 // 13 + "hello" -> "13hello"
                 RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
             }
-            RuntimeType::RnBoolean(b) => RuntimeType::nothing(),
+            RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(n) => RuntimeType::number(self.val + n.val),
-            RuntimeType::RnIdentifier(i) => RuntimeType::nothing(),
+            RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
