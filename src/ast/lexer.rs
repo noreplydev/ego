@@ -2,7 +2,6 @@ use std::fmt;
 
 #[derive(Clone, Debug)]
 pub enum LexerTokenType {
-    FunctionCall,
     LetKeyword,
     ImportKeyword,
     FnKeyword,
@@ -11,6 +10,8 @@ pub enum LexerTokenType {
     ElseKeyword,
     TrueKeyword,
     FalseKeyword,
+    ReturnKeyword,
+    FunctionCall,
     Identifier,
     AssignmentOperator,
     AddOperator,
@@ -36,7 +37,6 @@ pub enum LexerTokenType {
 impl fmt::Display for LexerTokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::LetKeyword => write!(f, "LetKeyword"),
             LexerTokenType::ImportKeyword => write!(f, "ImportKeyword"),
             LexerTokenType::FnKeyword => write!(f, "FnKeyword"),
@@ -45,6 +45,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::ElseKeyword => write!(f, "ElseKeyword"),
             LexerTokenType::TrueKeyword => write!(f, "TrueKeyword"),
             LexerTokenType::FalseKeyword => write!(f, "FalseKeyword"),
+            LexerTokenType::ReturnKeyword => write!(f, "ReturnKeyword"),
+            LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::AddOperator => write!(f, "AddOperator"),
@@ -104,8 +106,8 @@ impl fmt::Display for LexerToken {
     }
 }
 
-const KEYWORDS: [&str; 9] = [
-    "fn", "let", "if", "else", "while", "true", "false", "print", "import",
+const KEYWORDS: [&str; 10] = [
+    "fn", "let", "if", "else", "while", "true", "false", "print", "import", "return",
 ];
 
 pub fn lex(source: String) -> Vec<LexerToken> {
@@ -174,6 +176,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         }
                     }
                 }
+                // comparison characters
                 '=' | '+' | '-' | '*' | '>' | '<' => {
                     if is_string {
                         current_token.push(c);
@@ -295,6 +298,7 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "else" => LexerToken::new(LexerTokenType::ElseKeyword, token, line, at),
         "true" => LexerToken::new(LexerTokenType::TrueKeyword, token, line, at),
         "false" => LexerToken::new(LexerTokenType::FalseKeyword, token, line, at),
+        "return" => LexerToken::new(LexerTokenType::ReturnKeyword, token, line, at),
         "(" => LexerToken::new(LexerTokenType::OpenParenthesis, token, line, at),
         ")" => LexerToken::new(LexerTokenType::CloseParenthesis, token, line, at),
         "{" => LexerToken::new(LexerTokenType::OpenCurlyBrace, token, line, at),
