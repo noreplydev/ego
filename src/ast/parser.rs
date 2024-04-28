@@ -19,7 +19,7 @@ use crate::{
 
 use super::{
     binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
-    while_statement::WhileStatement,
+    import_statement::ImportStatement, while_statement::WhileStatement,
 };
 
 pub struct Module {
@@ -126,6 +126,10 @@ impl Module {
                 LexerTokenType::WhileKeyword => {
                     let while_node = self.while_statement();
                     module_ast.add_child(while_node);
+                }
+                LexerTokenType::ImportKeyword => {
+                    let import_node = self.import_statement();
+                    module_ast.add_child(import_node);
                 }
                 _ => {
                     self.next();
@@ -679,6 +683,203 @@ impl Module {
         };
 
         AstNodeType::WhileStatement(WhileStatement::new(expr_node, block_node, at, line))
+    }
+
+    // import std/
+    fn import_statement(&self) -> AstNodeType {
+        // consume 'import' keyword
+        let token = self.unsafe_peek();
+        let at = token.at;
+        let line = token.line;
+
+        // consume '<identifier>'
+        self.next();
+        let token = self.peek("<identifier>");
+        if token.token_type != LexerTokenType::Identifier {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Unexpected token '{}' after import keyword", token.value).as_str(),
+                Some(token.line),
+            )
+        }
+        let mut module = vec![token.value.clone()];
+
+        // consume ";" | "/"
+        self.next();
+        let token = self.peek(";"); // with ; will be a valid statement
+
+        if token.token_type == LexerTokenType::EndOfStatement {
+            return AstNodeType::ImportStatement(ImportStatement::new(module, vec![], at, line));
+        }
+
+        // module/module/module
+        if token.token_type == LexerTokenType::DivideOperator {
+            let mut last_token = LexerTokenType::Identifier;
+
+            while self.is_peekable() {
+                let token = self.unsafe_peek();
+
+                match token.token_type {
+                    LexerTokenType::Identifier => {
+                        if last_token == LexerTokenType::DivideOperator {
+                            last_token = LexerTokenType::Identifier;
+                            module.push(token.value.clone());
+                            self.next();
+                        } else {
+                            error::throw(
+                                ErrorType::ParsingError,
+                                format!("Unexpected token '{}' after an identifier", token.value)
+                                    .as_str(),
+                                Some(token.line),
+                            );
+                            std::process::exit(1);
+                        }
+                    }
+                    LexerTokenType::DivideOperator => {
+                        if last_token == LexerTokenType::Identifier {
+                            last_token = LexerTokenType::DivideOperator;
+                            self.next();
+                        } else {
+                            error::throw(
+                                ErrorType::ParsingError,
+                                format!("Unexpected token '{}' after '/'", token.value).as_str(),
+                                Some(token.line),
+                            );
+                            std::process::exit(1);
+                        }
+                    }
+                    _ => break,
+                }
+            }
+        }
+
+        // consume ";" | "."
+        let token = self.peek(";");
+        match token.token_type {
+            // ;
+            LexerTokenType::EndOfStatement => {
+                return AstNodeType::ImportStatement(ImportStatement::new(
+                    module,
+                    vec![],
+                    at,
+                    line,
+                ));
+            }
+            // .[member, member];
+            LexerTokenType::Dot => {
+                // consume [
+                self.next();
+                let token = self.peek("[");
+                if token.token_type != LexerTokenType::OpenSquareBracket {
+                    error::throw(
+                        ErrorType::ParsingError,
+                        format!("Expected '[' but got '{}' after '.'", token.value).as_str(),
+                        Some(token.line),
+                    );
+                }
+
+                let mut members: Vec<String> = vec![];
+                let mut closed = false;
+                let mut last_token = LexerTokenType::Comma;
+
+                // consume member, member]
+                self.next();
+                while self.is_peekable() {
+                    let token = self.unsafe_peek();
+                    match token.token_type {
+                        LexerTokenType::Identifier => {
+                            if last_token == LexerTokenType::Comma {
+                                last_token = LexerTokenType::Identifier;
+                                members.push(token.value.clone());
+                                self.next();
+                            } else {
+                                error::throw(
+                                    ErrorType::ParsingError,
+                                    format!(
+                                        "Unexpected token '{}' after an identifier",
+                                        token.value
+                                    )
+                                    .as_str(),
+                                    Some(token.line),
+                                );
+                                std::process::exit(1);
+                            }
+                        }
+                        LexerTokenType::Comma => {
+                            if last_token == LexerTokenType::Identifier {
+                                last_token = LexerTokenType::Comma;
+                                self.next();
+                            } else {
+                                error::throw(
+                                    ErrorType::ParsingError,
+                                    format!("Unexpected token '{}' after ','", token.value)
+                                        .as_str(),
+                                    Some(token.line),
+                                );
+                                std::process::exit(1);
+                            }
+                        }
+                        LexerTokenType::CloseSquareBracket => {
+                            if last_token == LexerTokenType::Identifier {
+                                closed = true;
+                                self.next();
+                                break;
+                            } else {
+                                error::throw(
+                                    ErrorType::SyntaxError,
+                                    format!(
+                                        "Expected '<identifier>' after members closing token ']'"
+                                    )
+                                    .as_str(),
+                                    Some(token.line),
+                                );
+                            }
+                        }
+                        _ => break,
+                    }
+                }
+
+                // non closed CallExpression
+                if !closed {
+                    error::throw(
+                        ErrorType::SyntaxError,
+                        format!("Expected ']' after module named members import").as_str(),
+                        Some(token.line),
+                    )
+                };
+
+                // ;
+                let token = self.peek(";");
+                if token.token_type == LexerTokenType::EndOfStatement {
+                    return AstNodeType::ImportStatement(ImportStatement::new(
+                        module, members, at, line,
+                    ));
+                } else {
+                    error::throw(
+                        ErrorType::SyntaxError,
+                        format!(
+                            "Expected ';' but got '{}' as end of import statement",
+                            token.value
+                        )
+                        .as_str(),
+                        Some(token.line),
+                    );
+                    std::process::exit(1);
+                }
+            }
+            _ => {
+                error::throw(
+                    ErrorType::SyntaxError,
+                    format!(
+                        "Expected ';' but got '{}' as end of import statement",
+                        token.value
+                    )
+                    .as_str(),
+                    Some(token.line),
+                );
+                std::process::exit(1);
+            }
+        }
     }
 
     // a | a() | a.value | a = 20 + a

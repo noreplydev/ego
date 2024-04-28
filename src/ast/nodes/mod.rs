@@ -8,6 +8,7 @@ pub mod function_declaration;
 pub mod group;
 pub mod identifier;
 pub mod if_statement;
+pub mod import_statement;
 pub mod module;
 pub mod number;
 pub mod string_literal;
@@ -18,14 +19,15 @@ use self::{
     assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
     bool::Bool, call_expression::CallExpressionNode, else_statement::ElseStatement,
     function_declaration::FunctionDeclaration, group::Group, identifier::Identifier,
-    if_statement::IfStatement, number::Number, string_literal::StringLiteral,
-    while_statement::WhileStatement,
+    if_statement::IfStatement, import_statement::ImportStatement, number::Number,
+    string_literal::StringLiteral, while_statement::WhileStatement,
 };
 
 #[derive(Debug, Clone)]
 pub enum AstNodeType {
     IfStatement(IfStatement),
     WhileStatement(WhileStatement),
+    ImportStatement(ImportStatement),
     ElseStatement(ElseStatement),
     Group(Group),
     Block(Block),
@@ -41,6 +43,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement(_) => write!(f, "IfStatement"),
             AstNodeType::ElseStatement(_) => write!(f, "ElseStatement"),
+            AstNodeType::ImportStatement(_) => write!(f, "ImportStatement"),
             AstNodeType::WhileStatement(_) => write!(f, "WhileStatement"),
             AstNodeType::Block(_) => write!(f, "Block"),
             AstNodeType::Group(_) => write!(f, "Group"),
