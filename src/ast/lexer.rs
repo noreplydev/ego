@@ -11,7 +11,6 @@ pub enum LexerTokenType {
     TrueKeyword,
     FalseKeyword,
     ReturnKeyword,
-    FunctionCall,
     Identifier,
     AssignmentOperator,
     AddOperator,
@@ -46,7 +45,6 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::TrueKeyword => write!(f, "TrueKeyword"),
             LexerTokenType::FalseKeyword => write!(f, "FalseKeyword"),
             LexerTokenType::ReturnKeyword => write!(f, "ReturnKeyword"),
-            LexerTokenType::FunctionCall => write!(f, "FunctionCall"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
             LexerTokenType::AddOperator => write!(f, "AddOperator"),
@@ -106,8 +104,8 @@ impl fmt::Display for LexerToken {
     }
 }
 
-const KEYWORDS: [&str; 10] = [
-    "fn", "let", "if", "else", "while", "true", "false", "print", "import", "return",
+const KEYWORDS: [&str; 9] = [
+    "fn", "let", "if", "else", "while", "true", "false", "import", "return",
 ];
 
 pub fn lex(source: String) -> Vec<LexerToken> {
@@ -289,7 +287,6 @@ pub fn lex(source: String) -> Vec<LexerToken> {
 
 fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
     match token.as_str() {
-        "print" => LexerToken::new(LexerTokenType::FunctionCall, token, line, at),
         "import" => LexerToken::new(LexerTokenType::ImportKeyword, token, line, at),
         "fn" => LexerToken::new(LexerTokenType::FnKeyword, token, line, at),
         "while" => LexerToken::new(LexerTokenType::WhileKeyword, token, line, at),

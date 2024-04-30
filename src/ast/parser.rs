@@ -100,10 +100,6 @@ impl Module {
             let token = self.unsafe_peek();
 
             match token.token_type {
-                LexerTokenType::FunctionCall => {
-                    let function_node = self.call_expression();
-                    module_ast.add_child(function_node);
-                }
                 LexerTokenType::LetKeyword => {
                     let assignment_node = self.assignment_statement();
                     module_ast.add_child(assignment_node);
@@ -172,10 +168,6 @@ impl Module {
                     self.next();
                     closed = true;
                     break; // break block loop since it reaches the end
-                }
-                LexerTokenType::FunctionCall => {
-                    let function_node = self.call_expression();
-                    block_node.add_child(function_node);
                 }
                 LexerTokenType::LetKeyword => {
                     let assignment_node = self.assignment_statement();
@@ -290,7 +282,7 @@ impl Module {
                             last_token = Some(LexerTokenType::StringLiteral)
                         }
                         Expression::CallExpression(_) => {
-                            last_token = Some(LexerTokenType::FunctionCall)
+                            last_token = Some(LexerTokenType::Identifier)
                         }
                         Expression::BinaryExpression(_) => {
                             last_token = Some(LexerTokenType::Number)
