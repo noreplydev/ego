@@ -85,7 +85,57 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
             // hoisted before execution
             RuntimeType::nothing()
         }
-        AstNodeType::CallExpression(node) => {
+        AstNodeType::AssignamentStatement(node) => {
+            let value_as_runtype = calc_expression(&node.init, scopes);
+            match node.var_type {
+                VarType::None => {
+                    scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
+                }
+                VarType::Const | VarType::Let => {
+                    scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+                }
+            }
+            RuntimeType::nothing()
+        }
+        AstNodeType::IfStatement(node) => {
+            let condition = calc_expression(&node.condition, scopes);
+            if condition.to_boolean() {
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
+            } else if let Some(else_body) = &node.else_node {
+                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes);
+            }
+            RuntimeType::nothing()
+        }
+        AstNodeType::WhileStatement(node) => {
+            while calc_expression(&node.condition, scopes).to_boolean() {
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
+            }
+            RuntimeType::nothing()
+        }
+        AstNodeType::Expression(expr) => calc_expression(expr, scopes),
+        _ => RuntimeType::nothing(),
+    }
+}
+
+fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
+    match node {
+        Expression::Bool(b) => RuntimeType::boolean(b.value),
+        Expression::Number(n) => RuntimeType::number(n.value),
+        Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
+        Expression::BinaryExpression(expr) => {
+            let left = calc_expression(&expr.left, scopes);
+            let right = calc_expression(&expr.right, scopes);
+            let result = left.arithmetic(expr.operator, right, scopes);
+
+            match result {
+                Ok(val) => val,
+                Err(err) => {
+                    error::throw(err, expr.operator.to_string().as_str(), Some(expr.line));
+                    std::process::exit(1);
+                }
+            }
+        }
+        Expression::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
                 .arguments
                 .children
@@ -140,55 +190,6 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
             }
             scopes.pop();
             RuntimeType::nothing()
-        }
-        AstNodeType::AssignamentStatement(node) => {
-            let value_as_runtype = calc_expression(&node.init, scopes);
-            match node.var_type {
-                VarType::None => {
-                    scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
-                }
-                VarType::Const | VarType::Let => {
-                    scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
-                }
-            }
-            RuntimeType::nothing()
-        }
-        AstNodeType::IfStatement(node) => {
-            let condition = calc_expression(&node.condition, scopes);
-            if condition.to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
-            } else if let Some(else_body) = &node.else_node {
-                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes);
-            }
-            RuntimeType::nothing()
-        }
-        AstNodeType::WhileStatement(node) => {
-            while calc_expression(&node.condition, scopes).to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
-            }
-            RuntimeType::nothing()
-        }
-        _ => RuntimeType::nothing(),
-    }
-}
-
-fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
-    match node {
-        Expression::Bool(b) => RuntimeType::boolean(b.value),
-        Expression::Number(n) => RuntimeType::number(n.value),
-        Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
-        Expression::BinaryExpression(expr) => {
-            let left = calc_expression(&expr.left, scopes);
-            let right = calc_expression(&expr.right, scopes);
-            let result = left.arithmetic(expr.operator, right, scopes);
-
-            match result {
-                Ok(val) => val,
-                Err(err) => {
-                    error::throw(err, expr.operator.to_string().as_str(), Some(expr.line));
-                    std::process::exit(1);
-                }
-            }
         }
         Expression::Identifier(i) => {
             if let Some(val) = scopes.get_identifier_value(&i.name) {

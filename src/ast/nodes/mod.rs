@@ -35,7 +35,6 @@ pub enum AstNodeType {
     Group(Group),
     Block(Block),
     Expression(Expression),
-    CallExpression(CallExpression),
     AssignamentStatement(AssignamentNode),
     FunctionDeclaration(FunctionDeclaration),
 }
@@ -43,7 +42,6 @@ pub enum AstNodeType {
 impl fmt::Display for AstNodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AstNodeType::CallExpression(node) => write!(f, "FunctionCall: {:#?}", node),
             AstNodeType::IfStatement(_) => write!(f, "IfStatement"),
             AstNodeType::ElseStatement(_) => write!(f, "ElseStatement"),
             AstNodeType::ImportStatement(_) => write!(f, "ImportStatement"),
@@ -57,6 +55,9 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Bool(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier(_)) => write!(f, "Identifier"),
+            AstNodeType::Expression(Expression::CallExpression(node)) => {
+                write!(f, "CallExpression: {:#?}", node)
+            }
             AstNodeType::Expression(Expression::BinaryExpression(_)) => {
                 write!(f, "BinaryExpression")
             }
@@ -78,4 +79,5 @@ pub enum Expression {
     Bool(Bool),
     Identifier(Identifier),
     BinaryExpression(BinaryExpression),
+    CallExpression(CallExpression),
 }

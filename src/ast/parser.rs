@@ -289,6 +289,9 @@ impl Module {
                         Expression::StringLiteral(_) => {
                             last_token = Some(LexerTokenType::StringLiteral)
                         }
+                        Expression::CallExpression(_) => {
+                            last_token = Some(LexerTokenType::FunctionCall)
+                        }
                         Expression::BinaryExpression(_) => {
                             last_token = Some(LexerTokenType::Number)
                         }
@@ -354,12 +357,12 @@ impl Module {
             std::process::exit(1); // for type checking
         };
 
-        AstNodeType::CallExpression(CallExpression::new(
+        AstNodeType::Expression(Expression::CallExpression(CallExpression::new(
             identifier_node,
             arguments_node,
             at,
             line,
-        ))
+        )))
     }
 
     // let a = 20
