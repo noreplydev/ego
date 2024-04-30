@@ -69,7 +69,7 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
     }
 }
 
-fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
+fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
     match node {
         AstNodeType::Block(node) => {
             scopes.push();
@@ -79,9 +79,11 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 counter += 1;
             }
             scopes.pop();
+            RuntimeType::nothing()
         }
         AstNodeType::FunctionDeclaration(node) => {
             // hoisted before execution
+            RuntimeType::nothing()
         }
         AstNodeType::CallExpression(node) => {
             let runtime_arguments: Vec<RuntimeType> = node
@@ -137,6 +139,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                 }
             }
             scopes.pop();
+            RuntimeType::nothing()
         }
         AstNodeType::AssignamentStatement(node) => {
             let value_as_runtype = calc_expression(&node.init, scopes);
@@ -148,21 +151,24 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) {
                     scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
                 }
             }
+            RuntimeType::nothing()
         }
         AstNodeType::IfStatement(node) => {
             let condition = calc_expression(&node.condition, scopes);
             if condition.to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes)
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
             } else if let Some(else_body) = &node.else_node {
-                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes)
+                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes);
             }
+            RuntimeType::nothing()
         }
         AstNodeType::WhileStatement(node) => {
             while calc_expression(&node.condition, scopes).to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes)
+                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
             }
+            RuntimeType::nothing()
         }
-        _ => {}
+        _ => RuntimeType::nothing(),
     }
 }
 
