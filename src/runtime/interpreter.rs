@@ -152,7 +152,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
             // push new hashmap onto the stack
             // for function scope
             scopes.push();
-            match node.identifier.name.as_str() {
+            let call_expression_return = match node.identifier.name.as_str() {
                 "print" => print(runtime_arguments, scopes),
                 _ => {
                     let function = scopes
@@ -185,11 +185,11 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                         }
                     }
 
-                    exec_node(&AstNodeType::Block(body), scopes);
+                    exec_node(&AstNodeType::Block(body), scopes)
                 }
-            }
+            };
             scopes.pop();
-            RuntimeType::nothing()
+            call_expression_return
         }
         Expression::Identifier(i) => {
             if let Some(val) = scopes.get_identifier_value(&i.name) {

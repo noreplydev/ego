@@ -307,56 +307,6 @@ impl Module {
         AstNodeType::Group(group_node)
     }
 
-    // print(a, b, c)
-    fn call_expression(&self) -> AstNodeType {
-        // get the identifier
-        let identifier_token = self.unsafe_peek();
-        let identifier_node = Identifier::new(
-            identifier_token.value.clone(),
-            identifier_token.at,
-            identifier_token.line,
-        );
-
-        // consume identifier
-        self.next();
-
-        let arguments_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
-
-        let arguments_node = if let AstNodeType::Group(arguments_node) = arguments_node {
-            arguments_node
-        } else {
-            error::throw(
-                ErrorType::ParsingError,
-                "Unexpected node type in CallExpression, expected Group type node",
-                Some(identifier_token.line),
-            );
-            std::process::exit(1);
-        };
-
-        // check for final semicolon
-        let token = self.peek(";");
-        let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
-            let call_expression_properties = (token.at, token.line);
-            // consume ';'
-            self.next();
-            call_expression_properties
-        } else {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!("Expected ';' but got '{}' as end of statement", token.value).as_str(),
-                Some(token.line),
-            );
-            std::process::exit(1); // for type checking
-        };
-
-        AstNodeType::Expression(Expression::CallExpression(CallExpression::new(
-            identifier_node,
-            arguments_node,
-            at,
-            line,
-        )))
-    }
-
     // let a = 20
     fn assignment_statement(&self) -> AstNodeType {
         let token = self.unsafe_peek();
@@ -924,7 +874,7 @@ impl Module {
                 // [identifier calling]
                 LexerTokenType::OpenParenthesis => {
                     // a();
-                    self.call_expression()
+                    AstNodeType::Expression(self.call_expression())
                 }
                 // [identifier value mutation]
                 LexerTokenType::AssignmentOperator => {
@@ -1035,6 +985,7 @@ impl Module {
         node
     }
 
+    // 2 * 4
     fn parse_term(&self) -> Expression {
         let mut node = self.parse_factor();
 
@@ -1073,9 +1024,10 @@ impl Module {
         node
     }
 
+    // 2 | x | "Hi"
     fn parse_factor(&self) -> Expression {
         let token = self.unsafe_peek();
-        match token.token_type {
+        let expr = match token.token_type {
             LexerTokenType::OpenParenthesis => {
                 self.next(); // to consume the '('
                 let expr = self.parse_expression();
@@ -1132,8 +1084,26 @@ impl Module {
                 ))
             }
             LexerTokenType::Identifier => {
-                self.next(); // consume identifier
-                Expression::Identifier(Identifier::new(token.value.clone(), token.at, token.line))
+                // check if is identifier or identifier call expression
+                if let Some(next) = self.peek_next() {
+                    if next.token_type == LexerTokenType::OpenParenthesis {
+                        self.call_expression()
+                    } else {
+                        self.next();
+                        Expression::Identifier(Identifier::new(
+                            token.value.clone(),
+                            token.at,
+                            token.line,
+                        ))
+                    }
+                } else {
+                    self.next();
+                    Expression::Identifier(Identifier::new(
+                        token.value.clone(),
+                        token.at,
+                        token.line,
+                    ))
+                }
             }
             _ => {
                 error::throw(
@@ -1143,6 +1113,56 @@ impl Module {
                 );
                 std::process::exit(1);
             }
-        }
+        };
+
+        expr
+    }
+
+    // print(a, b, c)
+    fn call_expression(&self) -> Expression {
+        // get the identifier
+        let identifier_token = self.unsafe_peek();
+        let identifier_node = Identifier::new(
+            identifier_token.value.clone(),
+            identifier_token.at,
+            identifier_token.line,
+        );
+
+        // consume identifier
+        self.next();
+
+        let arguments_node = self.group(Some(format!("{}()", identifier_node.name).as_str()));
+
+        let arguments_node = if let AstNodeType::Group(arguments_node) = arguments_node {
+            arguments_node
+        } else {
+            error::throw(
+                ErrorType::ParsingError,
+                "Unexpected node type in CallExpression, expected Group type node",
+                Some(identifier_token.line),
+            );
+            std::process::exit(1);
+        };
+
+        // check for final semicolon
+        let (at, line) = if self.is_peekable() {
+            let token = self.peek(";");
+            if token.token_type == LexerTokenType::EndOfStatement {
+                // consume ';'
+                self.next();
+                (token.at, token.line)
+            } else {
+                (identifier_node.at, identifier_node.line)
+            }
+        } else {
+            (identifier_node.at, identifier_node.line)
+        };
+
+        Expression::CallExpression(CallExpression::new(
+            identifier_node,
+            arguments_node,
+            at,
+            line,
+        ))
     }
 }
