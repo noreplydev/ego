@@ -5,7 +5,7 @@ use crate::{
         assignament_statement::{AssignamentNode, VarType},
         block::Block,
         bool::Bool,
-        call_expression::CallExpressionNode,
+        call_expression::CallExpression,
         function_declaration::FunctionDeclaration,
         group::Group,
         identifier::Identifier,
@@ -354,7 +354,7 @@ impl Module {
             std::process::exit(1); // for type checking
         };
 
-        AstNodeType::CallExpression(CallExpressionNode::new(
+        AstNodeType::CallExpression(CallExpression::new(
             identifier_node,
             arguments_node,
             at,

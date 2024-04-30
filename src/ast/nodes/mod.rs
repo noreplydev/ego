@@ -18,7 +18,7 @@ use std::fmt;
 
 use self::{
     assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
-    bool::Bool, call_expression::CallExpressionNode, else_statement::ElseStatement,
+    bool::Bool, call_expression::CallExpression, else_statement::ElseStatement,
     function_declaration::FunctionDeclaration, group::Group, identifier::Identifier,
     if_statement::IfStatement, import_statement::ImportStatement, number::Number,
     return_statement::ReturnStatement, string_literal::StringLiteral,
@@ -35,7 +35,7 @@ pub enum AstNodeType {
     Group(Group),
     Block(Block),
     Expression(Expression),
-    CallExpression(CallExpressionNode),
+    CallExpression(CallExpression),
     AssignamentStatement(AssignamentNode),
     FunctionDeclaration(FunctionDeclaration),
 }
