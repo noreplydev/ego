@@ -273,7 +273,7 @@ impl Module {
                     break;
                 }
                 _ => {
-                    let node = self.parse_expression();
+                    let node = self.parse_comparison();
                     match node {
                         Expression::Identifier(_) => last_token = Some(LexerTokenType::Identifier),
                         Expression::Bool(_) => last_token = Some(LexerTokenType::TrueKeyword),
@@ -341,7 +341,7 @@ impl Module {
 
         // consume variable value
         self.next();
-        let expr = self.parse_expression();
+        let expr = self.parse_comparison();
 
         // check for final semicolon
         let token = self.peek(";");
@@ -841,7 +841,7 @@ impl Module {
 
         // consume expression
         self.next();
-        let expression_node = self.parse_expression();
+        let expression_node = self.parse_comparison();
 
         // consume ';'
         let token = self.peek(";");
