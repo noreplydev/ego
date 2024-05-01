@@ -77,11 +77,12 @@ while (true) {
 You can define a function in Ego using the `fn` keyword followed by an identifier, arguments and a code block. 
 
 ```
-fn greet(name) {
-  print("Hi, "+name);  
+fn greet_user(name) {
+  return "Hi, "+name;  
 }
 
-greet("Cristian"); 
+let greet = greet_user("Cristian"); 
+print(greet); 
 ```
 
 ```
