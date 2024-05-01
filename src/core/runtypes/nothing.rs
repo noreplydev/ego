@@ -20,22 +20,22 @@ impl Nothing {
 
 // implement arithmetics
 impl Nothing {
-    pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn add(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn substract(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn mulitply(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn divide(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn greater_than(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::boolean(false)
     }
-    pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn less_than(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::boolean(false)
     }
 }

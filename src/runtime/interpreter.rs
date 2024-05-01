@@ -1,7 +1,7 @@
 use crate::{
     ast::{
-        assignament_statement::VarType, block::Block, identifier, module::ModuleAst, AstNodeType,
-        Expression,
+        assignament_statement::VarType, binary_expression::BinaryExpression,
+        call_expression::CallExpression, module::ModuleAst, AstNodeType, Expression,
     },
     core::{
         error::{self, ErrorType},
@@ -74,14 +74,51 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
         AstNodeType::Block(node) => {
             scopes.push();
             let mut counter = 0;
+            let mut return_expr = None;
             while counter < node.children.len() {
-                exec_node(&node.children[counter], scopes);
+                let children = &node.children[counter];
                 counter += 1;
+
+                // executed only inside blocks of code
+                if let AstNodeType::ReturnStatement(ret) = children {
+                    return_expr = Some(match &ret.value {
+                        Expression::Number(v) => RuntimeType::number(v.value),
+                        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone()),
+                        Expression::Bool(v) => RuntimeType::boolean(v.value),
+                        Expression::Identifier(v) => RuntimeType::identifier(v.name.clone()),
+                        Expression::BinaryExpression(v) => calc_expression(
+                            &&Expression::BinaryExpression(BinaryExpression::new(
+                                v.operator,
+                                v.left.clone(),
+                                v.right.clone(),
+                                v.at,
+                                v.line,
+                            )),
+                            scopes,
+                        ),
+                        Expression::CallExpression(v) => calc_expression(
+                            &Expression::CallExpression(CallExpression::new(
+                                v.identifier.clone(),
+                                v.arguments.clone(),
+                                v.at,
+                                v.line,
+                            )),
+                            scopes,
+                        ),
+                    })
+                } else {
+                    exec_node(children, scopes);
+                }
             }
+
             scopes.pop();
-            RuntimeType::nothing()
+            if let Some(return_value) = return_expr {
+                return_value
+            } else {
+                RuntimeType::nothing()
+            }
         }
-        AstNodeType::FunctionDeclaration(node) => {
+        AstNodeType::FunctionDeclaration(_node) => {
             // hoisted before execution
             RuntimeType::nothing()
         }
