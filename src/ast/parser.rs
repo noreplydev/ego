@@ -874,7 +874,16 @@ impl Module {
                 // [identifier calling]
                 LexerTokenType::OpenParenthesis => {
                     // a();
-                    AstNodeType::Expression(self.call_expression())
+                    let call_expresssion_node = self.call_expression();
+                    // check for final semicolon
+                    if self.is_peekable() {
+                        if self.peek(";").token_type == LexerTokenType::EndOfStatement {
+                            // consume ';'
+                            self.next();
+                        }
+                    }
+
+                    AstNodeType::Expression(call_expresssion_node)
                 }
                 // [identifier value mutation]
                 LexerTokenType::AssignmentOperator => {
@@ -1144,20 +1153,8 @@ impl Module {
             std::process::exit(1);
         };
 
-        // check for final semicolon
-        let (at, line) = if self.is_peekable() {
-            let token = self.peek(";");
-            if token.token_type == LexerTokenType::EndOfStatement {
-                // consume ';'
-                self.next();
-                (token.at, token.line)
-            } else {
-                (identifier_node.at, identifier_node.line)
-            }
-        } else {
-            (identifier_node.at, identifier_node.line)
-        };
-
+        let at = identifier_node.at;
+        let line = identifier_node.line;
         Expression::CallExpression(CallExpression::new(
             identifier_node,
             arguments_node,
