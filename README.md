@@ -3,7 +3,7 @@
 
 
 <p align="center">
-<img src="https://github.com/noreplydev/ego/assets/99766455/cb38124b-e058-493c-8ea4-08a3788cfa85" alt="ego-logo" width="50%">
+  <img src="https://github.com/noreplydev/ego/assets/99766455/bc73b659-27d3-49ec-9951-eca6bd1f26e8" alt="ego-logo" width="25%">
 </p>
 
 # Hello world
