@@ -2,7 +2,7 @@ use super::Expression;
 
 #[derive(Debug, Clone)]
 pub struct BinaryExpression {
-    pub operator: char,
+    pub operator: String,
     pub left: Box<Expression>,
     pub right: Box<Expression>,
     pub at: usize,
@@ -11,7 +11,7 @@ pub struct BinaryExpression {
 
 impl BinaryExpression {
     pub fn new(
-        operator: char,
+        operator: String,
         left: Box<Expression>,
         right: Box<Expression>,
         at: usize,

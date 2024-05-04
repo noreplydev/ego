@@ -924,25 +924,18 @@ impl Module {
         while self.is_peekable() {
             let token = self.unsafe_peek();
             match token.token_type {
-                LexerTokenType::GreaterThanOperator | LexerTokenType::LessThanOperator => {
-                    let operator = if let Some(op) = token.value.chars().next() {
-                        op
-                    } else {
-                        error::throw(
-                            ErrorType::ParsingError,
-                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
-                            Some(token.line),
-                        );
-                        std::process::exit(1);
-                    };
-
+                LexerTokenType::GreaterThanOperator
+                | LexerTokenType::LessThanOperator
+                | LexerTokenType::EqualityOperator
+                | LexerTokenType::NotEqualOperator
+                | LexerTokenType::GreaterThanOrEqualOperator => {
                     // consume the operator
                     self.next();
 
                     // get right node
                     let right = self.parse_expression();
                     node = Expression::BinaryExpression(BinaryExpression::new(
-                        operator,
+                        token.value.clone(),
                         Box::new(node),
                         Box::new(right),
                         token.at,
@@ -963,24 +956,13 @@ impl Module {
             let token = self.unsafe_peek();
             match token.token_type {
                 LexerTokenType::AddOperator | LexerTokenType::SubtractOperator => {
-                    let operator = if let Some(op) = token.value.chars().next() {
-                        op
-                    } else {
-                        error::throw(
-                            ErrorType::ParsingError,
-                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
-                            Some(token.line),
-                        );
-                        std::process::exit(1);
-                    };
-
                     // consume the operator
                     self.next();
 
                     // get right node
                     let right = self.parse_term();
                     node = Expression::BinaryExpression(BinaryExpression::new(
-                        operator,
+                        token.value.clone(),
                         Box::new(node),
                         Box::new(right),
                         token.at,
@@ -1002,24 +984,13 @@ impl Module {
             let token = self.unsafe_peek();
             match token.token_type {
                 LexerTokenType::MultiplyOperator | LexerTokenType::DivideOperator => {
-                    let operator = if let Some(op) = token.value.chars().next() {
-                        op
-                    } else {
-                        error::throw(
-                            ErrorType::ParsingError,
-                            format!("Operator '{}' cannot be parsed as char", token.value).as_str(),
-                            Some(token.line),
-                        );
-                        std::process::exit(1);
-                    };
-
                     // consume the operator
                     self.next();
 
                     // get right node
                     let right = self.parse_factor();
                     node = Expression::BinaryExpression(BinaryExpression::new(
-                        operator,
+                        token.value.clone(),
                         Box::new(node),
                         Box::new(right),
                         token.at,

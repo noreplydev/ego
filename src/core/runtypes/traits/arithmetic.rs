@@ -6,7 +6,7 @@ use crate::{
 pub trait Arithmetic {
     fn arithmetic(
         &self,
-        operator: char,
+        operator: &str,
         operand: RuntimeType,
         scopes: &ScopesStack,
     ) -> Result<RuntimeType, ErrorType>;

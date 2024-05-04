@@ -87,8 +87,8 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
                         Expression::Bool(v) => RuntimeType::boolean(v.value),
                         Expression::Identifier(v) => RuntimeType::identifier(v.name.clone()),
                         Expression::BinaryExpression(v) => calc_expression(
-                            &&Expression::BinaryExpression(BinaryExpression::new(
-                                v.operator,
+                            &Expression::BinaryExpression(BinaryExpression::new(
+                                v.operator.clone(),
                                 v.left.clone(),
                                 v.right.clone(),
                                 v.at,
@@ -162,7 +162,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
         Expression::BinaryExpression(expr) => {
             let left = calc_expression(&expr.left, scopes);
             let right = calc_expression(&expr.right, scopes);
-            let result = left.arithmetic(expr.operator, right, scopes);
+            let result = left.arithmetic(expr.operator.as_str(), right, scopes);
 
             match result {
                 Ok(val) => val,
