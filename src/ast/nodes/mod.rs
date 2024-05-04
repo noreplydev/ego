@@ -10,6 +10,7 @@ pub mod identifier;
 pub mod if_statement;
 pub mod import_statement;
 pub mod module;
+pub mod nothing;
 pub mod number;
 pub mod return_statement;
 pub mod string_literal;
@@ -20,7 +21,7 @@ use self::{
     assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
     bool::Bool, call_expression::CallExpression, else_statement::ElseStatement,
     function_declaration::FunctionDeclaration, group::Group, identifier::Identifier,
-    if_statement::IfStatement, import_statement::ImportStatement, number::Number,
+    if_statement::IfStatement, import_statement::ImportStatement, nothing::Nothing, number::Number,
     return_statement::ReturnStatement, string_literal::StringLiteral,
     while_statement::WhileStatement,
 };
@@ -55,6 +56,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::Expression(Expression::Number(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Bool(_)) => write!(f, "Number"),
             AstNodeType::Expression(Expression::Identifier(_)) => write!(f, "Identifier"),
+            AstNodeType::Expression(Expression::Nothing(_)) => write!(f, "Nothing"),
             AstNodeType::Expression(Expression::CallExpression(node)) => {
                 write!(f, "CallExpression: {:#?}", node)
             }
@@ -80,4 +82,5 @@ pub enum Expression {
     Identifier(Identifier),
     BinaryExpression(BinaryExpression),
     CallExpression(CallExpression),
+    Nothing(Nothing),
 }

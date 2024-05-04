@@ -47,13 +47,13 @@ impl Nothing {
     }
     pub fn not_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         match _operand {
-            RuntimeType::Nothing(v) => RuntimeType::boolean(false),
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             _ => RuntimeType::boolean(true),
         }
     }
     pub fn equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         match _operand {
-            RuntimeType::Nothing(v) => RuntimeType::boolean(true),
+            RuntimeType::Nothing(_) => RuntimeType::boolean(true),
             _ => RuntimeType::boolean(false),
         }
     }

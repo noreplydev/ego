@@ -86,6 +86,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
                         Expression::StringLiteral(v) => RuntimeType::string(v.value.clone()),
                         Expression::Bool(v) => RuntimeType::boolean(v.value),
                         Expression::Identifier(v) => RuntimeType::identifier(v.name.clone()),
+                        Expression::Nothing(_) => RuntimeType::nothing(),
                         Expression::BinaryExpression(v) => calc_expression(
                             &Expression::BinaryExpression(BinaryExpression::new(
                                 v.operator.clone(),
@@ -156,9 +157,18 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
 
 fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
     match node {
-        Expression::Bool(b) => RuntimeType::boolean(b.value),
-        Expression::Number(n) => RuntimeType::number(n.value),
-        Expression::StringLiteral(s) => RuntimeType::string(s.value.clone()),
+        Expression::Bool(v) => RuntimeType::boolean(v.value),
+        Expression::Number(v) => RuntimeType::number(v.value),
+        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone()),
+        Expression::Nothing(_) => RuntimeType::nothing(),
+        Expression::Identifier(v) => {
+            if let Some(val) = scopes.get_identifier_value(&v.name) {
+                val.clone() // now we are cloning the value, so
+                            // it's not like passing the reference
+            } else {
+                RuntimeType::nothing()
+            }
+        }
         Expression::BinaryExpression(expr) => {
             let left = calc_expression(&expr.left, scopes);
             let right = calc_expression(&expr.right, scopes);
@@ -235,14 +245,6 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
             };
             scopes.pop();
             call_expression_return
-        }
-        Expression::Identifier(i) => {
-            if let Some(val) = scopes.get_identifier_value(&i.name) {
-                val.clone() // now we are cloning the value, so
-                            // it's not like passing the reference
-            } else {
-                RuntimeType::nothing()
-            }
         }
     }
 }

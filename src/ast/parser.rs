@@ -19,7 +19,7 @@ use crate::{
 
 use super::{
     binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
-    import_statement::ImportStatement, return_statement::ReturnStatement,
+    import_statement::ImportStatement, nothing::Nothing, return_statement::ReturnStatement,
     while_statement::WhileStatement,
 };
 
@@ -43,9 +43,49 @@ impl Module {
         self.tree(module)
     }
 
+    fn tree(&mut self, mut module_ast: ModuleAst) -> ModuleAst {
+        while self.is_peekable() {
+            let token = self.unsafe_peek();
+
+            match token.token_type {
+                LexerTokenType::LetKeyword => {
+                    let assignment_node = self.assignment_statement();
+                    module_ast.add_child(assignment_node);
+                }
+                LexerTokenType::FnKeyword => {
+                    let function_node = self.function_declaration();
+                    module_ast.add_child(function_node);
+                }
+                LexerTokenType::Identifier => {
+                    let identifier_node = self.identifier();
+                    module_ast.add_child(identifier_node);
+                }
+                LexerTokenType::OpenCurlyBrace => {
+                    let block_node = self.block();
+                    module_ast.add_child(block_node);
+                }
+                LexerTokenType::IfKeyword => {
+                    let if_node = self.if_statement();
+                    module_ast.add_child(if_node);
+                }
+                LexerTokenType::WhileKeyword => {
+                    let while_node = self.while_statement();
+                    module_ast.add_child(while_node);
+                }
+                LexerTokenType::ImportKeyword => {
+                    let import_node = self.import_statement();
+                    module_ast.add_child(import_node);
+                }
+                _ => {
+                    self.next();
+                }
+            }
+        }
+
+        module_ast
+    }
+
     // Index handlers:
-    // returns directly the node since only next() method
-    // changes the current index and it checks if it's overflowed
     fn peek(&self, token: &str) -> &LexerToken {
         if self.is_peekable() {
             &self.tokens[self.current.get()]
@@ -93,48 +133,6 @@ impl Module {
 
     fn current(&self) -> usize {
         self.current.get()
-    }
-
-    fn tree(&mut self, mut module_ast: ModuleAst) -> ModuleAst {
-        while self.is_peekable() {
-            let token = self.unsafe_peek();
-
-            match token.token_type {
-                LexerTokenType::LetKeyword => {
-                    let assignment_node = self.assignment_statement();
-                    module_ast.add_child(assignment_node);
-                }
-                LexerTokenType::FnKeyword => {
-                    let function_node = self.function_declaration();
-                    module_ast.add_child(function_node);
-                }
-                LexerTokenType::Identifier => {
-                    let identifier_node = self.identifier();
-                    module_ast.add_child(identifier_node);
-                }
-                LexerTokenType::OpenCurlyBrace => {
-                    let block_node = self.block();
-                    module_ast.add_child(block_node);
-                }
-                LexerTokenType::IfKeyword => {
-                    let if_node = self.if_statement();
-                    module_ast.add_child(if_node);
-                }
-                LexerTokenType::WhileKeyword => {
-                    let while_node = self.while_statement();
-                    module_ast.add_child(while_node);
-                }
-                LexerTokenType::ImportKeyword => {
-                    let import_node = self.import_statement();
-                    module_ast.add_child(import_node);
-                }
-                _ => {
-                    self.next();
-                }
-            }
-        }
-
-        module_ast
     }
 
     // {}
@@ -278,6 +276,7 @@ impl Module {
                         Expression::Identifier(_) => last_token = Some(LexerTokenType::Identifier),
                         Expression::Bool(_) => last_token = Some(LexerTokenType::TrueKeyword),
                         Expression::Number(_) => last_token = Some(LexerTokenType::Number),
+                        Expression::Nothing(_) => last_token = Some(LexerTokenType::NothingKeyword),
                         Expression::StringLiteral(_) => {
                             last_token = Some(LexerTokenType::StringLiteral)
                         }
@@ -1084,6 +1083,10 @@ impl Module {
                         token.line,
                     ))
                 }
+            }
+            LexerTokenType::NothingKeyword => {
+                self.next(); // consume nothing keyword
+                Expression::Nothing(Nothing::new(token.at, token.line))
             }
             _ => {
                 error::throw(
