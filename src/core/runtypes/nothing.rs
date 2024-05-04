@@ -38,4 +38,23 @@ impl Nothing {
     pub fn less_than(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         RuntimeType::boolean(false)
     }
+    pub fn greater_than_or_equal(
+        &self,
+        _operand: RuntimeType,
+        _scopes: &ScopesStack,
+    ) -> RuntimeType {
+        RuntimeType::boolean(true)
+    }
+    pub fn not_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        match _operand {
+            RuntimeType::Nothing(v) => RuntimeType::boolean(false),
+            _ => RuntimeType::boolean(true),
+        }
+    }
+    pub fn equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        match _operand {
+            RuntimeType::Nothing(v) => RuntimeType::boolean(true),
+            _ => RuntimeType::boolean(false),
+        }
+    }
 }

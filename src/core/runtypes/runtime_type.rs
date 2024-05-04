@@ -125,6 +125,9 @@ impl Arithmetic for RuntimeType {
                 "/" => Ok(v.divide(operand, scopes)),
                 ">" => Ok(v.greater_than(operand, scopes)),
                 "<" => Ok(v.less_than(operand, scopes)),
+                ">=" => Ok(v.greater_than_or_equal(operand, scopes)),
+                "!=" => Ok(v.not_equal(operand, scopes)),
+                "==" => Ok(v.equal(operand, scopes)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             RuntimeType::RnNumber(v) => match operator {
