@@ -208,7 +208,15 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                         RuntimeType::RnFunction(func) => {
                             (func.parameters.clone(), func.body.clone())
                         }
-                        _ => unreachable!(),
+                        _ => {
+                            error::throw(
+                                ErrorType::ReferenceError,
+                                format!("Identifier '{}' is not callable", node.identifier.name)
+                                    .as_str(),
+                                Some(node.line),
+                            );
+                            std::process::exit(1);
+                        }
                     };
 
                     for (i, parameter) in parameters.iter().enumerate() {
