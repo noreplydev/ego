@@ -29,7 +29,7 @@ fn main() {
     let file_content = fs::read_to_string(filename).unwrap_or_else(|_| {
         error::throw(
             ErrorType::FatalError,
-            "Something went wrong reading file",
+            format!("Cannot read {filename}").as_str(),
             None,
         );
         std::process::exit(1); // to avoid types error
