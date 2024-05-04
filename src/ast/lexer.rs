@@ -19,6 +19,8 @@ pub enum LexerTokenType {
     DivideOperator,
     LessThanOperator,
     GreaterThanOperator,
+    GreaterThanOrEqualOperator,
+    EqualityOperator,
     StringLiteral,
     Number,
     OpenParenthesis,
@@ -47,12 +49,14 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::ReturnKeyword => write!(f, "ReturnKeyword"),
             LexerTokenType::Identifier => write!(f, "Identifier"),
             LexerTokenType::AssignmentOperator => write!(f, "AssignmentOperator"),
+            LexerTokenType::EqualityOperator => write!(f, "EqualityOperator"),
             LexerTokenType::AddOperator => write!(f, "AddOperator"),
             LexerTokenType::SubtractOperator => write!(f, "SubtractOperator"),
             LexerTokenType::MultiplyOperator => write!(f, "MultiplyOperator"),
             LexerTokenType::DivideOperator => write!(f, "DivideOperator"),
             LexerTokenType::LessThanOperator => write!(f, "LessThanOperator"),
             LexerTokenType::GreaterThanOperator => write!(f, "GreaterThanOperator"),
+            LexerTokenType::GreaterThanOrEqualOperator => write!(f, "GreaterThanOrEqualOperator"),
             LexerTokenType::StringLiteral => write!(f, "StringLiteral"),
             LexerTokenType::Number => write!(f, "Number"),
             LexerTokenType::OpenParenthesis => write!(f, "OpenParenthesis"),
@@ -174,8 +178,64 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         }
                     }
                 }
-                // comparison characters
-                '=' | '+' | '-' | '*' | '>' | '<' => {
+                // expressions characters
+                '=' => {
+                    if let Some(next) = chars.peek() {
+                        match next {
+                            '=' => {
+                                // for '=='
+                                chars.next(); // Consume the '='
+                                current_token.push(c);
+                                current_token.push('=');
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                            _ => {
+                                // for '='
+                                current_token.push(c);
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                        }
+                    }
+                }
+                '>' => {
+                    if let Some(next) = chars.peek() {
+                        match next {
+                            '=' => {
+                                // for '>='
+                                chars.next(); // Consume the '='
+                                current_token.push(c);
+                                current_token.push('=');
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                            _ => {
+                                // for '>'
+                                current_token.push(c);
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                        }
+                    }
+                }
+                '+' | '-' | '*' | '<' => {
                     if is_string {
                         current_token.push(c);
                     } else {
@@ -306,6 +366,8 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "," => LexerToken::new(LexerTokenType::Comma, token, line, at),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token, line, at),
         "=" => LexerToken::new(LexerTokenType::AssignmentOperator, token, line, at),
+        "==" => LexerToken::new(LexerTokenType::EqualityOperator, token, line, at),
+        ">=" => LexerToken::new(LexerTokenType::GreaterThanOrEqualOperator, token, line, at),
         "+" => LexerToken::new(LexerTokenType::AddOperator, token, line, at),
         "-" => LexerToken::new(LexerTokenType::SubtractOperator, token, line, at),
         "*" => LexerToken::new(LexerTokenType::MultiplyOperator, token, line, at),
