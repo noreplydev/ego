@@ -106,12 +106,12 @@ impl RnNumber {
     }
     pub fn not_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         match operand {
-            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
-            RuntimeType::RnString(_) => RuntimeType::boolean(false),
-            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::Nothing(_) => RuntimeType::boolean(true),
+            RuntimeType::RnString(_) => RuntimeType::boolean(true),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(true),
             RuntimeType::RnNumber(n) => RuntimeType::boolean(self.val != n.val),
-            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
-            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(true),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(true),
         }
     }
     pub fn equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
