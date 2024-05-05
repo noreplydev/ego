@@ -927,7 +927,8 @@ impl Module {
                 | LexerTokenType::LessThanOperator
                 | LexerTokenType::EqualityOperator
                 | LexerTokenType::NotEqualOperator
-                | LexerTokenType::GreaterThanOrEqualOperator => {
+                | LexerTokenType::GreaterThanOrEqualOperator
+                | LexerTokenType::LessThanOrEqualOperator => {
                     // consume the operator
                     self.next();
 

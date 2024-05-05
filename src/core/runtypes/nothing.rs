@@ -45,6 +45,9 @@ impl Nothing {
     ) -> RuntimeType {
         RuntimeType::boolean(true)
     }
+    pub fn less_than_or_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        RuntimeType::boolean(true)
+    }
     pub fn not_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         match _operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),

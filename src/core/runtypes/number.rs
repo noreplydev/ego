@@ -104,6 +104,16 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
+    pub fn less_than_or_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(n) => RuntimeType::boolean(self.val <= n.val),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
     pub fn not_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(true),
