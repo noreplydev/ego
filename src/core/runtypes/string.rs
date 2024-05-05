@@ -4,7 +4,7 @@ use super::RuntimeType;
 
 #[derive(Debug, Clone)]
 pub struct RnString {
-    val: String,
+    pub val: String,
 }
 
 impl RnString {
@@ -86,7 +86,7 @@ impl RnString {
     pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
-            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(v) => RuntimeType::boolean(self.val.len() > v.val.len()),
             RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
             RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
             RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
@@ -96,7 +96,41 @@ impl RnString {
     pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
-            RuntimeType::RnString(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(v) => RuntimeType::boolean(self.val.len() < v.val.len()),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
+    pub fn greater_than_or_equal(
+        &self,
+        operand: RuntimeType,
+        _scopes: &ScopesStack,
+    ) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(true),
+            RuntimeType::RnString(v) => RuntimeType::boolean(self.val.len() >= v.val.len()),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
+            RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
+        }
+    }
+    pub fn not_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(true),
+            RuntimeType::RnString(v) => RuntimeType::boolean(self.val != v.val),
+            RuntimeType::RnBoolean(_) => RuntimeType::boolean(true),
+            RuntimeType::RnNumber(_) => RuntimeType::boolean(true),
+            RuntimeType::RnIdentifier(_) => RuntimeType::boolean(true),
+            RuntimeType::RnFunction(_) => RuntimeType::boolean(true),
+        }
+    }
+    pub fn equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+        match operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            RuntimeType::RnString(v) => RuntimeType::boolean(self.val == v.val),
             RuntimeType::RnBoolean(_) => RuntimeType::boolean(false),
             RuntimeType::RnNumber(_) => RuntimeType::boolean(false),
             RuntimeType::RnIdentifier(_) => RuntimeType::boolean(false),
