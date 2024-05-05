@@ -1,4 +1,4 @@
-| Under development: actively building the v0.1 version  |
+| actively building the alpha-v0.1 version  |
 |---|
 
 
