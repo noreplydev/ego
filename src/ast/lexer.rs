@@ -19,6 +19,7 @@ pub enum LexerTokenType {
     MultiplyOperator,
     DivideOperator,
     LessThanOperator,
+    LessThanOrEqualOperator,
     GreaterThanOperator,
     GreaterThanOrEqualOperator,
     EqualityOperator,
@@ -59,6 +60,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::MultiplyOperator => write!(f, "MultiplyOperator"),
             LexerTokenType::DivideOperator => write!(f, "DivideOperator"),
             LexerTokenType::LessThanOperator => write!(f, "LessThanOperator"),
+            LexerTokenType::LessThanOrEqualOperator => write!(f, "LessThanOrEqualOperator"),
             LexerTokenType::GreaterThanOperator => write!(f, "GreaterThanOperator"),
             LexerTokenType::GreaterThanOrEqualOperator => write!(f, "GreaterThanOrEqualOperator"),
             LexerTokenType::NotEqualOperator => write!(f, "NotEqualOperator"),
@@ -214,6 +216,34 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     }
                 }
                 '>' => {
+                    if let Some(next) = chars.peek() {
+                        match next {
+                            '=' => {
+                                // for '>='
+                                chars.next(); // Consume the '='
+                                current_token.push(c);
+                                current_token.push('=');
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                            _ => {
+                                // for '>'
+                                current_token.push(c);
+                                tokens.push(token_with_type(
+                                    current_token.clone(),
+                                    line_counter,
+                                    line_char_counter,
+                                ));
+                                current_token.clear();
+                            }
+                        }
+                    }
+                }
+                '<' => {
                     if let Some(next) = chars.peek() {
                         match next {
                             '=' => {
@@ -411,6 +441,7 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         ">" => LexerToken::new(LexerTokenType::GreaterThanOperator, token, line, at),
         ">=" => LexerToken::new(LexerTokenType::GreaterThanOrEqualOperator, token, line, at),
         "<" => LexerToken::new(LexerTokenType::LessThanOperator, token, line, at),
+        "<=" => LexerToken::new(LexerTokenType::LessThanOrEqualOperator, token, line, at),
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token, line, at)
         }
