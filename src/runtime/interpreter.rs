@@ -5,7 +5,7 @@ use crate::{
     },
     core::{
         error::{self, ErrorType},
-        handlers::print::print,
+        handlers::{print_handler::print, type_handler::type_of},
         runtypes::{traits::arithmetic::Arithmetic, RuntimeType},
     },
 };
@@ -83,7 +83,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
                 if let AstNodeType::ReturnStatement(ret) = children {
                     return_expr = Some(match &ret.value {
                         Expression::Number(v) => RuntimeType::number(v.value),
-                        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone()),
+                        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone(), false),
                         Expression::Bool(v) => RuntimeType::boolean(v.value),
                         Expression::Identifier(v) => RuntimeType::identifier(v.name.clone()),
                         Expression::Nothing(_) => RuntimeType::nothing(),
@@ -159,7 +159,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
     match node {
         Expression::Bool(v) => RuntimeType::boolean(v.value),
         Expression::Number(v) => RuntimeType::number(v.value),
-        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone()),
+        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone(), false),
         Expression::Nothing(_) => RuntimeType::nothing(),
         Expression::Identifier(v) => {
             if let Some(val) = scopes.get_identifier_value(&v.name) {
@@ -201,6 +201,18 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
             scopes.push();
             let call_expression_return = match node.identifier.name.as_str() {
                 "print" => print(runtime_arguments, scopes),
+                "type" => {
+                    if runtime_arguments.len() > 0 {
+                        type_of(runtime_arguments[0].clone(), scopes)
+                    } else {
+                        error::throw(
+                            ErrorType::SyntaxError,
+                            "type(...) requires one parameter of <any> type in it's call",
+                            Some(node.line),
+                        );
+                        std::process::exit(1);
+                    }
+                }
                 _ => {
                     let function = scopes
                         .get_identifier_value(&node.identifier.name)

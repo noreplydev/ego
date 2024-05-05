@@ -5,15 +5,23 @@ use super::RuntimeType;
 #[derive(Debug, Clone)]
 pub struct RnString {
     pub val: String,
+    pub raw: bool,
 }
 
 impl RnString {
-    pub fn new(value: String) -> RnString {
-        RnString { val: value }
+    pub fn new(value: String, raw: bool) -> RnString {
+        RnString { val: value, raw }
     }
 
     pub fn to_string(&self) -> String {
-        interpolate(self.val.clone())
+        if self.raw {
+            return self.val.clone();
+        }
+
+        let mut chars = self.val.chars();
+        chars.next();
+        chars.next_back();
+        chars.collect()
     }
 
     pub fn to_boolean(&self) -> bool {
@@ -25,13 +33,6 @@ impl RnString {
     }
 }
 
-fn interpolate(string: String) -> String {
-    let mut chars = string.chars();
-    chars.next();
-    chars.next_back();
-    chars.collect()
-}
-
 // implement arithmetics
 impl RnString {
     pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
@@ -39,15 +40,15 @@ impl RnString {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + nothing -> nothing
             RuntimeType::RnString(s) => {
                 // "hello" + "world" -> "helloworld"
-                RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
+                RuntimeType::string(format!("{}{}", self.to_string(), s.to_string()), true)
             }
             RuntimeType::RnBoolean(b) => {
                 // "hello" + true -> "hellotrue"
-                RuntimeType::string(format!("\"{}{}\"", self.to_string(), b.to_string()))
+                RuntimeType::string(format!("{}{}", self.to_string(), b.to_string()), true)
             }
             RuntimeType::RnNumber(n) => {
                 // "hello" + 13-> "hello13"
-                RuntimeType::string(format!("\"{}{}\"", self.to_string(), n.to_string()))
+                RuntimeType::string(format!("{}{}", self.to_string(), n.to_string()), true)
             }
             RuntimeType::RnIdentifier(_) => RuntimeType::nothing(),
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),

@@ -1,9 +1,6 @@
-use crate::{
-    ast::{block::Block, group::Group, identifier::Identifier},
-    runtime::ScopesStack,
-};
+use crate::ast::{block::Block, identifier::Identifier};
 
-use super::{identifier::RnIdentifier, RuntimeType};
+use super::identifier::RnIdentifier;
 
 #[derive(Debug, Clone)]
 pub struct RnFunction {

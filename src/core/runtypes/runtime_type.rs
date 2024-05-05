@@ -31,8 +31,8 @@ impl RuntimeType {
         RuntimeType::Nothing(Nothing::new())
     }
 
-    pub fn string(value: String) -> RuntimeType {
-        RuntimeType::RnString(RnString::new(value))
+    pub fn string(value: String, raw: bool) -> RuntimeType {
+        RuntimeType::RnString(RnString::new(value, raw))
     }
 
     pub fn number(value: i64) -> RuntimeType {

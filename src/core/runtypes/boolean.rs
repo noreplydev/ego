@@ -28,7 +28,7 @@ impl RnBoolean {
             RuntimeType::Nothing(_) => RuntimeType::nothing(), // nothing + true -> nothing
             RuntimeType::RnString(s) => {
                 // true + "world" -> "trueworld"
-                RuntimeType::string(format!("\"{}{}\"", self.to_string(), s.to_string()))
+                RuntimeType::string(format!("{}{}", self.to_string(), s.to_string()), true)
             }
             RuntimeType::RnBoolean(_) => RuntimeType::nothing(),
             RuntimeType::RnNumber(_) => RuntimeType::nothing(),
