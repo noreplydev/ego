@@ -1,12 +1,16 @@
+pub mod logo;
 pub mod run;
 
+use self::logo::Logo;
 use self::run::Run;
+
 use crate::core::error;
 use crate::core::error::ErrorType;
 use std::env;
 
 pub enum Command {
     Run(Run),
+    Logo(Logo),
 }
 
 impl Command {
@@ -29,6 +33,7 @@ impl Command {
     fn cmd_from_str(command: &str, args: Vec<String>) -> Command {
         match command {
             "run" => Command::Run(Run::new(args)),
+            "logo" => Command::Logo(Logo::new(args)),
             _ => {
                 error::throw(
                     ErrorType::EgoUsageError,
@@ -42,6 +47,7 @@ impl Command {
     pub fn exec(&self) {
         match self {
             Command::Run(v) => v.exec(),
+            Command::Logo(v) => v.exec(),
         }
     }
 }
