@@ -22,7 +22,7 @@ fn main() {
     let debug = args.len() > 2 && args[2] == "-d";
 
     if !filename.ends_with(".ego") {
-        error::throw(ErrorType::EgoUsageError, "This is not .e (ego) file", None);
+        error::throw(ErrorType::EgoUsageError, "This is not .ego file", None);
     }
 
     let module_name = filename.split(".").collect::<Vec<&str>>()[0];
