@@ -36,11 +36,11 @@ $ ego hello_world.ego -d
 Ego has expressions interpretation so you can make 
 
 ```ego
-let string = "Number: "; 
-let sum = (2 + 2) * 2; 
-let result = string + sum + "."; 
+let string = "Number: "
+let sum = (2 + 2) * 2
+let result = string + sum + "."
 
-print(result); 
+print(result)
 ```
 
 After running with ego cli, you will see something like this in your terminal
@@ -53,9 +53,9 @@ Ego supports conditional execution so you could try
 
 ```ego
 if (true) {
-  print("Executed"); 
+  print("Executed")
 } else {
-  print("Not executed"); 
+  print("Not executed")
 }
 ```
 
@@ -65,11 +65,11 @@ You can change the condition to false to see how the else code block is executed
 Ego has just one iteration construct. A while loop. That's it.
 
 ```ego
-let x = 0; 
+let x = 0
 
-while (true) {
-  print(x); 
-  x = x + 1;
+while true {
+  print(x)
+  x = x + 1
 }
 ```
 
@@ -78,11 +78,11 @@ You can define a function in Ego using the `fn` keyword followed by an identifie
 
 ```
 fn greet_user(name) {
-  return "Hi, "+name;  
+  return "Hi, "+name 
 }
 
-let greet = greet_user("Cristian"); 
-print(greet); 
+let greet = greet_user("Cristian")
+print(greet)
 ```
 
 ```
@@ -93,10 +93,10 @@ You might be thinking what happens if we don't pass the name argument. Let's try
 
 ```
 fn greet(name) {
-  print("Hi, "+name);  
+  print("Hi, "+name)
 }
 
-greet(); 
+greet()
 ```
 
 ```
