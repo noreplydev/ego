@@ -8,47 +8,58 @@ use crate::{
         handlers::{print_handler::print, type_handler::type_of},
         runtypes::{traits::arithmetic::Arithmetic, RuntimeType},
     },
+    runtime::scope::ScopeInvoker,
 };
 
 use super::ScopesStack;
 
 pub fn exec(ast: ModuleAst) {
-    let mut scopes = ScopesStack::new();
+    let mut scopes = ScopesStack::new(ScopeInvoker::Module);
 
     // hoisting
     let mut counter = 0;
     while counter < ast.children.len() {
-        hoist_node(&ast.children[counter], &mut scopes);
+        hoist_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module);
         counter += 1;
     }
 
     // execution
     let mut counter = 0;
     while counter < ast.children.len() {
-        exec_node(&ast.children[counter], &mut scopes);
+        exec_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module);
         counter += 1;
     }
 }
 
-fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
+fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker) {
     match node {
         AstNodeType::Block(node) => {
             // block level hoisting
-            scopes.push();
             let mut counter = 0;
             while counter < node.children.len() {
-                hoist_node(&node.children[counter], scopes);
+                hoist_node(&node.children[counter], scopes, invoker);
                 counter += 1;
             }
-            scopes.pop();
         }
         AstNodeType::IfStatement(node) => {
             // block level hoisting
-            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
+            scopes.push(ScopeInvoker::IfStatement);
+            hoist_node(
+                &AstNodeType::Block(node.body.clone()),
+                scopes,
+                ScopeInvoker::IfStatement,
+            );
+            scopes.pop();
         }
         AstNodeType::WhileStatement(node) => {
             // block level hoisting
-            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
+            scopes.push(ScopeInvoker::WhileStatement);
+            hoist_node(
+                &AstNodeType::Block(node.body.clone()),
+                scopes,
+                ScopeInvoker::WhileStatement,
+            );
+            scopes.pop();
         }
         AstNodeType::FunctionDeclaration(node) => {
             // add declaration to scopes
@@ -63,16 +74,21 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack) {
             scopes.add_identifier(identifier, rn_function);
 
             // hoisting function level declarations
-            hoist_node(&AstNodeType::Block(node.body.clone()), scopes);
+            scopes.push(ScopeInvoker::Function);
+            hoist_node(
+                &AstNodeType::Block(node.body.clone()),
+                scopes,
+                ScopeInvoker::Function,
+            );
+            scopes.pop();
         }
         _ => {}
     }
 }
 
-fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
+fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker) -> RuntimeType {
     match node {
         AstNodeType::Block(node) => {
-            scopes.push();
             let mut counter = 0;
             let mut return_expr = None;
             while counter < node.children.len() {
@@ -108,7 +124,7 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
                         ),
                     })
                 } else {
-                    exec_node(children, scopes);
+                    exec_node(children, scopes, invoker);
                 }
             }
 
@@ -137,16 +153,32 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack) -> RuntimeType {
         }
         AstNodeType::IfStatement(node) => {
             let condition = calc_expression(&node.condition, scopes);
+            scopes.push(ScopeInvoker::IfStatement);
             if condition.to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
+                exec_node(
+                    &AstNodeType::Block(node.body.clone()),
+                    scopes,
+                    ScopeInvoker::IfStatement,
+                );
             } else if let Some(else_body) = &node.else_node {
-                exec_node(&AstNodeType::Block(else_body.body.clone()), scopes);
+                exec_node(
+                    &AstNodeType::Block(else_body.body.clone()),
+                    scopes,
+                    ScopeInvoker::IfStatement,
+                );
             }
+            scopes.pop();
             RuntimeType::nothing()
         }
         AstNodeType::WhileStatement(node) => {
             while calc_expression(&node.condition, scopes).to_boolean() {
-                exec_node(&AstNodeType::Block(node.body.clone()), scopes);
+                scopes.push(ScopeInvoker::WhileStatement);
+                exec_node(
+                    &AstNodeType::Block(node.body.clone()),
+                    scopes,
+                    ScopeInvoker::WhileStatement,
+                );
+                scopes.pop();
             }
             RuntimeType::nothing()
         }
@@ -198,7 +230,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
 
             // push new hashmap onto the stack
             // for function scope
-            scopes.push();
+            scopes.push(ScopeInvoker::Function);
             let call_expression_return = match node.identifier.name.as_str() {
                 "print" => print(runtime_arguments, scopes),
                 "type" => {
@@ -252,7 +284,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                         }
                     }
 
-                    exec_node(&AstNodeType::Block(body), scopes)
+                    exec_node(&AstNodeType::Block(body), scopes, ScopeInvoker::Function)
                 }
             };
             scopes.pop();

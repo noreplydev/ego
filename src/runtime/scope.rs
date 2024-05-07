@@ -11,9 +11,9 @@ pub struct ScopesStack {
 }
 
 impl ScopesStack {
-    pub fn new() -> ScopesStack {
+    pub fn new(invoker: ScopeInvoker) -> ScopesStack {
         ScopesStack {
-            scopes: vec![Scope::new()],
+            scopes: vec![Scope::new(invoker)],
         }
     }
 
@@ -66,8 +66,9 @@ impl ScopesStack {
         std::process::exit(1);
     }
 
-    pub fn push(&mut self) {
-        self.scopes.push(Scope::new());
+    pub fn push(&mut self, invoker: ScopeInvoker) {
+        self.scopes.push(Scope::new(invoker));
+        print!("scopes: {:#?}", self.scopes);
     }
 
     pub fn pop(&mut self) {
@@ -82,15 +83,24 @@ impl ScopesStack {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum ScopeInvoker {
+    Module,
+    IfStatement,
+    WhileStatement,
+    Function,
+}
 #[derive(Debug, Clone)]
 pub struct Scope {
     vars: HashMap<String, RuntimeType>,
+    pub invoker: ScopeInvoker,
 }
 
 impl Scope {
-    fn new() -> Scope {
+    fn new(invoker: ScopeInvoker) -> Scope {
         Scope {
             vars: HashMap::new(),
+            invoker,
         }
     }
 
