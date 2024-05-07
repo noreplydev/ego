@@ -68,7 +68,6 @@ impl ScopesStack {
 
     pub fn push(&mut self, invoker: ScopeInvoker) {
         self.scopes.push(Scope::new(invoker));
-        print!("scopes: {:#?}", self.scopes);
     }
 
     pub fn pop(&mut self) {

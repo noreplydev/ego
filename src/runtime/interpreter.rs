@@ -128,7 +128,6 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker
                 }
             }
 
-            scopes.pop();
             if let Some(return_value) = return_expr {
                 return_value
             } else {
