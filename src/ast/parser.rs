@@ -309,6 +309,8 @@ impl Module {
     // let a = 20
     fn assignment_statement(&self) -> AstNodeType {
         let token = self.unsafe_peek();
+        let at = token.at;
+        let line = token.line;
 
         // get assignment type: mutable or constant or reassignment
         let var_type = match token.value.as_str() {
@@ -343,20 +345,12 @@ impl Module {
         let expr = self.parse_comparison();
 
         // check for final semicolon
-        let token = self.peek(";");
-        let (at, line) = if token.token_type == LexerTokenType::EndOfStatement {
-            let assignament_statement_properties = (token.at, token.line);
-            // consume ';'
-            self.next();
-            assignament_statement_properties
-        } else {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!("Expected ';' but got '{}' as end of statement", token.value).as_str(),
-                Some(token.line),
-            );
-            std::process::exit(1); // for type checking
-        };
+        if self.is_peekable() {
+            if self.peek(";").token_type == LexerTokenType::EndOfStatement {
+                // consume ';'
+                self.next();
+            }
+        }
 
         AstNodeType::AssignamentStatement(AssignamentNode::new(
             identifier_node,
@@ -794,20 +788,13 @@ impl Module {
         self.next();
         let expression_node = self.parse_comparison();
 
-        // consume ';'
-        let token = self.peek(";");
-        if token.token_type != LexerTokenType::EndOfStatement {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!(
-                    "Expected ';' but got '{}' as end of return statement",
-                    token.value
-                )
-                .as_str(),
-                Some(token.line),
-            )
+        // check for final semicolon
+        if self.is_peekable() {
+            if self.peek(";").token_type == LexerTokenType::EndOfStatement {
+                // consume ';'
+                self.next();
+            }
         }
-        self.next();
 
         AstNodeType::ReturnStatement(ReturnStatement::new(expression_node, at, line))
     }
