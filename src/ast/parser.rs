@@ -468,17 +468,6 @@ impl Module {
         let at = token.at;
         let line = token.line;
 
-        // check '('
-        self.next();
-        let token = self.peek("(");
-        if token.token_type != LexerTokenType::OpenParenthesis {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!("Unexpected token '{}' after if", token.value).as_str(),
-                Some(token.line),
-            );
-        }
-
         // consume expression
         self.next();
         let expr = self.expression();
@@ -494,18 +483,7 @@ impl Module {
             }
         };
 
-        // consume ')'
-        let token = self.peek(")");
-        if token.token_type != LexerTokenType::CloseParenthesis {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!("Unexpected token '{}' in if statement", token.value).as_str(),
-                Some(token.line),
-            )
-        }
-
         // consume '{'
-        self.next();
         let token = self.peek("{");
         if token.token_type != LexerTokenType::OpenCurlyBrace {
             error::throw(
