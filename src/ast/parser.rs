@@ -541,17 +541,6 @@ impl Module {
         let at = token.at;
         let line = token.line;
 
-        // check '('
-        self.next();
-        let token = self.peek("(");
-        if token.token_type != LexerTokenType::OpenParenthesis {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!("Expected '(' but got '{}' after while", token.value).as_str(),
-                Some(token.line),
-            );
-        }
-
         // consume expression
         self.next();
         let expr = self.expression();
@@ -565,21 +554,6 @@ impl Module {
                 );
                 std::process::exit(1);
             }
-        };
-
-        // consume ')'
-        self.next();
-        let token = self.peek(")");
-        if token.token_type == LexerTokenType::CloseParenthesis {
-            error::throw(
-                ErrorType::SyntaxError,
-                format!(
-                    "Expected ')' but got '{}' to close while condition expression",
-                    token.value
-                )
-                .as_str(),
-                Some(token.line),
-            )
         };
 
         // consume '{'
