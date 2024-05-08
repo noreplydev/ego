@@ -86,7 +86,11 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoke
     }
 }
 
-fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker) -> RuntimeType {
+fn exec_node(
+    node: &AstNodeType,
+    scopes: &mut ScopesStack,
+    invoker: ScopeInvoker,
+) -> Option<RuntimeType> {
     match node {
         AstNodeType::Block(node) => {
             let mut counter = 0;
@@ -122,21 +126,26 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker
                             )),
                             scopes,
                         ),
-                    })
+                    });
+                    break;
                 } else {
-                    exec_node(children, scopes, invoker);
+                    let exec_return = exec_node(children, scopes, invoker);
+                    if exec_return.is_some() {
+                        return_expr = exec_return;
+                        break;
+                    }
                 }
             }
 
             if let Some(return_value) = return_expr {
-                return_value
+                Some(return_value)
             } else {
-                RuntimeType::nothing()
+                None
             }
         }
         AstNodeType::FunctionDeclaration(_node) => {
             // hoisted before execution
-            RuntimeType::nothing()
+            None
         }
         AstNodeType::AssignamentStatement(node) => {
             let value_as_runtype = calc_expression(&node.init, scopes);
@@ -148,41 +157,43 @@ fn exec_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoker
                     scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
                 }
             }
-            RuntimeType::nothing()
+            None
         }
         AstNodeType::IfStatement(node) => {
             let condition = calc_expression(&node.condition, scopes);
             scopes.push(ScopeInvoker::IfStatement);
+            let mut return_expr = None;
             if condition.to_boolean() {
-                exec_node(
+                return_expr = exec_node(
                     &AstNodeType::Block(node.body.clone()),
                     scopes,
                     ScopeInvoker::IfStatement,
-                );
+                )
             } else if let Some(else_body) = &node.else_node {
-                exec_node(
+                return_expr = exec_node(
                     &AstNodeType::Block(else_body.body.clone()),
                     scopes,
                     ScopeInvoker::IfStatement,
-                );
+                )
             }
             scopes.pop();
-            RuntimeType::nothing()
+            return_expr
         }
         AstNodeType::WhileStatement(node) => {
+            let mut return_expr = None;
             while calc_expression(&node.condition, scopes).to_boolean() {
                 scopes.push(ScopeInvoker::WhileStatement);
-                exec_node(
+                return_expr = exec_node(
                     &AstNodeType::Block(node.body.clone()),
                     scopes,
                     ScopeInvoker::WhileStatement,
                 );
                 scopes.pop();
             }
-            RuntimeType::nothing()
+            return_expr
         }
-        AstNodeType::Expression(expr) => calc_expression(expr, scopes),
-        _ => RuntimeType::nothing(),
+        AstNodeType::Expression(expr) => Some(calc_expression(expr, scopes)),
+        _ => None,
     }
 }
 
@@ -283,7 +294,13 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                         }
                     }
 
-                    exec_node(&AstNodeType::Block(body), scopes, ScopeInvoker::Function)
+                    if let Some(fn_block_return) =
+                        exec_node(&AstNodeType::Block(body), scopes, ScopeInvoker::Function)
+                    {
+                        fn_block_return
+                    } else {
+                        RuntimeType::nothing()
+                    }
                 }
             };
             scopes.pop();
