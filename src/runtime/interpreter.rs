@@ -101,12 +101,14 @@ fn exec_node(
 
                 // executed only inside blocks of code
                 if let AstNodeType::ReturnStatement(ret) = children {
-                    return_expr = Some(match &ret.value {
-                        Expression::Number(v) => RuntimeType::number(v.value),
-                        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone(), false),
-                        Expression::Bool(v) => RuntimeType::boolean(v.value),
-                        Expression::Identifier(v) => RuntimeType::identifier(v.name.clone()),
-                        Expression::Nothing(_) => RuntimeType::nothing(),
+                    return_expr = match &ret.value {
+                        Expression::Number(v) => Some(RuntimeType::number(v.value)),
+                        Expression::StringLiteral(v) => {
+                            Some(RuntimeType::string(v.value.clone(), false))
+                        }
+                        Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
+                        Expression::Identifier(v) => Some(RuntimeType::identifier(v.name.clone())),
+                        Expression::Nothing(_) => Some(RuntimeType::nothing()),
                         Expression::BinaryExpression(v) => calc_expression(
                             &Expression::BinaryExpression(BinaryExpression::new(
                                 v.operator.clone(),
@@ -126,7 +128,7 @@ fn exec_node(
                             )),
                             scopes,
                         ),
-                    });
+                    };
                     break;
                 } else {
                     let exec_return = exec_node(children, scopes, invoker);
@@ -148,7 +150,14 @@ fn exec_node(
             None
         }
         AstNodeType::AssignamentStatement(node) => {
-            let value_as_runtype = calc_expression(&node.init, scopes);
+            let value_as_runtype = calc_expression(&node.init, scopes).unwrap_or_else(|| {
+                error::throw(
+                    ErrorType::InterpretingError,
+                    "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+                    Some(node.line),
+                );
+                std::process::exit(1);
+            });
             match node.var_type {
                 VarType::None => {
                     scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
@@ -160,9 +169,17 @@ fn exec_node(
             None
         }
         AstNodeType::IfStatement(node) => {
-            let condition = calc_expression(&node.condition, scopes);
+            let condition = calc_expression(&node.condition, scopes).unwrap_or_else(|| {
+                error::throw(
+                    ErrorType::InterpretingError,
+                    "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+                    Some(node.line),
+                );
+                std::process::exit(1);
+            });
             scopes.push(ScopeInvoker::IfStatement);
             let mut return_expr = None;
+
             if condition.to_boolean() {
                 return_expr = exec_node(
                     &AstNodeType::Block(node.body.clone()),
@@ -181,47 +198,67 @@ fn exec_node(
         }
         AstNodeType::WhileStatement(node) => {
             let mut return_expr = None;
-            while calc_expression(&node.condition, scopes).to_boolean() {
-                scopes.push(ScopeInvoker::WhileStatement);
-                return_expr = exec_node(
-                    &AstNodeType::Block(node.body.clone()),
-                    scopes,
-                    ScopeInvoker::WhileStatement,
+            while calc_expression(&node.condition, scopes)
+                .unwrap_or_else(|| {
+                    error::throw(
+                        ErrorType::InterpretingError,
+                        "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+                        Some(node.line),
+                    );
+                    std::process::exit(1);
+                })
+                .to_boolean() {
+                    scopes.push(ScopeInvoker::WhileStatement);
+                    return_expr = exec_node(
+                        &AstNodeType::Block(node.body.clone()),
+                        scopes,
+                        ScopeInvoker::WhileStatement,
                 );
                 scopes.pop();
             }
             return_expr
         }
-        AstNodeType::Expression(expr) => Some(calc_expression(expr, scopes)),
+        AstNodeType::Expression(expr) => calc_expression(expr, scopes),
         _ => None,
     }
 }
 
-fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
+fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> Option<RuntimeType> {
     match node {
-        Expression::Bool(v) => RuntimeType::boolean(v.value),
-        Expression::Number(v) => RuntimeType::number(v.value),
-        Expression::StringLiteral(v) => RuntimeType::string(v.value.clone(), false),
-        Expression::Nothing(_) => RuntimeType::nothing(),
+        Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
+        Expression::Number(v) => Some(RuntimeType::number(v.value)),
+        Expression::StringLiteral(v) => Some(RuntimeType::string(v.value.clone(), false)),
+        Expression::Nothing(_) => Some(RuntimeType::nothing()),
         Expression::Identifier(v) => {
             if let Some(val) = scopes.get_identifier_value(&v.name) {
-                val.clone() // now we are cloning the value, so
-                            // it's not like passing the reference
+                Some(val.clone()) // now we are cloning the value, so
+                                  // it's not like passing the reference
             } else {
-                RuntimeType::nothing()
+                None
             }
         }
         Expression::BinaryExpression(expr) => {
             let left = calc_expression(&expr.left, scopes);
             let right = calc_expression(&expr.right, scopes);
-            let result = left.arithmetic(expr.operator.as_str(), right, scopes);
-
-            match result {
-                Ok(val) => val,
-                Err(err) => {
-                    error::throw(err, expr.operator.to_string().as_str(), Some(expr.line));
-                    std::process::exit(1);
-                }
+            match left {
+                Some(_left) => match right {
+                    Some(_right) => {
+                        let result = _left.arithmetic(expr.operator.as_str(), _right, scopes);
+                        match result {
+                            Ok(val) => Some(val),
+                            Err(err) => {
+                                error::throw(
+                                    err,
+                                    expr.operator.to_string().as_str(),
+                                    Some(expr.line),
+                                );
+                                std::process::exit(1);
+                            }
+                        }
+                    }
+                    None => None,
+                },
+                None => None,
             }
         }
         Expression::CallExpression(node) => {
@@ -231,7 +268,14 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                 .iter()
                 .map(|arg| -> RuntimeType {
                     if let Some(arg) = arg {
-                        calc_expression(&arg, scopes)
+                        calc_expression(&arg, scopes).unwrap_or_else(|| {
+                            error::throw(
+                                ErrorType::InterpretingError,
+                                "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+                                Some(node.line),
+                            );
+                            std::process::exit(1);
+                        })
                     } else {
                         RuntimeType::nothing()
                     }
@@ -294,13 +338,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> RuntimeType {
                         }
                     }
 
-                    if let Some(fn_block_return) =
-                        exec_node(&AstNodeType::Block(body), scopes, ScopeInvoker::Function)
-                    {
-                        fn_block_return
-                    } else {
-                        RuntimeType::nothing()
-                    }
+                    exec_node(&AstNodeType::Block(body), scopes, ScopeInvoker::Function)
                 }
             };
             scopes.pop();
