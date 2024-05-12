@@ -207,12 +207,13 @@ fn exec_node(
                     );
                     std::process::exit(1);
                 })
-                .to_boolean() {
-                    scopes.push(ScopeInvoker::WhileStatement);
-                    return_expr = exec_node(
-                        &AstNodeType::Block(node.body.clone()),
-                        scopes,
-                        ScopeInvoker::WhileStatement,
+                .to_boolean() 
+            {
+                scopes.push(ScopeInvoker::WhileStatement);
+                return_expr = exec_node(
+                    &AstNodeType::Block(node.body.clone()),
+                    scopes,
+                    ScopeInvoker::WhileStatement,
                 );
                 scopes.pop();
             }
