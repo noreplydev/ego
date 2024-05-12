@@ -2,6 +2,7 @@ pub mod assignament_statement;
 pub mod binary_expression;
 pub mod block;
 pub mod bool;
+pub mod break_statement;
 pub mod call_expression;
 pub mod else_statement;
 pub mod function_declaration;
@@ -19,11 +20,11 @@ use std::fmt;
 
 use self::{
     assignament_statement::AssignamentNode, binary_expression::BinaryExpression, block::Block,
-    bool::Bool, call_expression::CallExpression, else_statement::ElseStatement,
-    function_declaration::FunctionDeclaration, group::Group, identifier::Identifier,
-    if_statement::IfStatement, import_statement::ImportStatement, nothing::Nothing, number::Number,
-    return_statement::ReturnStatement, string_literal::StringLiteral,
-    while_statement::WhileStatement,
+    bool::Bool, break_statement::BreakStatement, call_expression::CallExpression,
+    else_statement::ElseStatement, function_declaration::FunctionDeclaration, group::Group,
+    identifier::Identifier, if_statement::IfStatement, import_statement::ImportStatement,
+    nothing::Nothing, number::Number, return_statement::ReturnStatement,
+    string_literal::StringLiteral, while_statement::WhileStatement,
 };
 
 #[derive(Debug, Clone)]
@@ -32,6 +33,7 @@ pub enum AstNodeType {
     WhileStatement(WhileStatement),
     ImportStatement(ImportStatement),
     ReturnStatement(ReturnStatement),
+    BreakStatement(BreakStatement),
     ElseStatement(ElseStatement),
     Group(Group),
     Block(Block),
@@ -48,6 +50,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::ImportStatement(_) => write!(f, "ImportStatement"),
             AstNodeType::WhileStatement(_) => write!(f, "WhileStatement"),
             AstNodeType::ReturnStatement(_) => write!(f, "ReturnStatement"),
+            AstNodeType::BreakStatement(_) => write!(f, "BreakStatement"),
             AstNodeType::Block(_) => write!(f, "Block"),
             AstNodeType::Group(_) => write!(f, "Group"),
             AstNodeType::FunctionDeclaration(_) => write!(f, "FunctionDeclaration"),

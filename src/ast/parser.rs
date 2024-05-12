@@ -18,9 +18,9 @@ use crate::{
 };
 
 use super::{
-    binary_expression::BinaryExpression, else_statement::ElseStatement, if_statement::IfStatement,
-    import_statement::ImportStatement, nothing::Nothing, return_statement::ReturnStatement,
-    while_statement::WhileStatement,
+    binary_expression::BinaryExpression, break_statement::BreakStatement,
+    else_statement::ElseStatement, if_statement::IfStatement, import_statement::ImportStatement,
+    nothing::Nothing, return_statement::ReturnStatement, while_statement::WhileStatement,
 };
 
 pub struct Module {
@@ -194,6 +194,13 @@ impl Module {
                 LexerTokenType::ReturnKeyword => {
                     let return_node = self.return_statement();
                     block_node.add_child(return_node);
+                }
+                LexerTokenType::BreakKeyword => {
+                    let token = self.unsafe_peek();
+                    self.next(); // consume 'break'
+                    block_node.add_child(AstNodeType::BreakStatement(BreakStatement::new(
+                        token.at, token.line,
+                    )))
                 }
                 _ => {
                     error::throw(
