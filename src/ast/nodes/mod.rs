@@ -42,6 +42,40 @@ pub enum AstNodeType {
     FunctionDeclaration(FunctionDeclaration),
 }
 
+impl AstNodeType {
+    pub fn at(&self) -> usize {
+        match self {
+            AstNodeType::IfStatement(v) => v.at,
+            AstNodeType::WhileStatement(v) => v.at,
+            AstNodeType::ImportStatement(v) => v.at,
+            AstNodeType::ReturnStatement(v) => v.at,
+            AstNodeType::BreakStatement(v) => v.at,
+            AstNodeType::ElseStatement(v) => v.at,
+            AstNodeType::Group(v) => v.at,
+            AstNodeType::Block(v) => 0,
+            AstNodeType::Expression(v) => 0,
+            AstNodeType::AssignamentStatement(v) => v.at,
+            AstNodeType::FunctionDeclaration(v) => v.at,
+        }
+    }
+
+    pub fn line(&self) -> usize {
+        match self {
+            AstNodeType::IfStatement(v) => v.line,
+            AstNodeType::WhileStatement(v) => v.line,
+            AstNodeType::ImportStatement(v) => v.line,
+            AstNodeType::ReturnStatement(v) => v.line,
+            AstNodeType::BreakStatement(v) => v.line,
+            AstNodeType::ElseStatement(v) => v.line,
+            AstNodeType::Group(v) => v.line,
+            AstNodeType::Block(v) => 0,
+            AstNodeType::Expression(v) => 0,
+            AstNodeType::AssignamentStatement(v) => v.line,
+            AstNodeType::FunctionDeclaration(v) => v.line,
+        }
+    }
+}
+
 impl fmt::Display for AstNodeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

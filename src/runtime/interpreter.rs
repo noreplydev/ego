@@ -99,42 +99,63 @@ fn exec_node(
                 let children = &node.children[counter];
                 counter += 1;
 
-                // executed only inside blocks of code
-                if let AstNodeType::ReturnStatement(ret) = children {
-                    return_expr = match &ret.value {
-                        Expression::Number(v) => Some(RuntimeType::number(v.value)),
-                        Expression::StringLiteral(v) => {
-                            Some(RuntimeType::string(v.value.clone(), false))
+                match invoker {
+                    ScopeInvoker::WhileStatement => {  
+                        match children {
+                            AstNodeType::BreakStatement(_) => {
+                                return_expr = Some(RuntimeType::nothing()); 
+                            }
+                            AstNodeType::ReturnStatement(_) => {
+                                error::throw(ErrorType::SyntaxError, "Return statements are not valid inside while loop", Some(children.line())); 
+                                std::process::exit(1); 
+                            }
+                            _ => {
+                                let exec_return = exec_node(children, scopes, invoker);
+                                if exec_return.is_some() {
+                                    return_expr = exec_return;
+                                    break;
+                                }
+                            }
                         }
-                        Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
-                        Expression::Identifier(v) => Some(RuntimeType::identifier(v.name.clone())),
-                        Expression::Nothing(_) => Some(RuntimeType::nothing()),
-                        Expression::BinaryExpression(v) => calc_expression(
-                            &Expression::BinaryExpression(BinaryExpression::new(
-                                v.operator.clone(),
-                                v.left.clone(),
-                                v.right.clone(),
-                                v.at,
-                                v.line,
-                            )),
-                            scopes,
-                        ),
-                        Expression::CallExpression(v) => calc_expression(
-                            &Expression::CallExpression(CallExpression::new(
-                                v.identifier.clone(),
-                                v.arguments.clone(),
-                                v.at,
-                                v.line,
-                            )),
-                            scopes,
-                        ),
-                    };
-                    break;
-                } else {
-                    let exec_return = exec_node(children, scopes, invoker);
-                    if exec_return.is_some() {
-                        return_expr = exec_return;
-                        break;
+                    }
+                    _ => {
+                        if let AstNodeType::ReturnStatement(ret) = children {
+                            return_expr = match &ret.value {
+                                Expression::Number(v) => Some(RuntimeType::number(v.value)),
+                                Expression::StringLiteral(v) => {
+                                    Some(RuntimeType::string(v.value.clone(), false))
+                                }
+                                Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
+                                Expression::Identifier(v) => Some(RuntimeType::identifier(v.name.clone())),
+                                Expression::Nothing(_) => Some(RuntimeType::nothing()),
+                                Expression::BinaryExpression(v) => calc_expression(
+                                    &Expression::BinaryExpression(BinaryExpression::new(
+                                        v.operator.clone(),
+                                        v.left.clone(),
+                                        v.right.clone(),
+                                        v.at,
+                                        v.line,
+                                    )),
+                                    scopes,
+                                ),
+                                Expression::CallExpression(v) => calc_expression(
+                                    &Expression::CallExpression(CallExpression::new(
+                                        v.identifier.clone(),
+                                        v.arguments.clone(),
+                                        v.at,
+                                        v.line,
+                                    )),
+                                    scopes,
+                                ),
+                            };
+                            break;
+                        } else {
+                            let exec_return = exec_node(children, scopes, invoker);
+                            if exec_return.is_some() {
+                                return_expr = exec_return;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -215,6 +236,10 @@ fn exec_node(
                     scopes,
                     ScopeInvoker::WhileStatement,
                 );
+                if return_expr.is_some() {
+                    scopes.pop();
+                    break
+                }
                 scopes.pop();
             }
             return_expr
