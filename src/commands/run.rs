@@ -14,6 +14,9 @@ impl Run {
     pub fn new(args: Vec<String>) -> Run {
         Run { args }
     }
+    pub fn debug(&self) -> bool {
+        self.args.contains(&"-d".to_string())
+    }
     pub fn exec(&self) {
         if self.args.len() < 1 {}
 
@@ -28,19 +31,18 @@ impl Run {
         });
 
         let tokens = lex(file_content);
-        /*         if debug {
+        if self.debug() {
             println!("\nLexer tokens: \n-------------");
             for (i, token) in tokens.iter().enumerate() {
                 println!("{i}. {token}");
             }
-        } */
+        }
 
         let mut module = Module::new(module_name, tokens);
         let ast = module.parse();
-        /*         if debug {
-                   println!("\nAst nodes: \n---------------\n{:#?}", ast);
-               }
-        */
+        if self.debug() {
+            println!("\nAst nodes: \n---------------\n{:#?}", ast);
+        }
         exec(ast);
     }
 }
