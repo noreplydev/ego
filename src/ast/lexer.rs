@@ -301,7 +301,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         }
                     }
                 }
-                '+' | '-' | '*' | '<' => {
+                '+' | '-' | '*' => {
                     if is_string {
                         current_token.push(c);
                     } else {
