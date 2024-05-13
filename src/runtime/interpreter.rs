@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use crate::{
     ast::{
         assignament_statement::VarType, binary_expression::BinaryExpression,
@@ -12,6 +14,22 @@ use crate::{
 };
 
 use super::ScopesStack;
+
+pub struct Interpreter {
+    ast: ModuleAst, 
+    scopes: ScopesStack, 
+    current: Cell<usize>,
+}
+
+impl Interpreter {
+    pub fn new(ast: ModuleAst) -> Interpreter {
+        Interpreter {
+            ast, 
+            scopes: ScopesStack::new(ScopeInvoker::Module), 
+            current: Cell::new(0)
+        }
+    }
+}
 
 pub fn exec(ast: ModuleAst) {
     let mut scopes = ScopesStack::new(ScopeInvoker::Module);

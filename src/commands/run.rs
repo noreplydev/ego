@@ -4,7 +4,7 @@ use crate::ast::lex;
 use crate::ast::Module;
 use crate::core::error;
 use crate::core::error::ErrorType;
-use crate::runtime::exec;
+use crate::runtime::{exec, Interpreter};
 
 pub struct Run {
     args: Vec<String>,
@@ -43,6 +43,8 @@ impl Run {
         if self.debug() {
             println!("\nAst nodes: \n---------------\n{:#?}", ast);
         }
+
+        let interpreter = Interpreter::new(ast.clone());
         exec(ast);
     }
 }
