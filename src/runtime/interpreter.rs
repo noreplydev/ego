@@ -17,7 +17,6 @@ use super::ScopesStack;
 pub struct Interpreter {
     ast: ModuleAst,
     scopes: ScopesStack,
-    current: Cell<usize>,
 }
 
 impl Interpreter {
@@ -25,26 +24,23 @@ impl Interpreter {
         Interpreter {
             ast,
             scopes: ScopesStack::new(ScopeInvoker::Module),
-            current: Cell::new(0),
         }
     }
-}
 
-pub fn exec(ast: ModuleAst) {
-    let mut scopes = ScopesStack::new(ScopeInvoker::Module);
-
-    // hoisting
-    let mut counter = 0;
-    while counter < ast.children.len() {
-        hoist_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module);
-        counter += 1;
-    }
-
-    // execution
-    let mut counter = 0;
-    while counter < ast.children.len() {
-        exec_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module); 
-        counter += 1;
+    pub fn exec(&mut self) {
+        // hoisting
+        let mut counter = 0;
+        while counter < self.ast.children.len() {
+            hoist_node(&self.ast.children[counter], &mut self.scopes, ScopeInvoker::Module);
+            counter += 1;
+        }
+    
+        // execution
+        let mut counter = 0;
+        while counter < self.ast.children.len() {
+            exec_node(&self.ast.children[counter], &mut self.scopes, ScopeInvoker::Module); 
+            counter += 1;
+        }
     }
 }
 
