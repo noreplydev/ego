@@ -2,8 +2,7 @@ use std::cell::Cell;
 
 use crate::{
     ast::{
-        assignament_statement::VarType, binary_expression::BinaryExpression,
-        call_expression::CallExpression, module::ModuleAst, AstNodeType, Expression,
+        assignament_statement::{AssignamentNode, VarType}, binary_expression::BinaryExpression, block::Block, call_expression::CallExpression, if_statement::IfStatement, module::ModuleAst, while_statement::WhileStatement, AstNodeType, Expression
     },
     core::{
         error::{self, ErrorType},
@@ -16,17 +15,17 @@ use crate::{
 use super::ScopesStack;
 
 pub struct Interpreter {
-    ast: ModuleAst, 
-    scopes: ScopesStack, 
+    ast: ModuleAst,
+    scopes: ScopesStack,
     current: Cell<usize>,
 }
 
 impl Interpreter {
     pub fn new(ast: ModuleAst) -> Interpreter {
         Interpreter {
-            ast, 
-            scopes: ScopesStack::new(ScopeInvoker::Module), 
-            current: Cell::new(0)
+            ast,
+            scopes: ScopesStack::new(ScopeInvoker::Module),
+            current: Cell::new(0),
         }
     }
 }
@@ -44,7 +43,7 @@ pub fn exec(ast: ModuleAst) {
     // execution
     let mut counter = 0;
     while counter < ast.children.len() {
-        exec_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module);
+        exec_node(&ast.children[counter], &mut scopes, ScopeInvoker::Module); 
         counter += 1;
     }
 }
@@ -110,161 +109,185 @@ fn exec_node(
     invoker: ScopeInvoker,
 ) -> Option<RuntimeType> {
     match node {
-        AstNodeType::Block(node) => {
-            let mut counter = 0;
-            let mut return_expr = None;
-            while counter < node.children.len() {
-                let children = &node.children[counter];
-                counter += 1;
-
-                match invoker {
-                    ScopeInvoker::WhileStatement => {  
-                        match children {
-                            AstNodeType::BreakStatement(_) => {
-                                return_expr = Some(RuntimeType::nothing()); 
-                            }
-                            AstNodeType::ReturnStatement(_) => {
-                                error::throw(ErrorType::SyntaxError, "Return statements are not valid inside while loop", Some(children.line())); 
-                                std::process::exit(1); 
-                            }
-                            _ => {
-                                let exec_return = exec_node(children, scopes, invoker);
-                                if exec_return.is_some() {
-                                    return_expr = exec_return;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    _ => {
-                        if let AstNodeType::ReturnStatement(ret) = children {
-                            return_expr = match &ret.value {
-                                Expression::Number(v) => Some(RuntimeType::number(v.value)),
-                                Expression::StringLiteral(v) => {
-                                    Some(RuntimeType::string(v.value.clone(), false))
-                                }
-                                Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
-                                Expression::Identifier(v) => Some(RuntimeType::identifier(v.name.clone())),
-                                Expression::Nothing(_) => Some(RuntimeType::nothing()),
-                                Expression::BinaryExpression(v) => calc_expression(
-                                    &Expression::BinaryExpression(BinaryExpression::new(
-                                        v.operator.clone(),
-                                        v.left.clone(),
-                                        v.right.clone(),
-                                        v.at,
-                                        v.line,
-                                    )),
-                                    scopes,
-                                ),
-                                Expression::CallExpression(v) => calc_expression(
-                                    &Expression::CallExpression(CallExpression::new(
-                                        v.identifier.clone(),
-                                        v.arguments.clone(),
-                                        v.at,
-                                        v.line,
-                                    )),
-                                    scopes,
-                                ),
-                            };
-                            break;
-                        } else {
-                            let exec_return = exec_node(children, scopes, invoker);
-                            if exec_return.is_some() {
-                                return_expr = exec_return;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if let Some(return_value) = return_expr {
-                Some(return_value)
-            } else {
-                None
-            }
-        }
-        AstNodeType::FunctionDeclaration(_node) => {
-            // hoisted before execution
-            None
-        }
-        AstNodeType::AssignamentStatement(node) => {
-            let value_as_runtype = calc_expression(&node.init, scopes).unwrap_or_else(|| {
-                error::throw(
-                    ErrorType::InterpretingError,
-                    "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
-                    Some(node.line),
-                );
-                std::process::exit(1);
-            });
-            match node.var_type {
-                VarType::None => {
-                    scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
-                }
-                VarType::Const | VarType::Let => {
-                    scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
-                }
-            }
-            None
-        }
-        AstNodeType::IfStatement(node) => {
-            let condition = calc_expression(&node.condition, scopes).unwrap_or_else(|| {
-                error::throw(
-                    ErrorType::InterpretingError,
-                    "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
-                    Some(node.line),
-                );
-                std::process::exit(1);
-            });
-            scopes.push(ScopeInvoker::IfStatement);
-            let mut return_expr = None;
-
-            if condition.to_boolean() {
-                return_expr = exec_node(
-                    &AstNodeType::Block(node.body.clone()),
-                    scopes,
-                    ScopeInvoker::IfStatement,
-                )
-            } else if let Some(else_body) = &node.else_node {
-                return_expr = exec_node(
-                    &AstNodeType::Block(else_body.body.clone()),
-                    scopes,
-                    ScopeInvoker::IfStatement,
-                )
-            }
-            scopes.pop();
-            return_expr
-        }
-        AstNodeType::WhileStatement(node) => {
-            let mut return_expr = None;
-            while calc_expression(&node.condition, scopes)
-                .unwrap_or_else(|| {
-                    error::throw(
-                        ErrorType::InterpretingError,
-                        "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
-                        Some(node.line),
-                    );
-                    std::process::exit(1);
-                })
-                .to_boolean() 
-            {
-                scopes.push(ScopeInvoker::WhileStatement);
-                return_expr = exec_node(
-                    &AstNodeType::Block(node.body.clone()),
-                    scopes,
-                    ScopeInvoker::WhileStatement,
-                );
-                if return_expr.is_some() {
-                    scopes.pop();
-                    break
-                }
-                scopes.pop();
-            }
-            return_expr
-        }
+        AstNodeType::Block(node) => exec_block(node, scopes, invoker), 
+        AstNodeType::FunctionDeclaration(_node) => None, 
+        AstNodeType::IfStatement(node) => exec_if(node, scopes, invoker), 
+        AstNodeType::WhileStatement(node) => exec_while(node, scopes, invoker), 
+        AstNodeType::AssignamentStatement(node) => exec_assignament(node, scopes, invoker), 
         AstNodeType::Expression(expr) => calc_expression(expr, scopes),
         _ => None,
     }
+}
+
+fn exec_block(
+    node: &Block,
+    scopes: &mut ScopesStack,
+    invoker: ScopeInvoker,
+) -> Option<RuntimeType> {
+    let mut counter = 0;
+    let mut return_expr = None;
+    while counter < node.children.len() {
+        let children = &node.children[counter];
+        counter += 1;
+
+        match invoker {
+            ScopeInvoker::WhileStatement => match children {
+                AstNodeType::BreakStatement(_) => {
+                    return_expr = Some(RuntimeType::nothing());
+                }
+                AstNodeType::ReturnStatement(_) => {
+                    error::throw(
+                        ErrorType::SyntaxError,
+                        "Return statements are not valid inside while loop",
+                        Some(children.line()),
+                    );
+                    std::process::exit(1);
+                }
+                _ => {
+                    let exec_return = exec_node(children, scopes, invoker);
+                    if exec_return.is_some() {
+                        return_expr = exec_return;
+                        break;
+                    }
+                }
+            },
+            _ => {
+                if let AstNodeType::ReturnStatement(ret) = children {
+                    return_expr = match &ret.value {
+                        Expression::Number(v) => Some(RuntimeType::number(v.value)),
+                        Expression::StringLiteral(v) => {
+                            Some(RuntimeType::string(v.value.clone(), false))
+                        }
+                        Expression::Bool(v) => Some(RuntimeType::boolean(v.value)),
+                        Expression::Identifier(v) => Some(RuntimeType::identifier(v.name.clone())),
+                        Expression::Nothing(_) => Some(RuntimeType::nothing()),
+                        Expression::BinaryExpression(v) => calc_expression(
+                            &Expression::BinaryExpression(BinaryExpression::new(
+                                v.operator.clone(),
+                                v.left.clone(),
+                                v.right.clone(),
+                                v.at,
+                                v.line,
+                            )),
+                            scopes,
+                        ),
+                        Expression::CallExpression(v) => calc_expression(
+                            &Expression::CallExpression(CallExpression::new(
+                                v.identifier.clone(),
+                                v.arguments.clone(),
+                                v.at,
+                                v.line,
+                            )),
+                            scopes,
+                        ),
+                    };
+                    break;
+                } else {
+                    let exec_return = exec_node(children, scopes, invoker);
+                    if exec_return.is_some() {
+                        return_expr = exec_return;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if let Some(return_value) = return_expr {
+        Some(return_value)
+    } else {
+        None
+    }
+}
+
+fn exec_assignament(
+    node: &AssignamentNode,
+    scopes: &mut ScopesStack,
+    invoker: ScopeInvoker,
+) -> Option<RuntimeType> {
+    let value_as_runtype = calc_expression(&node.init, scopes).unwrap_or_else(|| {
+        error::throw(
+            ErrorType::InterpretingError,
+            "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+            Some(node.line),
+        );
+        std::process::exit(1);
+    });
+    match node.var_type {
+        VarType::None => {
+            scopes.set_indentifier(node.identifier.name.clone(), value_as_runtype);
+        }
+        VarType::Const | VarType::Let => {
+            scopes.add_identifier(node.identifier.name.clone(), value_as_runtype);
+        }
+    }
+    None
+}
+
+fn exec_if(
+    node: &IfStatement,
+    scopes: &mut ScopesStack,
+    invoker: ScopeInvoker,
+) -> Option<RuntimeType> {
+    let condition = calc_expression(&node.condition, scopes).unwrap_or_else(|| {
+        error::throw(
+            ErrorType::InterpretingError,
+            "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+            Some(node.line),
+        );
+        std::process::exit(1);
+    });
+    scopes.push(ScopeInvoker::IfStatement);
+    let mut return_expr = None;
+
+    if condition.to_boolean() {
+        return_expr = exec_node(
+            &AstNodeType::Block(node.body.clone()),
+            scopes,
+            ScopeInvoker::IfStatement,
+        )
+    } else if let Some(else_body) = &node.else_node {
+        return_expr = exec_node(
+            &AstNodeType::Block(else_body.body.clone()),
+            scopes,
+            ScopeInvoker::IfStatement,
+        )
+    }
+    scopes.pop();
+    return_expr
+}
+
+fn exec_while(
+    node: &WhileStatement,
+    scopes: &mut ScopesStack,
+    invoker: ScopeInvoker,
+) -> Option<RuntimeType> {
+    let mut return_expr = None;
+    while calc_expression(&node.condition, scopes)
+        .unwrap_or_else(|| {
+            error::throw(
+                ErrorType::InterpretingError,
+                "This is a known possible issue. Please report on https://github.com/noreplydev/ego with your code",
+                Some(node.line),
+            );
+            std::process::exit(1);
+        })
+        .to_boolean() 
+    {
+        scopes.push(ScopeInvoker::WhileStatement);
+        return_expr = exec_node(
+            &AstNodeType::Block(node.body.clone()),
+            scopes,
+            ScopeInvoker::WhileStatement,
+        );
+        if return_expr.is_some() {
+            scopes.pop();
+            break
+        }
+        scopes.pop();
+    }
+    return_expr
+
 }
 
 fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> Option<RuntimeType> {
