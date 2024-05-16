@@ -136,21 +136,27 @@ pub fn lex(source: String) -> Vec<LexerToken> {
     let mut line_counter = 1; // track current line
 
     while let Some(c) = chars.next() {
-        // inside comment
         if is_comment {
             if c == '\n' {
                 is_comment = false;
                 line_counter += 1;
                 line_char_counter = 0;
             }
+        } else if is_string {
+            if c == '"' {
+                print!(" {c} |");
+                current_token.push(c);
+                is_string = false;
+            } else {
+                print!(" {c} |");
+                current_token.push(c);
+            }
         // normal mode
         } else {
             match c {
                 // a quote
                 '"' => {
-                    current_token.push(c);
-
-                    if is_string {
+                    if current_token.len() > 0 {
                         tokens.push(token_with_type(
                             current_token,
                             line_counter,
@@ -159,6 +165,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         current_token = String::new();
                     }
 
+                    current_token.push(c);
                     is_string = !is_string;
                 }
                 // comments & divide operator
@@ -167,24 +174,20 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         if c == '/' && next == &'/' {
                             is_comment = true;
                         } else {
-                            if is_string {
-                                current_token.push(c);
-                            } else {
-                                if current_token.len() > 0 {
-                                    tokens.push(token_with_type(
-                                        current_token,
-                                        line_counter,
-                                        line_char_counter - 1,
-                                    )); // push previous token, - 1 since is the previous
-                                    current_token = String::new();
-                                }
+                            if current_token.len() > 0 {
                                 tokens.push(token_with_type(
-                                    c.to_string(),
+                                    current_token,
                                     line_counter,
-                                    line_char_counter,
-                                ));
+                                    line_char_counter - 1,
+                                )); // push previous token, - 1 since is the previous
                                 current_token = String::new();
                             }
+                            tokens.push(token_with_type(
+                                c.to_string(),
+                                line_counter,
+                                line_char_counter,
+                            ));
+                            current_token = String::new();
                         }
                     }
                 }
@@ -302,51 +305,41 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     }
                 }
                 '+' | '-' | '*' => {
-                    if is_string {
-                        current_token.push(c);
-                    } else {
-                        if current_token.len() > 0 {
-                            tokens.push(token_with_type(
-                                current_token,
-                                line_counter,
-                                line_char_counter - 1,
-                            )); // push previous token, - 1 since is the previous
-                            current_token = String::new();
-                        }
+                    if current_token.len() > 0 {
                         tokens.push(token_with_type(
-                            c.to_string(),
+                            current_token,
                             line_counter,
-                            line_char_counter,
-                        ));
+                            line_char_counter - 1,
+                        )); // push previous token, - 1 since is the previous
                         current_token = String::new();
                     }
+                    tokens.push(token_with_type(
+                        c.to_string(),
+                        line_counter,
+                        line_char_counter,
+                    ));
+                    current_token = String::new();
                 }
                 // special characters
                 '(' | ')' | '{' | '}' | '[' | ']' | '.' | ',' | ';' => {
-                    if is_string {
-                        current_token.push(c);
-                    } else {
-                        if current_token.len() > 0 {
-                            tokens.push(token_with_type(
-                                current_token,
-                                line_counter,
-                                line_char_counter - 1,
-                            )); // push previous token, - 1 since is the previous
-                            current_token = String::new();
-                        }
+                    if current_token.len() > 0 {
                         tokens.push(token_with_type(
-                            c.to_string(),
+                            current_token,
                             line_counter,
-                            line_char_counter,
-                        ));
-                        // push current
+                            line_char_counter - 1,
+                        )); // push previous token, - 1 since is the previous
+                        current_token = String::new();
                     }
+                    tokens.push(token_with_type(
+                        c.to_string(),
+                        line_counter,
+                        line_char_counter,
+                    ));
+                    // push current
                 }
                 // whitespace types
                 ' ' | '\n' | '\t' => {
-                    if is_string {
-                        current_token.push(c);
-                    } else if keywords.contains(&current_token.as_str()) {
+                    if keywords.contains(&current_token.as_str()) {
                         tokens.push(token_with_type(
                             current_token,
                             line_counter,
@@ -383,7 +376,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     }
                 }
                 // characters that are not whitespace
-                _ if is_string || !c.is_whitespace() => {
+                _ if !c.is_whitespace() => {
                     // check for numeric strings
                     current_token.push(c);
                 }
