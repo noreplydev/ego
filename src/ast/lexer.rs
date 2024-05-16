@@ -19,6 +19,8 @@ pub enum LexerTokenType {
     SubtractOperator,
     MultiplyOperator,
     DivideOperator,
+    OrOperator,
+    AndOperator,
     LessThanOperator,
     LessThanOrEqualOperator,
     GreaterThanOperator,
@@ -61,6 +63,8 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::SubtractOperator => write!(f, "SubtractOperator"),
             LexerTokenType::MultiplyOperator => write!(f, "MultiplyOperator"),
             LexerTokenType::DivideOperator => write!(f, "DivideOperator"),
+            LexerTokenType::OrOperator => write!(f, "OrOperator"),
+            LexerTokenType::AndOperator => write!(f, "AndOperator"),
             LexerTokenType::LessThanOperator => write!(f, "LessThanOperator"),
             LexerTokenType::LessThanOrEqualOperator => write!(f, "LessThanOrEqualOperator"),
             LexerTokenType::GreaterThanOperator => write!(f, "GreaterThanOperator"),
@@ -304,7 +308,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         }
                     }
                 }
-                '+' | '-' | '*' => {
+                '+' | '-' | '*' | '|' | '&' => {
                     if current_token.len() > 0 {
                         tokens.push(token_with_type(
                             current_token,
@@ -431,6 +435,8 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "+" => LexerToken::new(LexerTokenType::AddOperator, token, line, at),
         "-" => LexerToken::new(LexerTokenType::SubtractOperator, token, line, at),
         "*" => LexerToken::new(LexerTokenType::MultiplyOperator, token, line, at),
+        "|" => LexerToken::new(LexerTokenType::OrOperator, token, line, at),
+        "&" => LexerToken::new(LexerTokenType::AndOperator, token, line, at),
         "/" => LexerToken::new(LexerTokenType::DivideOperator, token, line, at),
         ">" => LexerToken::new(LexerTokenType::GreaterThanOperator, token, line, at),
         ">=" => LexerToken::new(LexerTokenType::GreaterThanOrEqualOperator, token, line, at),
