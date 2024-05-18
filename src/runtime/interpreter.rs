@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use crate::{
     ast::{
         assignament_statement::{AssignamentNode, VarType}, binary_expression::BinaryExpression, block::Block, call_expression::CallExpression, if_statement::IfStatement, module::ModuleAst, while_statement::WhileStatement, AstNodeType, Expression

@@ -1,5 +1,3 @@
-use crate::runtime::ScopesStack;
-
 use super::RuntimeType;
 
 #[derive(Debug, Clone)]
