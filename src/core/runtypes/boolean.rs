@@ -124,4 +124,15 @@ impl RnBoolean {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
+    pub fn or(&self, _operand: RuntimeType) -> RuntimeType {
+        match _operand {
+            _ => RuntimeType::boolean(true),
+        }
+    }
+    pub fn and(&self, _operand: RuntimeType) -> RuntimeType {
+        match _operand {
+            RuntimeType::Nothing(_) => RuntimeType::boolean(false),
+            _ => RuntimeType::boolean(true),
+        }
+    }
 }
