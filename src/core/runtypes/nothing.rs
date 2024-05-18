@@ -20,41 +20,37 @@ impl Nothing {
 
 // implement arithmetics
 impl Nothing {
-    pub fn add(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn add(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn substract(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn substract(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn mulitply(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn mulitply(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn divide(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn divide(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::nothing()
     }
-    pub fn greater_than(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn greater_than(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::boolean(false)
     }
-    pub fn less_than(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn less_than(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::boolean(false)
     }
-    pub fn greater_than_or_equal(
-        &self,
-        _operand: RuntimeType,
-        _scopes: &ScopesStack,
-    ) -> RuntimeType {
+    pub fn greater_than_or_equal(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::boolean(true)
     }
-    pub fn less_than_or_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn less_than_or_equal(&self, _operand: RuntimeType) -> RuntimeType {
         RuntimeType::boolean(true)
     }
-    pub fn not_equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn not_equal(&self, _operand: RuntimeType) -> RuntimeType {
         match _operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             _ => RuntimeType::boolean(true),
         }
     }
-    pub fn equal(&self, _operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn equal(&self, _operand: RuntimeType) -> RuntimeType {
         match _operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(true),
             _ => RuntimeType::boolean(false),

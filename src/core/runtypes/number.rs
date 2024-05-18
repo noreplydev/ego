@@ -27,7 +27,7 @@ impl RnNumber {
 
 // implement arithmetics
 impl RnNumber {
-    pub fn add(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn add(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(s) => {
@@ -40,7 +40,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
-    pub fn substract(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn substract(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
@@ -50,7 +50,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
-    pub fn mulitply(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn mulitply(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
@@ -60,7 +60,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
-    pub fn divide(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn divide(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::nothing(),
             RuntimeType::RnString(_) => RuntimeType::nothing(),
@@ -70,7 +70,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::nothing(),
         }
     }
-    pub fn greater_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn greater_than(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(true),
             RuntimeType::RnString(_) => RuntimeType::boolean(false),
@@ -80,7 +80,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
-    pub fn less_than(&self, operand: RuntimeType, scopes: &ScopesStack) -> RuntimeType {
+    pub fn less_than(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             RuntimeType::RnString(_) => RuntimeType::boolean(false),
@@ -90,11 +90,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
-    pub fn greater_than_or_equal(
-        &self,
-        operand: RuntimeType,
-        _scopes: &ScopesStack,
-    ) -> RuntimeType {
+    pub fn greater_than_or_equal(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             RuntimeType::RnString(_) => RuntimeType::boolean(false),
@@ -104,7 +100,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
-    pub fn less_than_or_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn less_than_or_equal(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             RuntimeType::RnString(_) => RuntimeType::boolean(false),
@@ -114,7 +110,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(false),
         }
     }
-    pub fn not_equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn not_equal(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(true),
             RuntimeType::RnString(_) => RuntimeType::boolean(true),
@@ -124,7 +120,7 @@ impl RnNumber {
             RuntimeType::RnFunction(_) => RuntimeType::boolean(true),
         }
     }
-    pub fn equal(&self, operand: RuntimeType, _scopes: &ScopesStack) -> RuntimeType {
+    pub fn equal(&self, operand: RuntimeType) -> RuntimeType {
         match operand {
             RuntimeType::Nothing(_) => RuntimeType::boolean(false),
             RuntimeType::RnString(_) => RuntimeType::boolean(false),
