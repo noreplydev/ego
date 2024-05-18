@@ -18,13 +18,16 @@ impl Run {
         self.args.contains(&"-d".to_string())
     }
     pub fn exec(&self) {
-        if self.args.len() < 1 {}
+        let module_name = if self.args.len() > 0 {
+            self.args[0].clone()
+        } else {
+            "main.ego".to_string() // default lookup on a ego project
+        };
 
-        let module_name = self.args[0].clone();
         let file_content = fs::read_to_string(&module_name).unwrap_or_else(|_| {
             error::throw(
                 ErrorType::FatalError,
-                format!("Cannot read {}", self.args[0]).as_str(),
+                format!("Cannot read {}\n", module_name).as_str(),
                 None,
             );
             std::process::exit(1); // to avoid types error

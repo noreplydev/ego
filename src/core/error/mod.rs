@@ -26,7 +26,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::UnknownArithmeticOperand => error_string = "Unknown arithmetic operand error.",
     }
 
-    println!("[ego] {error_string} {error_message}");
+    println!("\n[ego] {error_string} {error_message}");
     if let Some(line) = line {
         println!("      └ on line: {line}");
     }
