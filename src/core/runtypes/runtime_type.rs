@@ -111,12 +111,7 @@ impl Print for RuntimeType {
 }
 
 impl Arithmetic for RuntimeType {
-    fn arithmetic(
-        &self,
-        operator: &str,
-        operand: RuntimeType,
-        scopes: &ScopesStack,
-    ) -> Result<RuntimeType, ErrorType> {
+    fn arithmetic(&self, operator: &str, operand: RuntimeType) -> Result<RuntimeType, ErrorType> {
         match self {
             RuntimeType::Nothing(v) => match operator {
                 "+" => Ok(v.add(operand)),

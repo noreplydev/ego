@@ -1,6 +1,6 @@
-use crate::{core::runtypes::RuntimeType, runtime::ScopesStack};
+use crate::core::runtypes::RuntimeType;
 
-pub fn type_of(rt: RuntimeType, scopes: &ScopesStack) -> Option<RuntimeType> {
+pub fn type_of(rt: RuntimeType) -> Option<RuntimeType> {
     Some(match rt {
         RuntimeType::Nothing(_) => RuntimeType::string("nothing".to_string(), true),
         RuntimeType::RnBoolean(_) => RuntimeType::string("boolean".to_string(), true),

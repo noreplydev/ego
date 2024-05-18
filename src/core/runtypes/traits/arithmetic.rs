@@ -1,13 +1,5 @@
-use crate::{
-    core::{error::ErrorType, runtypes::RuntimeType},
-    runtime::ScopesStack,
-};
+use crate::core::{error::ErrorType, runtypes::RuntimeType};
 
 pub trait Arithmetic {
-    fn arithmetic(
-        &self,
-        operator: &str,
-        operand: RuntimeType,
-        scopes: &ScopesStack,
-    ) -> Result<RuntimeType, ErrorType>;
+    fn arithmetic(&self, operator: &str, operand: RuntimeType) -> Result<RuntimeType, ErrorType>;
 }

@@ -52,8 +52,8 @@ impl AstNodeType {
             AstNodeType::BreakStatement(v) => v.at,
             AstNodeType::ElseStatement(v) => v.at,
             AstNodeType::Group(v) => v.at,
-            AstNodeType::Block(v) => 0,
-            AstNodeType::Expression(v) => 0,
+            AstNodeType::Block(_v) => 0,
+            AstNodeType::Expression(_v) => 0,
             AstNodeType::AssignamentStatement(v) => v.at,
             AstNodeType::FunctionDeclaration(v) => v.at,
         }
@@ -68,8 +68,8 @@ impl AstNodeType {
             AstNodeType::BreakStatement(v) => v.line,
             AstNodeType::ElseStatement(v) => v.line,
             AstNodeType::Group(v) => v.line,
-            AstNodeType::Block(v) => 0,
-            AstNodeType::Expression(v) => 0,
+            AstNodeType::Block(_v) => 0,
+            AstNodeType::Expression(_v) => 0,
             AstNodeType::AssignamentStatement(v) => v.line,
             AstNodeType::FunctionDeclaration(v) => v.line,
         }

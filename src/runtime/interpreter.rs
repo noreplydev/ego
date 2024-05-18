@@ -197,7 +197,7 @@ fn exec_block(
 fn exec_assignament(
     node: &AssignamentNode,
     scopes: &mut ScopesStack,
-    invoker: ScopeInvoker,
+    _invoker: ScopeInvoker,
 ) -> Option<RuntimeType> {
     let value_as_runtype = calc_expression(&node.init, scopes).unwrap_or_else(|| {
         error::throw(
@@ -221,7 +221,7 @@ fn exec_assignament(
 fn exec_if(
     node: &IfStatement,
     scopes: &mut ScopesStack,
-    invoker: ScopeInvoker,
+    _invoker: ScopeInvoker,
 ) -> Option<RuntimeType> {
     let condition = calc_expression(&node.condition, scopes).unwrap_or_else(|| {
         error::throw(
@@ -254,7 +254,7 @@ fn exec_if(
 fn exec_while(
     node: &WhileStatement,
     scopes: &mut ScopesStack,
-    invoker: ScopeInvoker,
+    _invoker: ScopeInvoker,
 ) -> Option<RuntimeType> {
     let mut return_expr = None;
     while calc_expression(&node.condition, scopes)
@@ -304,7 +304,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> Option<Runtim
             match left {
                 Some(_left) => match right {
                     Some(_right) => {
-                        let result = _left.arithmetic(expr.operator.as_str(), _right, scopes);
+                        let result = _left.arithmetic(expr.operator.as_str(), _right);
                         match result {
                             Ok(val) => Some(val),
                             Err(err) => {
@@ -350,7 +350,7 @@ fn calc_expression(node: &Expression, scopes: &mut ScopesStack) -> Option<Runtim
                 "print" => print(runtime_arguments, scopes),
                 "type" => {
                     if runtime_arguments.len() > 0 {
-                        type_of(runtime_arguments[0].clone(), scopes)
+                        type_of(runtime_arguments[0].clone())
                     } else {
                         error::throw(
                             ErrorType::SyntaxError,
