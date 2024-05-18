@@ -869,7 +869,9 @@ impl Module {
         while self.is_peekable() {
             let token = self.unsafe_peek();
             match token.token_type {
-                LexerTokenType::GreaterThanOperator
+                LexerTokenType::AndOperator
+                | LexerTokenType::OrOperator
+                | LexerTokenType::GreaterThanOperator
                 | LexerTokenType::LessThanOperator
                 | LexerTokenType::EqualityOperator
                 | LexerTokenType::NotEqualOperator

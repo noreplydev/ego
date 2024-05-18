@@ -124,6 +124,8 @@ impl Arithmetic for RuntimeType {
                 "<=" => Ok(v.less_than_or_equal(operand)),
                 "!=" => Ok(v.not_equal(operand)),
                 "==" => Ok(v.equal(operand)),
+                "|" => Ok(v.or(operand)),
+                "&" => Ok(v.and(operand)),
                 _ => Err(ErrorType::UnknownArithmeticOperator),
             },
             RuntimeType::RnNumber(v) => match operator {
