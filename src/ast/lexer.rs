@@ -148,11 +148,9 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             }
         } else if is_string {
             if c == '"' {
-                print!(" {c} |");
                 current_token.push(c);
                 is_string = false;
             } else {
-                print!(" {c} |");
                 current_token.push(c);
             }
         // normal mode
