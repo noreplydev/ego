@@ -6,20 +6,19 @@
   <img src="https://github.com/noreplydev/ego/assets/99766455/bc73b659-27d3-49ec-9951-eca6bd1f26e8" alt="ego-logo" width="25%">
 </p>
 
-# Hello world
+# ego
 ego is an interpreted and dynamically typed programming language. To start writting ego the interpreter must be compilled locally using cargo. So you would need to clone the repo and create a build for your targeted OS. 
 
-After that, you will only need to create a .ego file like this: 
+After that, you will need to create an ego project. To start just type: 
 
 ```ego
-// hello_world.ego
-
-print("Hello, world!"); 
+ego new hello_world
 ```
 
-And that's it, you can run ego with a simple
+And that's it, you can cd the project like `cd <package_name>` and run with: 
 ```ego
-$ ego hello_world.ego 
+cd hello_world
+ego run
 ```
 
 You will see something like this in your terminal
@@ -29,7 +28,7 @@ Hello, world!
 
 As ego is in an experimental phase you can always debug the lexer tokens and the parser generated AST using the `-d` flag, like so: 
 ```ego
-$ ego hello_world.ego -d
+ego run main.ego -d
 ```
 
 ## Expressions
@@ -52,7 +51,7 @@ Number: 8.
 Ego supports conditional execution so you could try
 
 ```ego
-if (true) {
+if true {
   print("Executed")
 } else {
   print("Not executed")
@@ -67,7 +66,7 @@ Ego has just one iteration construct. A while loop. That's it.
 ```ego
 let x = 0
 
-while true {
+while x < 10 {
   print(x)
   x = x + 1
 }
@@ -78,12 +77,14 @@ You can define a function in Ego using the `fn` keyword followed by an identifie
 
 ```
 fn greet_user(name) {
-  return "Hi, "+name 
+  return "Hi, " + name 
 }
 
 let greet = greet_user("Cristian")
 print(greet)
 ```
+
+Which outputs: 
 
 ```
 Hi, Cristian
