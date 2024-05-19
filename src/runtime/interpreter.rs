@@ -73,7 +73,7 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoke
             scopes.pop();
         }
         AstNodeType::FunctionDeclaration(node) => {
-            // add declaration to scopes
+            // hoist current function
             let identifier = node.identifier.name.clone();
             let rn_function = RuntimeType::function(
                 identifier.clone(),
@@ -84,7 +84,7 @@ fn hoist_node(node: &AstNodeType, scopes: &mut ScopesStack, invoker: ScopeInvoke
             );
             scopes.add_identifier(identifier, rn_function);
 
-            // hoisting function level declarations
+            // hoist inside function body
             scopes.push(ScopeInvoker::Function);
             hoist_node(
                 &AstNodeType::Block(node.body.clone()),
