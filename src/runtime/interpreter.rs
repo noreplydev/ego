@@ -25,12 +25,15 @@ impl Interpreter {
         }
     }
 
-    pub fn exec(&mut self) {
+    pub fn exec(&mut self, debug: bool) {
         // hoisting
         let mut counter = 0;
         while counter < self.ast.children.len() {
             hoist_node(&self.ast.children[counter], &mut self.scopes, ScopeInvoker::Module);
             counter += 1;
+        }
+        if debug {
+            println!("\nScopes: \n---------------\n{:#?}", self.scopes);
         }
     
         // execution

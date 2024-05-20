@@ -48,6 +48,6 @@ impl Run {
         }
 
         let mut interpreter = Interpreter::new(ast.clone());
-        interpreter.exec();
+        interpreter.exec(self.debug());
     }
 }
