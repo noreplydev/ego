@@ -32,18 +32,18 @@ impl New {
 
                 // Create config file
                 path.pop();
-                path.push("ego.yaml");
+                path.push("ego.toml");
 
                 match File::create(&path) {
                     Ok(mut file) => {
                         if let Some(parent) = path.parent() {
                             if let Some(dir_name) = parent.file_name() {
                                 let config_data = format!(
-                                    "[package]\nego_version: 0.0.1\npackage_name: {}\nversion: 1.0.0",
+                                    "[package]\nego_version = \"0.0.1\"\npackage_name = \"{}\"\nversion = \"1.0.0\"",
                                     dir_name.to_string_lossy()
                                 );
                                 if let Err(e) = file.write_all(config_data.as_bytes()) {
-                                    println!(" ⅹ Failed to write to ego.yaml: {}", e);
+                                    println!(" ⅹ Failed to write to ego.toml: {}", e);
                                     std::process::exit(1);
                                 }
                             } else {
@@ -56,7 +56,7 @@ impl New {
                         }
                     }
                     Err(_) => {
-                        println!(" ⅹ Failed to create ego.yaml");
+                        println!(" ⅹ Failed to create ego.toml");
                         std::process::exit(1);
                     }
                 }
