@@ -8,6 +8,7 @@ pub enum ErrorType {
     StackUnderflowError,
     UnknownArithmeticOperator,
     TypeError,
+    InvalidTypeAnnotation,
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
@@ -21,6 +22,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::StackUnderflowError => "Stack underflow error:",
         ErrorType::UnknownArithmeticOperator => "Unknown arithmetic operator error:",
         ErrorType::TypeError => "Type Error: ",
+        ErrorType::InvalidTypeAnnotation => "Invalid type annotation: ",
     };
 
     println!("\n[ego] {error_string} {error_message}");
