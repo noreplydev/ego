@@ -10,17 +10,16 @@ pub enum ErrorType {
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
-    let mut error_string = "";
-    match error_type {
-        ErrorType::SyntaxError => error_string = "Syntax error:",
-        ErrorType::EgoUsageError => error_string = "Usage error:",
-        ErrorType::FatalError => error_string = "Fatal error:",
-        ErrorType::ParsingError => error_string = "Parsing error:",
-        ErrorType::InterpretingError => error_string = "Interpreting error:",
-        ErrorType::ReferenceError => error_string = "Reference error:",
-        ErrorType::StackUnderflowError => error_string = "Stack underflow error:",
-        ErrorType::UnknownArithmeticOperator => error_string = "Unknown arithmetic operator error:",
-    }
+    let error_string = match error_type {
+        ErrorType::SyntaxError => "Syntax error:",
+        ErrorType::EgoUsageError => "Usage error:",
+        ErrorType::FatalError => "Fatal error:",
+        ErrorType::ParsingError => "Parsing error:",
+        ErrorType::InterpretingError => "Interpreting error:",
+        ErrorType::ReferenceError => "Reference error:",
+        ErrorType::StackUnderflowError => "Stack underflow error:",
+        ErrorType::UnknownArithmeticOperator => "Unknown arithmetic operator error:",
+    };
 
     println!("\n[ego] {error_string} {error_message}");
     if let Some(line) = line {
