@@ -38,6 +38,7 @@ pub enum LexerTokenType {
     CloseSquareBracket,
     Comma,
     Dot,
+    Colon,
     EndOfStatement,
     Unknown,
 }
@@ -80,6 +81,7 @@ impl fmt::Display for LexerTokenType {
             LexerTokenType::OpenSquareBracket => write!(f, "OpenSquareBracket"),
             LexerTokenType::CloseSquareBracket => write!(f, "CloseSquareBracket"),
             LexerTokenType::Dot => write!(f, "Dot"),
+            LexerTokenType::Colon => write!(f, "Colon"),
             LexerTokenType::Comma => write!(f, "Comma"),
             LexerTokenType::EndOfStatement => write!(f, "EndOfStatement"),
             LexerTokenType::Unknown => write!(f, "Unknown"),
@@ -323,7 +325,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     current_token = String::new();
                 }
                 // special characters
-                '(' | ')' | '{' | '}' | '[' | ']' | '.' | ',' | ';' => {
+                '(' | ')' | '{' | '}' | '[' | ']' | '.' | ',' | ';' | ':' => {
                     if current_token.len() > 0 {
                         tokens.push(token_with_type(
                             current_token,
@@ -424,6 +426,7 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         "[" => LexerToken::new(LexerTokenType::OpenSquareBracket, token, line, at),
         "]" => LexerToken::new(LexerTokenType::CloseSquareBracket, token, line, at),
         "." => LexerToken::new(LexerTokenType::Dot, token, line, at),
+        ":" => LexerToken::new(LexerTokenType::Colon, token, line, at),
         "," => LexerToken::new(LexerTokenType::Comma, token, line, at),
         ";" => LexerToken::new(LexerTokenType::EndOfStatement, token, line, at),
         "!" => LexerToken::new(LexerTokenType::NotOperator, token, line, at),
