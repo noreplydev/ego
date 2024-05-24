@@ -20,7 +20,7 @@ use crate::{
 use super::{
     binary_expression::BinaryExpression, break_statement::BreakStatement,
     else_statement::ElseStatement, if_statement::IfStatement, import_statement::ImportStatement,
-    nothing::Nothing, return_statement::ReturnStatement, while_statement::WhileStatement,
+    nothing::Nothing, return_statement::ReturnStatement, while_statement::WhileStatement, Type,
 };
 
 pub struct Module {
@@ -334,10 +334,29 @@ impl Module {
 
         // consume identifier
         let token = self.peek("<Identifier>");
-        let identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+        let mut identifier_node = Identifier::new(token.value.clone(), token.at, token.line);
+
+        // check if is 'let a:' || 'let a ='
+        self.next();
+        if self.is_peekable() {
+            let token = self.unsafe_peek();
+
+            if token.token_type != LexerTokenType::AssignmentOperator
+                && token.token_type != LexerTokenType::Colon
+            {
+                error::throw(
+                    ErrorType::SyntaxError,
+                    format!("Expected '=' but got '{}'", token.value).as_str(),
+                    Some(token.line),
+                )
+            };
+        }
+
+        // get type anotation or none
+        let type_annotation = self.type_annotation();
+        identifier_node.set_annotation(type_annotation);
 
         // check next token is '='
-        self.next();
         let token = self.peek("=");
         if token.token_type != LexerTokenType::AssignmentOperator {
             error::throw(
@@ -347,7 +366,6 @@ impl Module {
             )
         };
 
-        // consume variable value
         self.next();
         let expr = self.parse_comparison();
 
@@ -1084,5 +1102,41 @@ impl Module {
             at,
             line,
         ))
+    }
+
+    // : bool | : string | : number | : nothing
+    fn type_annotation(&self) -> Option<Type> {
+        if self.peek("=").token_type == LexerTokenType::Colon {
+            // consume ':'
+            self.next();
+            if self.is_peekable() {
+                let possible_type = self.unsafe_peek();
+                self.next(); // consume 'annotated type'
+                match possible_type.token_type {
+                    LexerTokenType::NumberKeyword => Some(Type::Number),
+                    LexerTokenType::StringKeyword => Some(Type::String),
+                    LexerTokenType::BoolKeyword => Some(Type::Bool),
+                    LexerTokenType::NothingKeyword => Some(Type::Nothing),
+                    _ => {
+                        error::throw(
+                            ErrorType::ParsingError,
+                            format!("Expected type after ':' but got and early end of module")
+                                .as_str(),
+                            None,
+                        );
+                        std::process::exit(1);
+                    }
+                }
+            } else {
+                error::throw(
+                    ErrorType::ParsingError,
+                    format!("Expected type after ':' but got and early end of module").as_str(),
+                    None,
+                );
+                std::process::exit(1);
+            }
+        } else {
+            None
+        }
     }
 }
