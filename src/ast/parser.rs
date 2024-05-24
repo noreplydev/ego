@@ -368,6 +368,64 @@ impl Module {
 
         self.next();
         let expr = self.parse_comparison();
+        // static type checking
+        if let Some(annotation) = type_annotation {
+            match &expr {
+                Expression::Bool(_) => {
+                    if annotation != Type::Bool {
+                        error::throw(
+                            ErrorType::TypeError,
+                            format!(
+                                "Annotation of type '{}' differs from assigned 'bool' value",
+                                annotation.to_string()
+                            )
+                            .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                Expression::StringLiteral(_) => {
+                    if annotation != Type::String {
+                        error::throw(
+                            ErrorType::TypeError,
+                            format!(
+                                "Annotation of type '{}' differs from assigned 'string' value",
+                                annotation.to_string()
+                            )
+                            .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                Expression::Number(_) => {
+                    if annotation != Type::Number {
+                        error::throw(
+                            ErrorType::TypeError,
+                            format!(
+                                "Annotation of type '{}' differs from assigned 'number' value",
+                                annotation.to_string()
+                            )
+                            .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                Expression::Nothing(_) => {
+                    if annotation != Type::Nothing {
+                        error::throw(
+                            ErrorType::TypeError,
+                            format!(
+                                "Annotation of type '{}' differs from assigned 'nothing' value",
+                                annotation.to_string()
+                            )
+                            .as_str(),
+                            Some(token.line),
+                        )
+                    }
+                }
+                _ => {}
+            }
+        }
 
         // check for final semicolon
         if self.is_peekable() {

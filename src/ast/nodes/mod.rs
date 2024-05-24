@@ -129,3 +129,20 @@ pub enum Type {
     Bool,
     Nothing,
 }
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        self.to_string() == other.to_string()
+    }
+}
+
+impl fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::String => write!(f, "string"),
+            Type::Number => write!(f, "number"),
+            Type::Bool => write!(f, "bool"),
+            Type::Nothing => write!(f, "nothing"),
+        }
+    }
+}
