@@ -1120,7 +1120,7 @@ impl Module {
                     _ => {
                         error::throw(
                             ErrorType::ParsingError,
-                            format!("Expected type after ':' but got and early end of module")
+                            format!("Expected type after ':' but got '{}'", possible_type.value)
                                 .as_str(),
                             None,
                         );

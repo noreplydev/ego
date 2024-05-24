@@ -25,7 +25,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::InvalidTypeAnnotation => "Invalid type annotation: ",
     };
 
-    println!("\n[ego] {error_string} {error_message}");
+    println!("\n[ego] {error_string} {error_message}\n");
     if let Some(line) = line {
         println!("      └ on line: {line}");
     }
