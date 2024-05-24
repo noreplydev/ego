@@ -121,3 +121,11 @@ pub enum Expression {
     CallExpression(CallExpression),
     Nothing(Nothing),
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum Type {
+    String,
+    Number,
+    Bool,
+    Nothing,
+}
