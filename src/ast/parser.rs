@@ -1119,7 +1119,7 @@ impl Module {
                     LexerTokenType::NothingKeyword => Some(Type::Nothing),
                     _ => {
                         error::throw(
-                            ErrorType::ParsingError,
+                            ErrorType::InvalidTypeAnnotation,
                             format!("Expected type after ':' but got '{}'", possible_type.value)
                                 .as_str(),
                             None,
