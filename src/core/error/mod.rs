@@ -25,9 +25,10 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::InvalidTypeAnnotation => "Invalid type annotation: ",
     };
 
-    println!("\n[ego] {error_string} {error_message}\n");
+    println!("\n[ego] {error_string} {error_message}");
     if let Some(line) = line {
         println!("      └ on line: {line}");
     }
+    println!(""); // space at the end
     std::process::exit(1);
 }
