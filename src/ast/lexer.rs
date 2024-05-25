@@ -1,5 +1,7 @@
 use std::fmt;
 
+use regex::Regex;
+
 #[derive(Clone, Debug)]
 pub enum LexerTokenType {
     LetKeyword,
@@ -142,6 +144,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
     let mut current_token = String::new();
     let mut is_string = false; // inside a string flag
     let mut is_comment = false; // inside a comment
+    let mut is_float = false; // inside a float value
 
     let mut chars = source.chars().peekable(); // remove leading and trailing whitespaces
     let mut char_counter = 1; // all module chars number
@@ -162,8 +165,15 @@ pub fn lex(source: String) -> Vec<LexerToken> {
             } else {
                 current_token.push(c);
             }
-        // normal mode
+        } else if is_float {
+            if c.is_numeric() && chars.peek().is_some_and(|char| char.is_numeric()) {
+                current_token.push(c);
+            } else {
+                current_token.push(c);
+                is_float = false;
+            }
         } else {
+            // normal mode
             match c {
                 // a quote
                 '"' => {
@@ -332,7 +342,7 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                     current_token = String::new();
                 }
                 // special characters
-                '(' | ')' | '{' | '}' | '[' | ']' | '.' | ',' | ';' | ':' => {
+                '(' | ')' | '{' | '}' | '[' | ']' | ',' | ';' | ':' => {
                     if current_token.len() > 0 {
                         tokens.push(token_with_type(
                             current_token,
@@ -341,12 +351,19 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                         )); // push previous token, - 1 since is the previous
                         current_token = String::new();
                     }
+                    // push current
                     tokens.push(token_with_type(
                         c.to_string(),
                         line_counter,
                         line_char_counter,
                     ));
-                    // push current
+                }
+                // dot and float
+                '.' => {
+                    if current_token.chars().all(|char| char.is_numeric()) {
+                        is_float = !is_float;
+                    }
+                    current_token.push(c);
                 }
                 // whitespace types
                 ' ' | '\n' | '\t' => {
@@ -374,7 +391,10 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 }
                 // accumulating numbers
                 _ if c.is_numeric() && current_token.chars().all(|char| char.is_numeric()) => {
-                    if chars.peek().is_some_and(|char| char.is_numeric()) {
+                    if chars
+                        .peek()
+                        .is_some_and(|char| char.is_numeric() || char == &'.')
+                    {
                         current_token.push(c);
                     } else {
                         current_token.push(c);
@@ -456,17 +476,22 @@ fn token_with_type(token: String, line: usize, at: usize) -> LexerToken {
         _ if token.chars().next() == Some('"') && token.chars().last() == Some('"') => {
             LexerToken::new(LexerTokenType::StringLiteral, token, line, at)
         }
-        _ if token.chars().all(|c| c.is_numeric()) => {
-            LexerToken::new(LexerTokenType::Number, token, line, at)
-        }
-        _ if is_identifier(token.clone()) => {
-            LexerToken::new(LexerTokenType::Identifier, token, line, at)
-        }
+        _ if is_number(&token) => LexerToken::new(LexerTokenType::Number, token, line, at),
+        _ if is_identifier(&token) => LexerToken::new(LexerTokenType::Identifier, token, line, at),
         _ => LexerToken::new(LexerTokenType::Unknown, token, line, at),
     }
 }
 
-fn is_identifier(token: String) -> bool {
+fn is_number(token: &String) -> bool {
+    let re = Regex::new(r"^\d+(\.\d+)?$").unwrap();
+    if re.is_match(token.as_str()) {
+        true
+    } else {
+        false
+    }
+}
+
+fn is_identifier(token: &String) -> bool {
     let mut chars = token.chars();
     chars
         .next()
