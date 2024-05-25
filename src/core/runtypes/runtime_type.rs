@@ -35,7 +35,7 @@ impl RuntimeType {
         RuntimeType::RnString(RnString::new(value, raw))
     }
 
-    pub fn number(value: i64) -> RuntimeType {
+    pub fn number(value: f64) -> RuntimeType {
         RuntimeType::RnNumber(RnNumber::new(value))
     }
 

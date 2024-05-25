@@ -2,11 +2,11 @@ use super::RuntimeType;
 
 #[derive(Debug, Clone)]
 pub struct RnNumber {
-    pub val: i64,
+    pub val: f64,
 }
 
 impl RnNumber {
-    pub fn new(value: i64) -> RnNumber {
+    pub fn new(value: f64) -> RnNumber {
         RnNumber { val: value }
     }
 
@@ -15,7 +15,7 @@ impl RnNumber {
     }
 
     pub fn to_boolean(&self) -> bool {
-        if self.val > 0 {
+        if self.val > 0.0 {
             true
         } else {
             false
