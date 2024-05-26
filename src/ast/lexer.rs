@@ -361,9 +361,17 @@ pub fn lex(source: String) -> Vec<LexerToken> {
                 // dot and float
                 '.' => {
                     if current_token.chars().all(|char| char.is_numeric()) {
+                        current_token.push(c);
                         is_float = !is_float;
+                    } else {
+                        tokens.push(token_with_type(
+                            current_token,
+                            line_counter,
+                            line_char_counter,
+                        ));
+                        current_token = String::new();
+                        current_token.push(c);
                     }
-                    current_token.push(c);
                 }
                 // whitespace types
                 ' ' | '\n' | '\t' => {
