@@ -20,7 +20,8 @@ use crate::{
 use super::{
     binary_expression::BinaryExpression, break_statement::BreakStatement,
     else_statement::ElseStatement, if_statement::IfStatement, import_statement::ImportStatement,
-    nothing::Nothing, return_statement::ReturnStatement, while_statement::WhileStatement, Type,
+    nothing::Nothing, return_statement::ReturnStatement, vector::Vector,
+    while_statement::WhileStatement, Type,
 };
 
 pub struct Module {
@@ -228,7 +229,7 @@ impl Module {
         AstNodeType::Block(block_node)
     }
 
-    // ()
+    // (a, b, c)
     fn group(&self, context: Option<&str>) -> AstNodeType {
         // where am i
         let context_msg = match context {
@@ -311,6 +312,88 @@ impl Module {
         // consume ')'
         self.next();
         AstNodeType::Group(group_node)
+    }
+
+    // [a, b, x]
+    fn vector(&self, context: Option<&str>) -> AstNodeType {
+        // where am i
+        let context_msg = match context {
+            Some(str) => format!(" in {}", str),
+            _ => "".to_string(),
+        };
+
+        let group_token = self.unsafe_peek();
+        let mut vector_node = Vector::new(group_token.at, group_token.line);
+
+        // check '['
+        if group_token.token_type == LexerTokenType::OpenSquareBracket {
+            self.next()
+        } else {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Unexpected token '{}'{}", group_token.value, context_msg).as_str(),
+                Some(group_token.line),
+            )
+        }
+
+        // get arguments & check ']'
+        let mut last_token = None;
+        let mut closed = false;
+
+        while self.is_peekable() {
+            let token = self.unsafe_peek();
+
+            match token.token_type {
+                LexerTokenType::Comma => {
+                    if last_token == Some(LexerTokenType::Comma) {
+                        vector_node.add_child(None);
+                    }
+
+                    last_token = Some(LexerTokenType::Comma);
+                    self.next();
+                }
+                LexerTokenType::CloseSquareBracket => {
+                    if last_token == Some(LexerTokenType::Comma) {
+                        vector_node.add_child(None);
+                    }
+
+                    closed = true;
+                    break;
+                }
+                _ => {
+                    let node = self.parse_comparison();
+                    match node {
+                        Expression::Identifier(_) => last_token = Some(LexerTokenType::Identifier),
+                        Expression::Bool(_) => last_token = Some(LexerTokenType::TrueKeyword),
+                        Expression::Number(_) => last_token = Some(LexerTokenType::Number),
+                        Expression::Nothing(_) => last_token = Some(LexerTokenType::NothingKeyword),
+                        Expression::StringLiteral(_) => {
+                            last_token = Some(LexerTokenType::StringLiteral)
+                        }
+                        Expression::CallExpression(_) => {
+                            last_token = Some(LexerTokenType::Identifier)
+                        }
+                        Expression::BinaryExpression(_) => {
+                            last_token = Some(LexerTokenType::Number)
+                        }
+                    }
+                    vector_node.add_child(Some(node));
+                }
+            }
+        }
+
+        // non closed CallExpression
+        if !closed {
+            error::throw(
+                ErrorType::SyntaxError,
+                format!("Expected ']' {}", context_msg).as_str(),
+                Some(vector_node.line),
+            )
+        };
+
+        // consume ']'
+        self.next();
+        AstNodeType::Vector(vector_node)
     }
 
     // let a = 20
@@ -663,7 +746,7 @@ impl Module {
         AstNodeType::WhileStatement(WhileStatement::new(expr_node, block_node, at, line))
     }
 
-    // import std/
+    // import std/io.[read_input, read_file]
     fn import_statement(&self) -> AstNodeType {
         // consume 'import' keyword
         let token = self.unsafe_peek();
@@ -745,105 +828,9 @@ impl Module {
             }
             // .[member, member];
             LexerTokenType::Dot => {
-                // consume [
+                // consume '.'
                 self.next();
-                let token = self.peek("[");
-                if token.token_type != LexerTokenType::OpenSquareBracket {
-                    error::throw(
-                        ErrorType::ParsingError,
-                        format!("Expected '[' but got '{}' after '.'", token.value).as_str(),
-                        Some(token.line),
-                    );
-                }
-
-                let mut members: Vec<String> = vec![];
-                let mut closed = false;
-                let mut last_token = LexerTokenType::Comma;
-
-                // consume member, member]
-                self.next();
-                while self.is_peekable() {
-                    let token = self.unsafe_peek();
-                    match token.token_type {
-                        LexerTokenType::Identifier => {
-                            if last_token == LexerTokenType::Comma {
-                                last_token = LexerTokenType::Identifier;
-                                members.push(token.value.clone());
-                                self.next();
-                            } else {
-                                error::throw(
-                                    ErrorType::ParsingError,
-                                    format!(
-                                        "Unexpected token '{}' after an identifier",
-                                        token.value
-                                    )
-                                    .as_str(),
-                                    Some(token.line),
-                                );
-                                std::process::exit(1);
-                            }
-                        }
-                        LexerTokenType::Comma => {
-                            if last_token == LexerTokenType::Identifier {
-                                last_token = LexerTokenType::Comma;
-                                self.next();
-                            } else {
-                                error::throw(
-                                    ErrorType::ParsingError,
-                                    format!("Unexpected token '{}' after ','", token.value)
-                                        .as_str(),
-                                    Some(token.line),
-                                );
-                                std::process::exit(1);
-                            }
-                        }
-                        LexerTokenType::CloseSquareBracket => {
-                            if last_token == LexerTokenType::Identifier {
-                                closed = true;
-                                self.next();
-                                break;
-                            } else {
-                                error::throw(
-                                    ErrorType::SyntaxError,
-                                    format!(
-                                        "Expected '<identifier>' after members closing token ']'"
-                                    )
-                                    .as_str(),
-                                    Some(token.line),
-                                );
-                            }
-                        }
-                        _ => break,
-                    }
-                }
-
-                // non closed CallExpression
-                if !closed {
-                    error::throw(
-                        ErrorType::SyntaxError,
-                        format!("Expected ']' after module named members import").as_str(),
-                        Some(token.line),
-                    )
-                };
-
-                // ;
-                let token = self.peek(";");
-                if token.token_type == LexerTokenType::EndOfStatement {
-                    return AstNodeType::ImportStatement(ImportStatement::new(
-                        module, members, at, line,
-                    ));
-                } else {
-                    error::throw(
-                        ErrorType::SyntaxError,
-                        format!(
-                            "Expected ';' but got '{}' as end of import statement",
-                            token.value
-                        )
-                        .as_str(),
-                        Some(token.line),
-                    );
-                    std::process::exit(1);
-                }
+                self.vector(Some("import statement"))
             }
             _ => {
                 error::throw(

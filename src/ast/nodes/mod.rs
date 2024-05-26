@@ -15,6 +15,7 @@ pub mod nothing;
 pub mod number;
 pub mod return_statement;
 pub mod string_literal;
+pub mod vector;
 pub mod while_statement;
 use std::fmt;
 
@@ -24,7 +25,7 @@ use self::{
     else_statement::ElseStatement, function_declaration::FunctionDeclaration, group::Group,
     identifier::Identifier, if_statement::IfStatement, import_statement::ImportStatement,
     nothing::Nothing, number::Number, return_statement::ReturnStatement,
-    string_literal::StringLiteral, while_statement::WhileStatement,
+    string_literal::StringLiteral, vector::Vector, while_statement::WhileStatement,
 };
 
 #[derive(Debug, Clone)]
@@ -36,6 +37,7 @@ pub enum AstNodeType {
     BreakStatement(BreakStatement),
     ElseStatement(ElseStatement),
     Group(Group),
+    Vector(Vector),
     Block(Block),
     Expression(Expression),
     AssignamentStatement(AssignamentNode),
@@ -52,6 +54,7 @@ impl AstNodeType {
             AstNodeType::BreakStatement(v) => v.at,
             AstNodeType::ElseStatement(v) => v.at,
             AstNodeType::Group(v) => v.at,
+            AstNodeType::Vector(v) => v.at,
             AstNodeType::Block(_v) => 0,
             AstNodeType::Expression(_v) => 0,
             AstNodeType::AssignamentStatement(v) => v.at,
@@ -68,6 +71,7 @@ impl AstNodeType {
             AstNodeType::BreakStatement(v) => v.line,
             AstNodeType::ElseStatement(v) => v.line,
             AstNodeType::Group(v) => v.line,
+            AstNodeType::Vector(v) => v.line,
             AstNodeType::Block(_v) => 0,
             AstNodeType::Expression(_v) => 0,
             AstNodeType::AssignamentStatement(v) => v.line,
@@ -87,6 +91,7 @@ impl fmt::Display for AstNodeType {
             AstNodeType::BreakStatement(_) => write!(f, "BreakStatement"),
             AstNodeType::Block(_) => write!(f, "Block"),
             AstNodeType::Group(_) => write!(f, "Group"),
+            AstNodeType::Vector(_) => write!(f, "Vector"),
             AstNodeType::FunctionDeclaration(_) => write!(f, "FunctionDeclaration"),
             AstNodeType::AssignamentStatement(_) => write!(f, "AssignamentStatement"),
             AstNodeType::Expression(Expression::StringLiteral(_)) => write!(f, "StringLiteral"),
