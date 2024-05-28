@@ -7,7 +7,7 @@
 </p>
 
 # ego
-ego is an interpreted and dynamically typed programming language. To start writting ego the interpreter must be compilled locally using cargo. So you would need to clone the repo and create a build for your targeted OS. 
+ego is an interpreted and dynamically typed programming language. To start writting ego the interpreter must be installed locally using for example `cargo install --git https://github.com/noreplydev/ego.git`. So you would need to clone the repo and create a build for your targeted OS. 
 
 After that, you will need to create an ego project. To start just type: 
 
