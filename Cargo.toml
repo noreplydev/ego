@@ -4,4 +4,5 @@ version = "0.0.0-alpha.0.1"
 edition = "2021"
 
 [dependencies]
+self-vm = { git = "https://github.com/noreplydev/self" }
 regex = "1"

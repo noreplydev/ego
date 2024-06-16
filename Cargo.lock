@@ -16,6 +16,7 @@ name = "ego"
 version = "0.0.0-alpha.0.1"
 dependencies = [
  "regex",
+ "self-vm",
 ]
 
 [[package]]
@@ -52,3 +53,8 @@ name = "regex-syntax"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adad44e29e4c806119491a7f06f03de4d1af22c3a680dd47f1e6e179439d1f56"
+
+[[package]]
+name = "self-vm"
+version = "0.1.0"
+source = "git+https://github.com/noreplydev/self#f7e88493aa53da71f862b8529b6aa6c8eebe1232"
