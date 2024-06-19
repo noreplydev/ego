@@ -1,5 +1,6 @@
 mod ast;
 mod commands;
+mod compiler;
 mod core;
 mod runtime;
 

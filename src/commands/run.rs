@@ -2,6 +2,7 @@ use std::fs;
 
 use crate::ast::lex;
 use crate::ast::Module;
+use crate::compiler::Compiler;
 use crate::core::error;
 use crate::core::error::ErrorType;
 use crate::runtime::Interpreter;
@@ -47,7 +48,13 @@ impl Run {
             println!("\nAst nodes: \n---------------\n{:#?}", ast);
         }
 
-        let mut interpreter = Interpreter::new(ast.clone());
-        interpreter.exec(self.debug());
+        if self.args.contains(&"-vm".to_string()) {
+            let bytecode = Compiler::gen_bytecode(ast);
+            let mut vm = self_vm::vm::Vm::new(bytecode);
+            vm.run();
+        } else {
+            let mut interpreter = Interpreter::new(ast.clone());
+            interpreter.exec(self.debug());
+        }
     }
 }
