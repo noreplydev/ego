@@ -9,6 +9,7 @@ pub enum ErrorType {
     UnknownArithmeticOperator,
     TypeError,
     InvalidTypeAnnotation,
+    CompilationError,
 }
 
 pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
@@ -23,6 +24,7 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::UnknownArithmeticOperator => "Unknown arithmetic operator error:",
         ErrorType::TypeError => "Type Error: ",
         ErrorType::InvalidTypeAnnotation => "Invalid type annotation: ",
+        ErrorType::CompilationError => "Compilation error: ",
     };
 
     println!("\n[ego] {error_string} {error_message}");
