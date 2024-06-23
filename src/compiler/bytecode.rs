@@ -9,7 +9,8 @@ pub struct Bytecode {
 impl Bytecode {
     pub fn get_handler() -> Bytecode {
         let mut hash_map = HashMap::new();
-        hash_map.insert("load_const".to_string(), 0x02);
+        hash_map.insert("i64".to_string(), 0x01);
+        hash_map.insert("load_const".to_string(), 0x01);
         hash_map.insert("print".to_string(), 0x02);
 
         Bytecode { table: hash_map }
