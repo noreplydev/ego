@@ -1,3 +1,5 @@
+use crate::log;
+
 pub enum ErrorType {
     SyntaxError,
     EgoUsageError,
@@ -27,10 +29,10 @@ pub fn throw(error_type: ErrorType, error_message: &str, line: Option<usize>) {
         ErrorType::CompilationError => "Compilation error: ",
     };
 
-    println!("\n[ego] {error_string} {error_message}");
+    log!("\n[ego] {error_string} {error_message}");
     if let Some(line) = line {
-        println!("      └ on line: {line}");
+        log!("      └ on line: {line}");
     }
-    println!(""); // space at the end
+    log!(""); // space at the end
     std::process::exit(1);
 }
