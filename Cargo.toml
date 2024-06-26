@@ -3,6 +3,10 @@ name = "ego"
 version = "0.0.0-alpha.0.1"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 self-vm = { git = "https://github.com/noreplydev/self" }
 regex = "1"
+wasm-bindgen = "0.2"
