@@ -3,8 +3,9 @@ mod commands;
 mod compiler;
 mod core;
 mod runtime;
+mod wasm;
 
-use commands::run::run_ego;
+use wasm::run_ego;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
