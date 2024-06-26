@@ -7,7 +7,9 @@ use crate::{
 };
 
 pub fn run_ego(code: String, vm: bool) -> Vec<String> {
-    log!("Executing ego: \n  - code: {}\n  - vm: {}", code, vm);
+    log!("Executing ego:");
+    log!("  '- code: {}", code);
+    log!("  '- vm: {}", vm);
     let tokens = lex(code);
     log!(" > Generated tokens");
 
@@ -18,6 +20,7 @@ pub fn run_ego(code: String, vm: bool) -> Vec<String> {
         " > Running on {}",
         if vm { "self vm" } else { "Ast interpreter" }
     );
+    log!("-------------------");
 
     if vm {
         let bytecode = Compiler::gen_bytecode(ast);
