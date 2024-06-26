@@ -9,6 +9,6 @@ use wasm::run_ego;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn exec_ego_code(code: String, vm: bool) {
-    run_ego(code, vm);
+pub fn exec_ego_code(code: String, vm: bool) -> Vec<String> {
+    run_ego(code, vm)
 }

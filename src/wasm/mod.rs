@@ -1,11 +1,12 @@
 use crate::{
     ast::{lex, Module},
     compiler::Compiler,
+    core::logs::get_log_history,
     log,
     runtime::Interpreter,
 };
 
-pub fn run_ego(code: String, vm: bool) {
+pub fn run_ego(code: String, vm: bool) -> Vec<String> {
     log!("Executing ego: \n  - code: {}\n  - vm: {}", code, vm);
     let tokens = lex(code);
     log!(" > Generated tokens");
@@ -22,8 +23,10 @@ pub fn run_ego(code: String, vm: bool) {
         let bytecode = Compiler::gen_bytecode(ast);
         let mut vm = self_vm::vm::Vm::new(bytecode);
         vm.run();
+        vec!["Logs with executions are not implemented yet".to_string()]
     } else {
         let mut interpreter = Interpreter::new(ast.clone());
         interpreter.exec(false);
+        get_log_history()
     }
 }
