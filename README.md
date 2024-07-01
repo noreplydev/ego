@@ -26,6 +26,8 @@ You will see something like this in your terminal
 Hello, world!
 ```
 
+> You can also run ego using the `self` virtual machine using `-vm` flag
+
 As ego is in an experimental phase you can always debug the lexer tokens and the parser generated AST using the `-d` flag, like so: 
 ```ego
 ego run main.ego -d
