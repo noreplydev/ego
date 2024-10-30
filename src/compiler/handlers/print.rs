@@ -3,7 +3,10 @@ use crate::{
     compiler::bytecode::get_bytecode,
 };
 
-use self_vm::utils::{bytes_from_32, bytes_from_64, Number};
+use self_vm::utils::{
+    to_bytes::{bytes_from_32, bytes_from_64},
+    Number,
+};
 
 pub fn print_as_bytecode(node: &CallExpression) -> Vec<u8> {
     let mut bytecode = vec![];
