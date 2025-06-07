@@ -1,4 +1,4 @@
-| actively building the alpha-v0.1 version  |
+| to see the updated version of ego refer to https://github.com/ego-programming-language/ego  |
 |---|
 
 
